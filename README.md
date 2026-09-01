@@ -127,9 +127,9 @@ reroute/
 
 | Name | Role |
 |---|---|
-| *[Lee Zhen Jie]* | Team Leader |
-| *[Member 2]* | *[Role]* |
-| *[Member 3]* | *[Role]* |
+| *Lee Zhen Jie* | Team Leader |
+| *Gan Rui En* | *Member* |
+| *Hong Jia Bao* | *Member* |
 
 ---
 
