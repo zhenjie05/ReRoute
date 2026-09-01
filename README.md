@@ -127,7 +127,7 @@ reroute/
 
 | Name | Role |
 |---|---|
-| *[Your name]* | Team Leader |
+| *[Lee Zhen Jie]* | Team Leader |
 | *[Member 2]* | *[Role]* |
 | *[Member 3]* | *[Role]* |
 
