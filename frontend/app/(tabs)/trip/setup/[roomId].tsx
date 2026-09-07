@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
-import { Button, Card, Badge } from '@/shared/components';
+import { Button, Card } from '@/shared/components';
 import { mockModularSuggestions } from '@/features/route-planning/data/mock-route-planning';
 import { TravelCompanions, TravelStyle, TravelPace } from '@/models/trip-room';
 
@@ -39,7 +39,8 @@ export default function TripSetupScreen() {
   };
 
   const handleFinishSetup = () => {
-    router.replace('/(tabs)/trip/room/room-tokyo-2026/chat' as any);
+    const targetRoomId = roomId && roomId !== 'new' ? roomId : 'room-tokyo-2026';
+    router.replace(`/(tabs)/trip/room/${targetRoomId}/chat` as any);
   };
 
   return (

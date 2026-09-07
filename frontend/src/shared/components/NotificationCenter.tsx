@@ -224,6 +224,35 @@ export const NotificationCenter: React.FC = () => {
             </View>
           </View>
 
+          {/* Quick AI Inquire Prompt Chips */}
+          <View style={{ paddingHorizontal: spacing.lg, marginBottom: spacing.xs }}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 6, paddingVertical: 2 }}
+            >
+              {['📍 Plan indoor route', '✈️ Flight status', '🍽️ Nearby dining'].map((chip) => (
+                <TouchableOpacity
+                  key={chip}
+                  activeOpacity={0.75}
+                  onPress={() => setInquireQuery(chip.slice(2).trim())}
+                  style={[
+                    styles.inquireChip,
+                    {
+                      backgroundColor: colors.surfaceContainerLow,
+                      borderColor: colors.surfaceContainerHigh,
+                      borderRadius: rounded.full,
+                    },
+                  ]}
+                >
+                  <Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant, fontWeight: '700' }]}>
+                    {chip}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+
           {/* Filter Pills Tabs */}
           <View style={{ paddingHorizontal: spacing.lg, marginVertical: spacing.xs }}>
             <ScrollView
@@ -275,7 +304,7 @@ export const NotificationCenter: React.FC = () => {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={[
               styles.listContent,
-              { paddingHorizontal: spacing.lg, paddingBottom: spacing['2xl'] },
+              { paddingHorizontal: spacing.lg, paddingBottom: spacing.md },
             ]}
           >
             {items.length === 0 ? (
@@ -302,6 +331,29 @@ export const NotificationCenter: React.FC = () => {
               items.map((item) => renderNotificationItem(item))
             )}
           </ScrollView>
+
+          {/* Archive / Preferences Footer Link */}
+          <View style={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.lg, paddingTop: 4 }}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => {
+                closeNotificationCenter();
+                router.push('/(tabs)/profile/settings' as any);
+              }}
+              style={[
+                styles.archiveBtn,
+                {
+                  backgroundColor: colors.surfaceContainerLow,
+                  borderColor: colors.surfaceContainerHigh,
+                  borderRadius: rounded.xl,
+                },
+              ]}
+            >
+              <Text style={[typography.utilityTiny, { color: colors.primary, fontWeight: '700', textAlign: 'center' }]}>
+                🕒 View notification archive & preferences →
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </Modal>
@@ -381,5 +433,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 40,
+  },
+  inquireChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderWidth: 1,
+  },
+  archiveBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

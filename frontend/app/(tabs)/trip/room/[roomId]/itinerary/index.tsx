@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
-import { Card, Badge, Button } from '@/shared/components';
+import { Card, Badge } from '@/shared/components';
 import { mockItineraryDays, mockItineraryItems } from '@/features/trip-room/data/mock-trip-room';
 
 export default function ItineraryDayListScreen() {

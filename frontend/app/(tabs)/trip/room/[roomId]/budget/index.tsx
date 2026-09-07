@@ -1,17 +1,16 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { Card, Badge, Button } from '@/shared/components';
 import {
   mockBudgetCategories,
   mockExpenses,
-  mockSettlements,
 } from '@/features/trip-room/data/mock-trip-room';
 
 export default function BudgetDashboardScreen() {
   const { roomId } = useLocalSearchParams<{ roomId: string }>();
-  const { colors, typography, spacing, rounded } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const router = useRouter();
 
   // Check for mixed currencies across room expenses (FR-2-9a)

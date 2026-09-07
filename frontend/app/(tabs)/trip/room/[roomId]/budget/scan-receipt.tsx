@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { Button, Card, Badge, LoadingState } from '@/shared/components';
 
 export default function ScanReceiptScreen() {
-  const { roomId } = useLocalSearchParams<{ roomId: string }>();
-  const { colors, typography, spacing, rounded } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const router = useRouter();
 
   const [scanning, setScanning] = useState(false);

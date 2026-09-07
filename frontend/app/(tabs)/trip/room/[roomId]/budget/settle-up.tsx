@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
-import { Button, Card, Badge } from '@/shared/components';
+import { Button, Card } from '@/shared/components';
 
 export default function SettleUpScreen() {
-  const { roomId } = useLocalSearchParams<{ roomId: string }>();
-  const { colors, typography, spacing, rounded } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const router = useRouter();
 
   const [settled, setSettled] = useState(false);

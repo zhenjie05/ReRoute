@@ -45,7 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             created_at: authUser.created_at,
           });
         }
-      } catch (err) {
+      } catch {
         // Fallback to mock user
       }
     };
@@ -131,7 +131,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
-    } catch (e) {
+    } catch {
       // Ignore
     }
     setUser(null);

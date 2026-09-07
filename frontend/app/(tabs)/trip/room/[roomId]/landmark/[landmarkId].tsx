@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
-import { Card, Badge, Button } from '@/shared/components';
+import { Card, Badge } from '@/shared/components';
 import { mockLandmarks } from '@/features/route-planning/data/mock-route-planning';
 
 export default function LandmarkDetailScreen() {
   const { landmarkId } = useLocalSearchParams<{ landmarkId: string }>();
-  const { colors, typography, spacing, rounded } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const router = useRouter();
 
   const landmark = mockLandmarks.find((l) => l.id === landmarkId) || mockLandmarks[0];

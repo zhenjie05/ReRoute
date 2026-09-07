@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import React from 'react';
+import { View, Text, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { Avatar, Card, Badge, Button, TopBar } from '@/shared/components';
@@ -7,7 +7,7 @@ import { useAuth } from '@/lib/hooks/useAuth';
 import { getUnifiedProfileData } from '@/features/profile/data/mock-profile';
 
 export default function ProfileScreen() {
-  const { colors, typography, spacing, rounded } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const { user } = useAuth();
   const router = useRouter();
 

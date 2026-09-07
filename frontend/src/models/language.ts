@@ -18,12 +18,12 @@ export interface LanguageLesson {
   category: 'food' | 'transit' | 'stay' | 'emergency';
   title: string;
   description: string;
-  lesson_content: Array<{
+  lesson_content: {
     phrase: string;
     translation: string;
     romanization?: string;
     audio_sample?: string;
-  }>;
+  }[];
   quiz_questions: QuizQuestion[];
   is_completed?: boolean;
   xp_reward: number;

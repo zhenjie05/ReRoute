@@ -12,7 +12,7 @@ export default function TripHubScreen() {
   const { hasLiveTrip, liveTrip } = useLiveTrip();
 
   const [selectedStage, setSelectedStage] = useState<'all' | 'planning' | 'active' | 'archived'>('all');
-  const [rooms, setRooms] = useState(mockTripRooms);
+  const [rooms] = useState(mockTripRooms);
 
   const filteredRooms = rooms.filter((r) => {
     if (selectedStage === 'all') return true;

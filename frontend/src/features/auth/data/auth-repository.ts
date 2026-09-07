@@ -1,5 +1,4 @@
 import { User } from '@/models/user';
-import { supabase } from '@/lib/supabase/client';
 
 export const mockUsers: User[] = [
   {

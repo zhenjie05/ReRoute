@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, Image } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { Card, Badge, Button } from '@/shared/components';
@@ -8,7 +8,7 @@ import { AlbumPhoto } from '@/models/album';
 
 export default function GroupAlbumScreen() {
   const { roomId } = useLocalSearchParams<{ roomId: string }>();
-  const { colors, typography, spacing, rounded } = useTheme();
+  const { colors, typography, spacing } = useTheme();
 
   const [photos, setPhotos] = useState<AlbumPhoto[]>(mockAlbumPhotos);
 

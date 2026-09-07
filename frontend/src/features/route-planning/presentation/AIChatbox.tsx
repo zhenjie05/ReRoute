@@ -332,7 +332,7 @@ export const AIChatbox: React.FC = () => {
           <TextInput
             value={promptText}
             onChangeText={setPromptText}
-            placeholder="Ask AI: Describe your dream escape (e.g. 5 days in Tokyo focused on food, shrines & autumn foliage)..."
+            placeholder="Ask AI: I want a Japan itinerary focused on fireworks, local street food & shrines..."
             placeholderTextColor={colors.outline}
             multiline
             style={[typography.bodySm, styles.promptInput, { color: colors.onSurface }]}

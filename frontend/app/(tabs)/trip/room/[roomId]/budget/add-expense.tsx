@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
-import { Button, Card, Badge } from '@/shared/components';
+import { Button, Card } from '@/shared/components';
 import { SplitType } from '@/models/budget';
 
 export default function AddExpenseScreen() {
-  const { roomId } = useLocalSearchParams<{ roomId: string }>();
   const { colors, typography, spacing, rounded } = useTheme();
   const router = useRouter();
 

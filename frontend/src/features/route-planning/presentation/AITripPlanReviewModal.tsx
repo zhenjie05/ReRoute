@@ -5,6 +5,7 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
+  Image,
   StyleSheet,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -282,8 +283,8 @@ export const AITripPlanReviewModal: React.FC<AITripPlanReviewModalProps> = ({
                     <Text style={[typography.utilityTiny, { color: colors.outline }]}>
                       09:10 - 17:10 • Direct (7h 00m)
                     </Text>
-                    <Text style={[typography.utilityTiny, { color: colors.onSurface, fontWeight: '800' }]}>
-                      $340 / person
+                    <Text style={[typography.utilityTiny, { color: colors.primary, fontWeight: '800' }]}>
+                      ✓ Japan Airlines JL724 • $340 / person
                     </Text>
                   </View>
                 </View>
@@ -317,21 +318,34 @@ export const AITripPlanReviewModal: React.FC<AITripPlanReviewModalProps> = ({
                       </Text>
                     </View>
                   </View>
-                  <Text style={[typography.labelMd, { color: colors.onSurface, fontWeight: '800', marginTop: 4 }]}>
-                    Senso-ji Temple & Nakamise Street
-                  </Text>
-                  <Text style={[typography.bodySm, { color: colors.onSurfaceVariant, marginVertical: 4, lineHeight: 18 }]}>
-                    Tokyo’s oldest temple with iconic giant red lanterns and vibrant street food stalls.
-                  </Text>
+                  <View style={styles.attractionHeroRow}>
+                    <View style={styles.thumbnailWrapper}>
+                      <Image
+                        source={{ uri: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=400&q=80' }}
+                        style={[styles.attractionThumb, { borderRadius: rounded.md }]}
+                        resizeMode="cover"
+                      />
+                      <View style={[styles.ratingOverlay, { backgroundColor: 'rgba(0,0,0,0.7)', borderRadius: rounded.sm }]}>
+                        <Text style={[typography.utilityTiny, { color: '#fde047', fontWeight: '800' }]}>
+                          4.8 ★
+                        </Text>
+                      </View>
+                    </View>
+                    <View style={{ flex: 1, marginLeft: spacing.sm }}>
+                      <Text style={[typography.labelMd, { color: colors.onSurface, fontWeight: '800' }]}>
+                        Senso-ji Temple & Nakamise Street
+                      </Text>
+                      <Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant, marginTop: 2, lineHeight: 15 }]} numberOfLines={2}>
+                        Historic Buddhist temple & Nakamise shopping street in Asakusa.
+                      </Text>
+                    </View>
+                  </View>
                   <View style={styles.metaChipsRow}>
                     <View style={[styles.miniChip, { backgroundColor: colors.surfaceContainerLow, borderRadius: rounded.md }]}>
                       <Text style={[typography.utilityTiny, { color: colors.onSurface }]}>🕒 2 - 3 hours</Text>
                     </View>
                     <View style={[styles.miniChip, { backgroundColor: colors.surfaceContainerLow, borderRadius: rounded.md }]}>
                       <Text style={[typography.utilityTiny, { color: colors.onSurface }]}>☀️ Best at 14:00</Text>
-                    </View>
-                    <View style={[styles.miniChip, { backgroundColor: '#fef3c7', borderRadius: rounded.md }]}>
-                      <Text style={[typography.utilityTiny, { color: '#b45309', fontWeight: '700' }]}>★ 4.8 / 5.0</Text>
                     </View>
                   </View>
                 </View>
@@ -384,7 +398,7 @@ export const AITripPlanReviewModal: React.FC<AITripPlanReviewModalProps> = ({
                 size="lg"
               />
               <Text style={[typography.utilityTiny, { color: colors.outline, textAlign: 'center', marginTop: 8 }]}>
-                🛡️ Collaborative sync enabled • Saves into your private Planning trips
+                🛡️ Collaborative sync enabled • Save as private draft
               </Text>
             </View>
           </ScrollView>
@@ -547,6 +561,27 @@ const styles = StyleSheet.create({
   miniChip: {
     paddingHorizontal: 6,
     paddingVertical: 3,
+  },
+  attractionHeroRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 6,
+  },
+  thumbnailWrapper: {
+    position: 'relative',
+    width: 60,
+    height: 60,
+  },
+  attractionThumb: {
+    width: 60,
+    height: 60,
+  },
+  ratingOverlay: {
+    position: 'absolute',
+    bottom: 3,
+    right: 3,
+    paddingHorizontal: 4,
+    paddingVertical: 1,
   },
   addStayBtn: {
     borderWidth: 1,

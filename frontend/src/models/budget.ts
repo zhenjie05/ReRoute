@@ -44,7 +44,7 @@ export interface ReceiptScan {
     date?: string;
     total_amount?: number;
     currency?: string;
-    line_items?: Array<{ name: string; price: number }>;
+    line_items?: { name: string; price: number }[];
   };
 }
 

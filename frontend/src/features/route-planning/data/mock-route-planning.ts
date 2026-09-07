@@ -1,5 +1,4 @@
 import { TripPreferences } from '@/models/trip-room';
-import { ItineraryItem } from '@/models/itinerary';
 import { Landmark } from '@/models/landmark';
 import { SafetyAlert } from '@/models/safety';
 

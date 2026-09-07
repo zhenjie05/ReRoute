@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
-import { Card, Button, Badge } from '@/shared/components';
+import { Card, Badge } from '@/shared/components';
 import { mockItineraryDays, mockItineraryItems } from '@/features/trip-room/data/mock-trip-room';
 import { ItineraryItem } from '@/models/itinerary';
 
 export default function ItineraryDayDetailScreen() {
-  const { roomId, dayId } = useLocalSearchParams<{ roomId: string; dayId: string }>();
+  const { dayId } = useLocalSearchParams<{ roomId: string; dayId: string }>();
   const { colors, typography, spacing, rounded } = useTheme();
   const router = useRouter();
 

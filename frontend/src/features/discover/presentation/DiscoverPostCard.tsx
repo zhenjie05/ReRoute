@@ -47,17 +47,26 @@ export const DiscoverPostCard: React.FC<DiscoverPostCardProps> = ({
         },
       ]}
     >
-      {/* Cover Image with Type & Duration Badges */}
+      {/* Cover Image with Type, Clones & Duration Badges */}
       <View style={styles.imageWrapper}>
         <Image
           source={{ uri: post.cover_image }}
           style={[styles.coverImage, { borderTopLeftRadius: rounded['2xl'], borderTopRightRadius: rounded['2xl'] }]}
         />
         <View style={styles.badgeOverlay}>
-          <Badge
-            label={post.type === 'cloneable_itinerary' ? '📋 Cloneable' : '📖 Recap'}
-            variant={post.type === 'cloneable_itinerary' ? 'primary' : 'secondary'}
-          />
+          {post.type === 'cloneable_itinerary' ? (
+            <View style={[styles.clonesBadge, { backgroundColor: '#dcfce7', borderRadius: rounded.full }]}>
+              <Text style={[typography.utilityTiny, { color: '#15803d', fontWeight: '800' }]}>
+                {post.stars_count > 0 ? `${post.stars_count * 3} Clones` : '12 Clones'}
+              </Text>
+            </View>
+          ) : (
+            <View style={[styles.locationBadge, { backgroundColor: 'rgba(255,255,255,0.92)', borderRadius: rounded.full }]}>
+              <Text style={[typography.utilityTiny, { color: colors.onSurface, fontWeight: '700' }]}>
+                📍 {post.destination}
+              </Text>
+            </View>
+          )}
           <Badge label={`${post.duration_days} Days`} variant="outline" />
         </View>
       </View>
@@ -137,14 +146,14 @@ export const DiscoverPostCard: React.FC<DiscoverPostCardProps> = ({
                 styles.cloneBtn,
                 {
                   backgroundColor: colors.primary,
-                  borderRadius: rounded.lg,
-                  paddingVertical: 4,
-                  paddingHorizontal: 10,
+                  borderRadius: rounded.xl,
+                  paddingVertical: 5,
+                  paddingHorizontal: 12,
                 },
               ]}
             >
               <Text style={[typography.utilityTiny, { color: '#ffffff', fontWeight: '800' }]}>
-                Clone Itinerary →
+                📋 Clone
               </Text>
             </TouchableOpacity>
           )}
@@ -176,6 +185,14 @@ const styles = StyleSheet.create({
     left: 8,
     flexDirection: 'row',
     gap: 6,
+  },
+  clonesBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  locationBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
   },
   authorRow: {
     flexDirection: 'row',

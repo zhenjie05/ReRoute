@@ -55,12 +55,20 @@ export const DiscoverFeed: React.FC = () => {
         <View style={styles.titleGroup}>
           <Text style={{ fontSize: 18 }}>🌍</Text>
           <Text style={[typography.headlineSm, { color: colors.onSurface, fontWeight: '800', marginLeft: 6 }]}>
-            Discover Community Trips
+            Discover
           </Text>
         </View>
-        <Text style={[typography.utilityTiny, { color: colors.outline }]}>
-          Public Feeds
-        </Text>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={[
+            styles.moreBtn,
+            { backgroundColor: colors.primary, borderRadius: rounded.full },
+          ]}
+        >
+          <Text style={[typography.utilityTiny, { color: '#ffffff', fontWeight: '800' }]}>
+            More &gt;
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {/* Filter Category Pills */}
@@ -146,6 +154,10 @@ const styles = StyleSheet.create({
   titleGroup: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  moreBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
   },
   filterStrip: {
     flexDirection: 'row',

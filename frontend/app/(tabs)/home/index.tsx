@@ -34,7 +34,7 @@ export default function HomeScreen() {
             Hey {displayName} 👋
           </Text>
           <Text style={[typography.bodySm, { color: colors.onSurfaceVariant, marginTop: 2 }]}>
-            Where would you and your squad like to escape next?
+            Where to next?
           </Text>
         </View>
 

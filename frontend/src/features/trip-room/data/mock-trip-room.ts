@@ -2,7 +2,7 @@ import { TripRoom, TripRoomMember } from '@/models/trip-room';
 import { ItineraryDay, ItineraryItem } from '@/models/itinerary';
 import { Message } from '@/models/chat';
 import { DecisionCard } from '@/models/decision';
-import { BudgetCategory, Expense, Settlement, ReceiptScan } from '@/models/budget';
+import { BudgetCategory, Expense, Settlement } from '@/models/budget';
 import { AlbumPhoto } from '@/models/album';
 
 export const mockTripRooms: TripRoom[] = [
