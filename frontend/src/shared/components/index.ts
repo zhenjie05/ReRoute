@@ -7,4 +7,6 @@ export * from './LoadingState';
 export * from './ErrorState';
 export * from './ModalSheet';
 export * from './TopBar';
+export * from './BottomNavBar';
+export * from './NotificationCenter';
 export * from './SOSOverlay';

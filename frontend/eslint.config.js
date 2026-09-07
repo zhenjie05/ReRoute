@@ -1,3 +1,4 @@
+/* global __dirname */
 const { FlatCompat } = require('@eslint/eslintrc');
 const js = require('@eslint/js');
 
