@@ -181,8 +181,29 @@ export const mockItineraryItems: ItineraryItem[] = [
 ];
 
 export const mockMessages: Message[] = [
+  // --- Tokyo Active Room Messages ---
   {
     id: 'msg-1',
+    room_id: 'room-tokyo-2026',
+    sender_id: null,
+    sender_type: 'system',
+    sender_name: 'System',
+    text: 'Alex Chen created the trip room.',
+    type: 'system_event',
+    created_at: '2026-09-01T00:00:00Z',
+  },
+  {
+    id: 'msg-1b',
+    room_id: 'room-tokyo-2026',
+    sender_id: null,
+    sender_type: 'system',
+    sender_name: 'System',
+    text: 'Taylor Swift joined the room.',
+    type: 'system_event',
+    created_at: '2026-09-02T10:00:00Z',
+  },
+  {
+    id: 'msg-2',
     room_id: 'room-tokyo-2026',
     sender_id: 'demo-user-1',
     sender_type: 'user',
@@ -193,7 +214,7 @@ export const mockMessages: Message[] = [
     created_at: '2026-09-05T10:15:00Z',
   },
   {
-    id: 'msg-2',
+    id: 'msg-3',
     room_id: 'room-tokyo-2026',
     sender_id: 'demo-user-2',
     sender_type: 'user',
@@ -204,27 +225,152 @@ export const mockMessages: Message[] = [
     created_at: '2026-09-05T10:17:00Z',
   },
   {
-    id: 'msg-3',
+    id: 'msg-4',
     room_id: 'room-tokyo-2026',
     sender_id: null,
     sender_type: 'mascot',
-    sender_name: 'Paku Mascot 🦉',
+    sender_name: 'ReRoute Corgi 🐕',
     text: '💡 Paku Tip: Evening rain forecast for Oct 12. I recommend moving the outdoor rooftop visit to Oct 11 afternoon for optimal visibility!',
     type: 'text',
     created_at: '2026-09-05T10:18:00Z',
   },
   {
-    id: 'msg-4',
+    id: 'msg-5',
+    room_id: 'room-tokyo-2026',
+    sender_id: null,
+    sender_type: 'system',
+    sender_name: 'System',
+    text: 'ReRoute Notice: Itinerary updated by Sarah',
+    type: 'system_event',
+    created_at: '2026-09-05T10:19:00Z',
+  },
+  {
+    id: 'msg-6',
     room_id: 'room-tokyo-2026',
     sender_id: 'demo-user-1',
     sender_type: 'user',
     sender_name: 'Alex Chen',
+    sender_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop',
     text: 'Let us vote on dinner choice!',
     type: 'decision_card',
     payload: {
       card_id: 'card-dinner-1',
     },
     created_at: '2026-09-05T10:20:00Z',
+  },
+  {
+    id: 'msg-7',
+    room_id: 'room-tokyo-2026',
+    sender_id: 'demo-user-2',
+    sender_type: 'user',
+    sender_name: 'Taylor Swift',
+    sender_avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&h=200&fit=crop',
+    text: 'Has anyone checked if the JR Pass covers our trip to Kyoto?',
+    type: 'text',
+    created_at: '2026-09-05T10:22:00Z',
+  },
+  {
+    id: 'msg-8',
+    room_id: 'room-tokyo-2026',
+    sender_id: 'demo-user-1',
+    sender_type: 'user',
+    sender_name: 'Alex Chen',
+    sender_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop',
+    text: 'Yes, I added it to the budget tab. We should book it today. Also, regarding tomorrow\'s sunrise plan...',
+    type: 'text',
+    created_at: '2026-09-05T10:25:00Z',
+    // This message has a thread reference chip (static, non-interactive)
+    payload: {
+      thread_ref: {
+        label: 'Thread · Day 4 – Fushimi Inari sunrise',
+        reply_count: 2,
+        itinerary_day_id: 'day-tokyo-3',
+      },
+    },
+  },
+  {
+    id: 'msg-9',
+    room_id: 'room-tokyo-2026',
+    sender_id: null,
+    sender_type: 'mascot',
+    sender_name: 'ReRoute Corgi 🐕',
+    text: '',
+    type: 'text',
+    created_at: '2026-09-05T10:30:00Z',
+    payload: {
+      generating: true,
+    },
+  },
+  // --- Safety risk decision card posted by system/mascot ---
+  {
+    id: 'msg-10',
+    room_id: 'room-tokyo-2026',
+    sender_id: null,
+    sender_type: 'system',
+    sender_name: 'System',
+    text: 'ReRoute Safety: A weather alert has triggered a reroute proposal.',
+    type: 'decision_card',
+    payload: {
+      card_id: 'card-rain-safety',
+    },
+    created_at: '2026-09-06T08:00:00Z',
+  },
+  // --- Bali Archived Room Messages ---
+  {
+    id: 'msg-bali-1',
+    room_id: 'room-bali-2025',
+    sender_id: null,
+    sender_type: 'system',
+    sender_name: 'System',
+    text: 'Alex Chen created the trip room.',
+    type: 'system_event',
+    created_at: '2025-07-01T00:00:00Z',
+  },
+  {
+    id: 'msg-bali-2',
+    room_id: 'room-bali-2025',
+    sender_id: 'demo-user-1',
+    sender_type: 'user',
+    sender_name: 'Alex Chen',
+    sender_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop',
+    text: 'Can\'t wait for the Bali trip! Who\'s ready for surfing?',
+    type: 'text',
+    created_at: '2025-07-15T09:00:00Z',
+  },
+  {
+    id: 'msg-bali-3',
+    room_id: 'room-bali-2025',
+    sender_id: 'demo-user-2',
+    sender_type: 'user',
+    sender_name: 'Taylor Swift',
+    sender_avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&h=200&fit=crop',
+    text: 'Absolutely! I found an amazing villa near Seminyak.',
+    type: 'text',
+    created_at: '2025-07-15T09:05:00Z',
+  },
+  {
+    id: 'msg-bali-4',
+    room_id: 'room-bali-2025',
+    sender_id: null,
+    sender_type: 'mascot',
+    sender_name: 'ReRoute Corgi 🐕',
+    text: '🌊 Surf conditions look great for Aug 3–5! Uluwatu Beach has the best breaks this season.',
+    type: 'text',
+    created_at: '2025-07-15T09:10:00Z',
+  },
+  {
+    id: 'msg-bali-5',
+    room_id: 'room-bali-2025',
+    sender_id: 'demo-user-1',
+    sender_type: 'user',
+    sender_name: 'Alex Chen',
+    sender_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop',
+    text: 'Where should we eat on Day 2?',
+    type: 'decision_card',
+    payload: {
+      card_id: 'card-bali-dinner',
+    },
+    created_at: '2025-07-16T12:00:00Z',
   },
 ];
 
@@ -233,12 +379,12 @@ export const mockDecisionCards: DecisionCard[] = [
     id: 'card-dinner-1',
     room_id: 'room-tokyo-2026',
     trigger_type: 'conflict',
-    title: 'Dinner Choice for Shibuya Evening',
+    title: 'Where for dinner on Day 3?',
     description: 'Decide where the group should dine after Shibuya Sky observation deck.',
     options: [
-      { id: 'opt-1', label: 'Ichiran Ramen Shibuya (Casual)', votes_count: 2 },
-      { id: 'opt-2', label: 'Sushi Midori Shibuya Prime (Seafood)', votes_count: 1 },
-      { id: 'opt-3', label: 'Torikizoku Yakitori (Izakaya)', votes_count: 0 },
+      { id: 'opt-1', label: 'Ichiran Ramen', votes_count: 2 },
+      { id: 'opt-2', label: 'Local Izakaya', votes_count: 3 },
+      { id: 'opt-3', label: 'Torikizoku Yakitori', votes_count: 0 },
     ],
     status: 'active',
     anonymous: true,
@@ -261,6 +407,39 @@ export const mockDecisionCards: DecisionCard[] = [
     resolved_at: '2026-09-06T09:30:00Z',
     winning_option_id: 'opt-rain-1',
   },
+  {
+    id: 'card-bali-dinner',
+    room_id: 'room-bali-2025',
+    trigger_type: 'disruption',
+    title: 'Day 2 Dinner Spot',
+    description: 'Choose between beachside BBQ or traditional Balinese feast.',
+    options: [
+      { id: 'opt-bali-1', label: 'Beachside BBQ at Jimbaran', votes_count: 2 },
+      { id: 'opt-bali-2', label: 'Traditional Balinese Feast in Ubud', votes_count: 1 },
+    ],
+    status: 'resolved',
+    anonymous: false,
+    created_at: '2025-07-16T12:00:00Z',
+    resolved_at: '2025-07-16T14:00:00Z',
+    winning_option_id: 'opt-bali-1',
+  },
+];
+
+export interface MockVote {
+  id: string;
+  decision_card_id: string;
+  user_id: string;
+  chosen_option: string;
+}
+
+export const mockVotes: MockVote[] = [
+  { id: 'vote-1', decision_card_id: 'card-dinner-1', user_id: 'demo-user-2', chosen_option: 'opt-1' },
+  { id: 'vote-2', decision_card_id: 'card-dinner-1', user_id: 'demo-user-3', chosen_option: 'opt-2' },
+  { id: 'vote-3', decision_card_id: 'card-rain-safety', user_id: 'demo-user-1', chosen_option: 'opt-rain-1' },
+  { id: 'vote-4', decision_card_id: 'card-rain-safety', user_id: 'demo-user-2', chosen_option: 'opt-rain-1' },
+  { id: 'vote-5', decision_card_id: 'card-bali-dinner', user_id: 'demo-user-1', chosen_option: 'opt-bali-1' },
+  { id: 'vote-6', decision_card_id: 'card-bali-dinner', user_id: 'demo-user-2', chosen_option: 'opt-bali-1' },
+  { id: 'vote-7', decision_card_id: 'card-bali-dinner', user_id: 'demo-user-3', chosen_option: 'opt-bali-2' },
 ];
 
 export const mockBudgetCategories: BudgetCategory[] = [

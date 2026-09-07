@@ -1,109 +1,269 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import {
   View,
-  Text,
-  TextInput,
   ScrollView,
-  StyleSheet,
-  TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
-import { Avatar, Card, Badge, Button, ModalSheet } from '@/shared/components';
-import { mockMessages, mockDecisionCards } from '@/features/trip-room/data/mock-trip-room';
 import { useAuth } from '@/lib/hooks/useAuth';
+import {
+  mockMessages,
+  mockDecisionCards,
+  mockTripRooms,
+  mockVotes,
+} from '@/features/trip-room/data/mock-trip-room';
+import {
+  DecisionPollCard,
+  SystemNoticePill,
+  MascotMessageCard,
+  MessageBubble,
+  ArchivedBanner,
+  MessageComposer,
+  ProposeVoteSheet,
+} from '@/features/trip-room/presentation/components';
+import { Message } from '@/models/chat';
+import { DecisionCard, DecisionTriggerType } from '@/models/decision';
 
+/**
+ * Discussion (Chat Room) tab — Screen 15 per SCREEN_SPEC.
+ *
+ * Renders the content *inside* the Discussion tab only.
+ * Does NOT rebuild the Trip Room header, tab row, or stage indicator
+ * (those live in the [roomId]/_layout.tsx shell).
+ */
 export default function TripChatScreen() {
   const { roomId } = useLocalSearchParams<{ roomId: string }>();
-  const { colors, typography, spacing, rounded } = useTheme();
+  const { colors, spacing } = useTheme();
   const { user } = useAuth();
   const router = useRouter();
+  const scrollRef = useRef<ScrollView>(null);
 
-  const [messages, setMessages] = useState(mockMessages);
+  // Resolve room and its stage
+  const room = mockTripRooms.find((r) => r.id === roomId) || mockTripRooms[0];
+  const isArchived = room.stage === 'archived';
+
+  // Filter messages and cards for this room
+  const [messages, setMessages] = useState<Message[]>(
+    mockMessages.filter((m) => m.room_id === (roomId || room.id)),
+  );
+  const [decisionCards, setDecisionCards] = useState<DecisionCard[]>(
+    mockDecisionCards.filter((c) => c.room_id === (roomId || room.id)),
+  );
+  const [votes, setVotes] = useState(
+    mockVotes.filter((v) =>
+      mockDecisionCards
+        .filter((c) => c.room_id === (roomId || room.id))
+        .some((c) => c.id === v.decision_card_id),
+    ),
+  );
+
   const [inputText, setInputText] = useState('');
-  const [decisionCards, setDecisionCards] = useState(mockDecisionCards);
-
-  // Propose Vote Modal State (FR-2-6a)
   const [voteModalVisible, setVoteModalVisible] = useState(false);
-  const [voteTitle, setVoteTitle] = useState('');
-  const [voteOption1, setVoteOption1] = useState('');
-  const [voteOption2, setVoteOption2] = useState('');
-  const [isAnonymous, setIsAnonymous] = useState(true);
 
-  const handleSendMessage = () => {
-    if (!inputText.trim()) return;
-    const newMsg = {
+  // Current user's vote for a given card
+  const getUserVoteForCard = useCallback(
+    (cardId: string): string | null => {
+      const vote = votes.find(
+        (v) => v.decision_card_id === cardId && v.user_id === (user?.id || 'demo-user-1'),
+      );
+      return vote?.chosen_option || null;
+    },
+    [votes, user],
+  );
+
+  // Send a text message
+  const handleSendMessage = useCallback(() => {
+    if (!inputText.trim() || isArchived) return;
+    const newMsg: Message = {
       id: `msg-${Date.now()}`,
-      room_id: (roomId as string) || 'room-tokyo-2026',
+      room_id: roomId || room.id,
       sender_id: user?.id || 'demo-user-1',
-      sender_type: 'user' as const,
+      sender_type: 'user',
       sender_name: user?.name || 'Alex Chen',
       sender_avatar: user?.avatar,
       text: inputText.trim(),
-      type: 'text' as const,
+      type: 'text',
       created_at: new Date().toISOString(),
     };
     setMessages((prev) => [...prev, newMsg]);
     setInputText('');
-  };
+    setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
+  }, [inputText, isArchived, roomId, room.id, user]);
 
-  const handleCastVote = (cardId: string, optionId: string) => {
-    setDecisionCards((prev) =>
-      prev.map((card) => {
-        if (card.id === cardId) {
-          return {
-            ...card,
-            options: card.options.map((opt) =>
-              opt.id === optionId
-                ? { ...opt, votes_count: (opt.votes_count || 0) + 1 }
-                : opt
-            ),
-          };
-        }
-        return card;
-      })
-    );
-  };
+  // Cast / update a vote
+  const handleCastVote = useCallback(
+    (cardId: string, optionId: string) => {
+      if (isArchived) return;
+      const userId = user?.id || 'demo-user-1';
+      const existingVote = votes.find(
+        (v) => v.decision_card_id === cardId && v.user_id === userId,
+      );
 
-  const handlePublishVote = () => {
-    if (!voteTitle.trim() || !voteOption1.trim() || !voteOption2.trim()) return;
+      if (existingVote) {
+        // Update existing vote
+        const oldOption = existingVote.chosen_option;
+        setVotes((prev) =>
+          prev.map((v) =>
+            v.id === existingVote.id ? { ...v, chosen_option: optionId } : v,
+          ),
+        );
+        // Adjust counts
+        setDecisionCards((prev) =>
+          prev.map((card) => {
+            if (card.id !== cardId) return card;
+            return {
+              ...card,
+              options: card.options.map((opt) => {
+                if (opt.id === oldOption) {
+                  return { ...opt, votes_count: Math.max(0, (opt.votes_count || 0) - 1) };
+                }
+                if (opt.id === optionId) {
+                  return { ...opt, votes_count: (opt.votes_count || 0) + 1 };
+                }
+                return opt;
+              }),
+            };
+          }),
+        );
+      } else {
+        // New vote
+        setVotes((prev) => [
+          ...prev,
+          {
+            id: `vote-${Date.now()}`,
+            decision_card_id: cardId,
+            user_id: userId,
+            chosen_option: optionId,
+          },
+        ]);
+        setDecisionCards((prev) =>
+          prev.map((card) => {
+            if (card.id !== cardId) return card;
+            return {
+              ...card,
+              options: card.options.map((opt) =>
+                opt.id === optionId
+                  ? { ...opt, votes_count: (opt.votes_count || 0) + 1 }
+                  : opt,
+              ),
+            };
+          }),
+        );
+      }
+    },
+    [isArchived, votes, user],
+  );
 
-    const newCard = {
-      id: `card-${Date.now()}`,
-      room_id: (roomId as string) || 'room-tokyo-2026',
-      trigger_type: 'conflict' as const,
-      title: voteTitle.trim(),
-      description: 'Custom group decision proposed by member.',
-      options: [
-        { id: `opt-${Date.now()}-1`, label: voteOption1.trim(), votes_count: 0 },
-        { id: `opt-${Date.now()}-2`, label: voteOption2.trim(), votes_count: 0 },
-      ],
-      status: 'active' as const,
-      anonymous: isAnonymous,
-      created_at: new Date().toISOString(),
-    };
+  // Publish a new vote from the Propose Vote sheet
+  const handlePublishVote = useCallback(
+    (data: {
+      title: string;
+      triggerType: DecisionTriggerType;
+      options: string[];
+      anonymous: boolean;
+    }) => {
+      if (isArchived) return;
+      const newCard: DecisionCard = {
+        id: `card-${Date.now()}`,
+        room_id: roomId || room.id,
+        trigger_type: data.triggerType,
+        title: data.title,
+        description: 'Custom group decision proposed by member.',
+        options: data.options.map((label, i) => ({
+          id: `opt-${Date.now()}-${i}`,
+          label,
+          votes_count: 0,
+        })),
+        status: 'active',
+        anonymous: data.anonymous,
+        created_at: new Date().toISOString(),
+      };
 
-    setDecisionCards((prev) => [newCard, ...prev]);
+      setDecisionCards((prev) => [...prev, newCard]);
 
-    const newMsg = {
-      id: `msg-${Date.now()}`,
-      room_id: (roomId as string) || 'room-tokyo-2026',
-      sender_id: user?.id || 'demo-user-1',
-      sender_type: 'user' as const,
-      sender_name: user?.name || 'Alex Chen',
-      text: `🗳️ Proposed a new vote: "${voteTitle}"`,
-      type: 'decision_card' as const,
-      payload: { card_id: newCard.id },
-      created_at: new Date().toISOString(),
-    };
+      const newMsg: Message = {
+        id: `msg-${Date.now()}`,
+        room_id: roomId || room.id,
+        sender_id: user?.id || 'demo-user-1',
+        sender_type: 'user',
+        sender_name: user?.name || 'Alex Chen',
+        sender_avatar: user?.avatar,
+        text: `🗳️ Proposed a new vote: "${data.title}"`,
+        type: 'decision_card',
+        payload: { card_id: newCard.id },
+        created_at: new Date().toISOString(),
+      };
 
-    setMessages((prev) => [...prev, newMsg]);
-    setVoteModalVisible(false);
-    setVoteTitle('');
-    setVoteOption1('');
-    setVoteOption2('');
+      setMessages((prev) => [...prev, newMsg]);
+      setVoteModalVisible(false);
+      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
+    },
+    [isArchived, roomId, room.id, user],
+  );
+
+  // Navigate to Safety Alert Detail
+  const handleSafetyAlertPress = useCallback(
+    (alertId: string) => {
+      router.push(`/(tabs)/home/safety-alert/${alertId}` as any);
+    },
+    [router],
+  );
+
+  // Navigate to Itinerary Day (thread chip deep-link)
+  const handleThreadChipPress = useCallback(
+    (itineraryDayId: string) => {
+      router.push(
+        `/(tabs)/trip/room/${roomId || room.id}/itinerary` as any,
+      );
+    },
+    [router, roomId, room.id],
+  );
+
+  // Render a single feed item
+  const renderFeedItem = (msg: Message) => {
+    // System message → centered pill notice
+    if (msg.sender_type === 'system' && msg.type !== 'decision_card') {
+      return <SystemNoticePill key={msg.id} text={msg.text} />;
+    }
+
+    // Mascot message → distinct mascot card
+    if (msg.sender_type === 'mascot') {
+      return <MascotMessageCard key={msg.id} message={msg} />;
+    }
+
+    // Decision card message → inline poll card
+    if (msg.type === 'decision_card' && msg.payload?.card_id) {
+      const card = decisionCards.find((c) => c.id === msg.payload.card_id);
+      if (!card) return null;
+
+      return (
+        <DecisionPollCard
+          key={msg.id}
+          card={card}
+          onVote={handleCastVote}
+          onSafetyAlertPress={handleSafetyAlertPress}
+          isArchived={isArchived}
+          userVoteOptionId={getUserVoteForCard(card.id)}
+        />
+      );
+    }
+
+    // Regular user message → bubble
+    if (msg.sender_type === 'user') {
+      const isMe = msg.sender_id === (user?.id || 'demo-user-1');
+      return (
+        <MessageBubble
+          key={msg.id}
+          message={msg}
+          isOwnMessage={isMe}
+          onThreadChipPress={handleThreadChipPress}
+        />
+      );
+    }
+
+    return null;
   };
 
   return (
@@ -112,303 +272,37 @@ export default function TripChatScreen() {
       style={{ flex: 1, backgroundColor: colors.background }}
     >
       <ScrollView
-        contentContainerStyle={{ padding: spacing.md, paddingBottom: 96 }}
+        ref={scrollRef}
+        contentContainerStyle={{
+          paddingTop: spacing.md,
+          paddingBottom: 80,
+        }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Messages Stream */}
-        {messages.map((msg) => {
-          const isMe = msg.sender_id === user?.id;
-          const isMascot = msg.sender_type === 'mascot';
+        {/* Archived State Banner */}
+        {isArchived && <ArchivedBanner />}
 
-          if (isMascot) {
-            // Mascot Message Card (FR-2-7, FR-9-2)
-            return (
-              <Card
-                key={msg.id}
-                variant="season"
-                style={{
-                  marginVertical: spacing.xs,
-                  borderLeftWidth: 4,
-                  borderLeftColor: colors.season.main,
-                }}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                  <Text style={{ fontSize: 18, marginRight: 6 }}>🦉</Text>
-                  <Text style={[typography.labelSm, { color: colors.season.text, fontWeight: '800' }]}>
-                    {msg.sender_name || 'Paku Mascot'}
-                  </Text>
-                  <Badge label="AI Assistant" variant="season" style={{ marginLeft: 6 }} />
-                </View>
-                <Text style={[typography.bodyMd, { color: colors.onSurface, lineHeight: 20 }]}>
-                  {msg.text}
-                </Text>
-              </Card>
-            );
-          }
-
-          if (msg.type === 'decision_card' && msg.payload?.card_id) {
-            const card = decisionCards.find((c) => c.id === msg.payload.card_id);
-            if (!card) return null;
-
-            // In-Feed Decision Card (FR-2-6, FR-2-6a, FR-1-9)
-            return (
-              <Card
-                key={msg.id}
-                variant="outlined"
-                style={{
-                  marginVertical: spacing.sm,
-                  backgroundColor: '#ffffff',
-                  borderColor: card.trigger_type === 'safety_risk' ? colors.warning : colors.primary,
-                  borderWidth: 2,
-                }}
-              >
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Badge
-                    label={
-                      card.trigger_type === 'safety_risk'
-                        ? '⚠️ Safety Risk Decision'
-                        : card.trigger_type === 'disruption'
-                        ? '⚡ Disruption Vote'
-                        : '🤝 Group Vote'
-                    }
-                    variant={card.trigger_type === 'safety_risk' ? 'warning' : 'season'}
-                  />
-                  {card.anonymous ? (
-                    <Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant }]}>
-                      🔒 Anonymous
-                    </Text>
-                  ) : null}
-                </View>
-
-                <Text style={[typography.headlineSm, { color: colors.onSurface, marginTop: spacing.xs }]}>
-                  {card.title}
-                </Text>
-                <Text style={[typography.bodySm, { color: colors.onSurfaceVariant, marginBottom: spacing.md }]}>
-                  {card.description}
-                </Text>
-
-                {/* Safety Alert link-out if safety_risk */}
-                {card.safety_alert_id ? (
-                  <TouchableOpacity
-                    onPress={() => router.push(`/(tabs)/home/safety-alert/${card.safety_alert_id}` as any)}
-                    style={{ marginBottom: spacing.md }}
-                  >
-                    <Text style={[typography.labelSm, { color: colors.primary, fontWeight: '700' }]}>
-                      View Weather & Risk Report →
-                    </Text>
-                  </TouchableOpacity>
-                ) : null}
-
-                {/* Options List */}
-                <View style={{ gap: spacing.xs }}>
-                  {card.options.map((opt) => (
-                    <TouchableOpacity
-                      key={opt.id}
-                      onPress={() => handleCastVote(card.id, opt.id)}
-                      style={[
-                        styles.voteOptionBtn,
-                        {
-                          backgroundColor: colors.surfaceContainerLow,
-                          borderRadius: rounded.md,
-                          padding: spacing.md,
-                        },
-                      ]}
-                    >
-                      <Text style={[typography.bodyMd, { color: colors.onSurface, fontWeight: '600', flex: 1 }]}>
-                        {opt.label}
-                      </Text>
-                      <Badge label={`${opt.votes_count || 0} votes`} variant="outline" />
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </Card>
-            );
-          }
-
-          // Regular User Chat Bubble
-          return (
-            <View
-              key={msg.id}
-              style={[
-                styles.bubbleRow,
-                isMe ? { justifyContent: 'flex-end' } : { justifyContent: 'flex-start' },
-              ]}
-            >
-              {!isMe ? <Avatar uri={msg.sender_avatar} name={msg.sender_name} size={32} /> : null}
-              <View
-                style={[
-                  styles.bubble,
-                  {
-                    backgroundColor: isMe ? colors.primary : colors.card,
-                    borderRadius: rounded.lg,
-                    padding: spacing.md,
-                    marginLeft: !isMe ? spacing.xs : 0,
-                    marginRight: isMe ? spacing.xs : 0,
-                  },
-                ]}
-              >
-                {!isMe && msg.sender_name ? (
-                  <Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant, marginBottom: 2 }]}>
-                    {msg.sender_name}
-                  </Text>
-                ) : null}
-                <Text
-                  style={[
-                    typography.bodyMd,
-                    { color: isMe ? colors.onPrimary : colors.onSurface },
-                  ]}
-                >
-                  {msg.text}
-                </Text>
-              </View>
-            </View>
-          );
-        })}
+        {/* Chronological message feed */}
+        {messages.map(renderFeedItem)}
       </ScrollView>
 
-      {/* Composer Toolbar (with Propose Vote trigger) */}
-      <View
-        style={[
-          styles.composerBar,
-          {
-            backgroundColor: '#ffffff',
-            borderTopColor: colors.cardBorder,
-            paddingHorizontal: spacing.md,
-            paddingVertical: spacing.sm,
-          },
-        ]}
-      >
-        {/* Propose Vote Action (FR-2-6a) */}
-        <TouchableOpacity
-          onPress={() => setVoteModalVisible(true)}
-          style={[styles.voteToolBtn, { backgroundColor: colors.surfaceContainerLow, borderRadius: rounded.md }]}
-        >
-          <Text style={{ fontSize: 18 }}>🗳️</Text>
-        </TouchableOpacity>
+      {/* Composer / Archived disabled state */}
+      <MessageComposer
+        isArchived={isArchived}
+        inputText={inputText}
+        onChangeText={setInputText}
+        onSend={handleSendMessage}
+        onProposeVote={() => setVoteModalVisible(true)}
+      />
 
-        <TextInput
-          value={inputText}
-          onChangeText={setInputText}
-          placeholder="Message group or ask Paku..."
-          placeholderTextColor={colors.outline}
-          style={[
-            styles.textInput,
-            {
-              backgroundColor: colors.surfaceContainerLow,
-              borderRadius: rounded.full,
-              paddingHorizontal: spacing.md,
-              color: colors.onSurface,
-            },
-          ]}
+      {/* Propose Vote Modal Sheet (FR-2-6a) */}
+      {!isArchived && (
+        <ProposeVoteSheet
+          visible={voteModalVisible}
+          onClose={() => setVoteModalVisible(false)}
+          onPublish={handlePublishVote}
         />
-
-        <Button
-          title="Send"
-          onPress={handleSendMessage}
-          variant="primary"
-          size="sm"
-        />
-      </View>
-
-      {/* Propose Vote Composer Modal Sheet (FR-2-6a) */}
-      <ModalSheet
-        visible={voteModalVisible}
-        onClose={() => setVoteModalVisible(false)}
-        title="Propose Group Vote 🗳️"
-      >
-        <View style={{ gap: spacing.md }}>
-          <Text style={[typography.labelSm, { color: colors.onSurface, fontWeight: '700' }]}>
-            Decision Question / Topic
-          </Text>
-          <TextInput
-            value={voteTitle}
-            onChangeText={setVoteTitle}
-            placeholder="e.g. Which ramen shop for dinner?"
-            placeholderTextColor={colors.outline}
-            style={[styles.modalInput, { borderColor: colors.outlineVariant, borderRadius: rounded.md, padding: spacing.md }]}
-          />
-
-          <Text style={[typography.labelSm, { color: colors.onSurface, fontWeight: '700' }]}>
-            Option 1
-          </Text>
-          <TextInput
-            value={voteOption1}
-            onChangeText={setVoteOption1}
-            placeholder="e.g. Ichiran Shibuya"
-            placeholderTextColor={colors.outline}
-            style={[styles.modalInput, { borderColor: colors.outlineVariant, borderRadius: rounded.md, padding: spacing.md }]}
-          />
-
-          <Text style={[typography.labelSm, { color: colors.onSurface, fontWeight: '700' }]}>
-            Option 2
-          </Text>
-          <TextInput
-            value={voteOption2}
-            onChangeText={setVoteOption2}
-            placeholder="e.g. Afuri Harajuku"
-            placeholderTextColor={colors.outline}
-            style={[styles.modalInput, { borderColor: colors.outlineVariant, borderRadius: rounded.md, padding: spacing.md }]}
-          />
-
-          <TouchableOpacity
-            onPress={() => setIsAnonymous(!isAnonymous)}
-            style={{ flexDirection: 'row', alignItems: 'center', marginVertical: spacing.xs }}
-          >
-            <Text style={{ fontSize: 18, marginRight: 8 }}>{isAnonymous ? '☑️' : '◻️'}</Text>
-            <Text style={[typography.bodySm, { color: colors.onSurface }]}>
-              Anonymous Voting (hide member picks)
-            </Text>
-          </TouchableOpacity>
-
-          <Button
-            title="Publish Vote to Room Chat"
-            onPress={handlePublishVote}
-            variant="primary"
-            size="lg"
-          />
-        </View>
-      </ModalSheet>
+      )}
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  bubbleRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    marginVertical: 4,
-  },
-  bubble: {
-    maxWidth: '78%',
-  },
-  voteOptionBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  composerBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    gap: 8,
-  },
-  voteToolBtn: {
-    width: 38,
-    height: 38,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  textInput: {
-    flex: 1,
-    height: 38,
-    fontSize: 14,
-  },
-  modalInput: {
-    borderWidth: 1,
-    fontSize: 14,
-  },
-});
