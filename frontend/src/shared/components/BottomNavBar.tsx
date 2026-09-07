@@ -80,7 +80,7 @@ export const BottomNavBar: React.FC<Partial<BottomTabBarProps> & StandaloneBotto
       });
 
       if (!isFocused && !event.defaultPrevented) {
-        props.navigation.navigate(tab.key);
+        router.push(tab.route as any);
       }
     } else if (props.onTabPress) {
       props.onTabPress(tab.key);
