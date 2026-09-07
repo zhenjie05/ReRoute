@@ -1,0 +1,171 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+} from 'react-native';
+import { useTheme } from '@/core/theme';
+import { mockDiscoverPosts } from '@/features/discover/data/mock-discover';
+import { DiscoverPostCard } from './DiscoverPostCard';
+
+type FilterOption = 'All' | 'Cloneable' | 'Cultural' | 'Nature';
+
+export const DiscoverFeed: React.FC = () => {
+  const { colors, typography, spacing, rounded } = useTheme();
+  const [posts, setPosts] = useState(mockDiscoverPosts);
+  const [selectedFilter, setSelectedFilter] = useState<FilterOption>('All');
+
+  const filterOptions: { key: FilterOption; label: string; icon: string }[] = [
+    { key: 'All', label: 'All', icon: '🌐' },
+    { key: 'Cloneable', label: 'Cloneable', icon: '📋' },
+    { key: 'Cultural', label: 'Cultural', icon: '🏛️' },
+    { key: 'Nature', label: 'Nature', icon: '🌲' },
+  ];
+
+  const handleToggleStar = (postId: string) => {
+    setPosts((prev) =>
+      prev.map((p) => {
+        if (p.id === postId) {
+          const isStarred = !p.is_starred;
+          return {
+            ...p,
+            is_starred: isStarred,
+            stars_count: isStarred ? p.stars_count + 1 : p.stars_count - 1,
+          };
+        }
+        return p;
+      })
+    );
+  };
+
+  const filteredPosts = posts.filter((p) => {
+    if (selectedFilter === 'All') return true;
+    if (selectedFilter === 'Cloneable') return p.type === 'cloneable_itinerary';
+    if (selectedFilter === 'Cultural') return p.travel_style === 'Cultural';
+    if (selectedFilter === 'Nature') return p.travel_style === 'Nature';
+    return true;
+  });
+
+  return (
+    <View style={{ marginHorizontal: spacing.lg, marginVertical: spacing.md }}>
+      {/* Header Row */}
+      <View style={styles.headerRow}>
+        <View style={styles.titleGroup}>
+          <Text style={{ fontSize: 18 }}>🌍</Text>
+          <Text style={[typography.headlineSm, { color: colors.onSurface, fontWeight: '800', marginLeft: 6 }]}>
+            Discover Community Trips
+          </Text>
+        </View>
+        <Text style={[typography.utilityTiny, { color: colors.outline }]}>
+          Public Feeds
+        </Text>
+      </View>
+
+      {/* Filter Category Pills */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.filterStrip}
+      >
+        {filterOptions.map((opt) => {
+          const isActive = selectedFilter === opt.key;
+          return (
+            <TouchableOpacity
+              key={opt.key}
+              activeOpacity={0.8}
+              onPress={() => setSelectedFilter(opt.key)}
+              style={[
+                styles.filterChip,
+                {
+                  backgroundColor: isActive ? colors.primary : colors.surfaceContainerLow,
+                  borderColor: isActive ? colors.primary : colors.surfaceContainerHigh,
+                  borderRadius: rounded.full,
+                },
+              ]}
+            >
+              <Text style={{ fontSize: 12 }}>{opt.icon}</Text>
+              <Text
+                style={[
+                  typography.utilityTiny,
+                  {
+                    color: isActive ? '#ffffff' : colors.onSurface,
+                    fontWeight: isActive ? '800' : '600',
+                    marginLeft: 4,
+                  },
+                ]}
+              >
+                {opt.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
+
+      {/* Cards List */}
+      <View style={{ marginTop: spacing.sm }}>
+        {filteredPosts.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={{ fontSize: 28, marginBottom: 4 }}>🔍</Text>
+            <Text style={[typography.labelSm, { color: colors.onSurface, fontWeight: '700' }]}>
+              No matching community itineraries
+            </Text>
+            <Text style={[typography.utilityTiny, { color: colors.outline, marginTop: 2 }]}>
+              Try selecting another category or clearing filters.
+            </Text>
+          </View>
+        ) : (
+          filteredPosts.map((post) => (
+            <DiscoverPostCard
+              key={post.id}
+              post={post}
+              onToggleStar={handleToggleStar}
+            />
+          ))
+        )}
+      </View>
+
+      {/* Recommendation Transparency Notice (FR-NAV-4 / Section 4.4) */}
+      <View style={styles.transparencyNotice}>
+        <Text style={[typography.utilityTiny, { color: colors.outline, textAlign: 'center', fontStyle: 'italic', lineHeight: 14 }]}>
+          💡 Starred trips and preferences help tailor your personalized AI recommendations.
+        </Text>
+      </View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  titleGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  filterStrip: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingVertical: 4,
+  },
+  filterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 32,
+  },
+  transparencyNotice: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+});

@@ -7,7 +7,7 @@ import { mockSafetyAlerts } from '@/features/route-planning/data/mock-route-plan
 
 export default function SafetyAlertDetailScreen() {
   const { alertId } = useLocalSearchParams<{ alertId: string }>();
-  const { colors, typography, spacing, rounded } = useTheme();
+  const { colors, typography, spacing, rounded, shadows } = useTheme();
   const router = useRouter();
 
   const alert = mockSafetyAlerts.find((a) => a.id === alertId) || mockSafetyAlerts[0];
@@ -16,57 +16,82 @@ export default function SafetyAlertDetailScreen() {
     Linking.openURL(alert.source_url).catch(() => {});
   };
 
+  const handleCallEmergency = () => {
+    const num = alert.emergency_number.split('/')[0].trim();
+    Linking.openURL(`tel:${num}`).catch(() => {});
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      {/* Header */}
-      <View style={[styles.header, { paddingHorizontal: spacing.lg, paddingVertical: spacing.md }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={{ fontSize: 20 }}>←</Text>
+      {/* Header Bar */}
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: colors.surface,
+            borderBottomColor: colors.surfaceContainerHigh,
+            paddingHorizontal: spacing.lg,
+            paddingVertical: spacing.md,
+            ...shadows.soft,
+          },
+        ]}
+      >
+        <TouchableOpacity
+          onPress={() => router.back()}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          style={styles.backBtn}
+        >
+          <Text style={{ fontSize: 20, color: colors.onSurface }}>←</Text>
         </TouchableOpacity>
-        <Text style={[typography.headlineSm, { color: colors.onSurface }]}>Safety Advisory</Text>
+        <Text style={[typography.headlineSm, { color: colors.onSurface, fontWeight: '800' }]}>
+          Safety & Weather Advisory
+        </Text>
         <View style={{ width: 32 }} />
       </View>
 
       <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: 100 }}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm }}>
-          <Badge label={`⚠️ Risk Level: ${alert.risk_level.toUpperCase()}`} variant="warning" />
-          <Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant }]}>
-            {alert.destination}
+        <View style={styles.badgeRow}>
+          <Badge
+            label={`⚠️ Risk: ${alert.risk_level.toUpperCase()}`}
+            variant={alert.risk_level === 'high' ? 'error' : 'warning'}
+          />
+          <Text style={[typography.labelSm, { color: colors.outline, fontWeight: '700' }]}>
+            📍 {alert.destination}
           </Text>
         </View>
 
-        <Text style={[typography.headlineLg, { color: colors.onSurface, marginBottom: spacing.md }]}>
+        <Text style={[typography.headlineMd, { color: colors.onSurface, marginVertical: spacing.sm, fontWeight: '800' }]}>
           {alert.title}
         </Text>
 
         {/* Live Weather Snapshot Widget */}
-        <Card variant="season" style={{ marginBottom: spacing.lg }}>
-          <Text style={[typography.labelSm, { color: colors.season.text, fontWeight: '700', marginBottom: spacing.xs }]}>
+        <Card variant="season" style={{ marginBottom: spacing.md }}>
+          <Text style={[typography.labelSm, { color: colors.season.text, fontWeight: '800', marginBottom: spacing.xs }]}>
             🌤️ Live Weather & Risk Snapshot
           </Text>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: spacing.xs }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.xs }}>
             <View>
-              <Text style={[typography.headlineLg, { color: colors.onSurface }]}>
+              <Text style={[typography.headlineLg, { color: colors.onSurface, fontWeight: '900' }]}>
                 {alert.weather_snapshot.temperature_c}°C
               </Text>
               <Text style={[typography.bodySm, { color: colors.onSurfaceVariant }]}>
                 {alert.weather_snapshot.condition}
               </Text>
             </View>
-            <View style={{ alignItems: 'flex-end' }}>
+            <View style={{ alignItems: 'flex-end', gap: 4 }}>
               <Text style={[typography.labelSm, { color: colors.onSurface }]}>
                 💨 Wind: {alert.weather_snapshot.wind_kmh} km/h
               </Text>
-              <Text style={[typography.labelSm, { color: colors.onSurface, marginTop: 4 }]}>
-                🌧️ Rain: {alert.weather_snapshot.precipitation_chance}%
+              <Text style={[typography.labelSm, { color: colors.onSurface }]}>
+                🌧️ Precipitation: {alert.weather_snapshot.precipitation_chance}%
               </Text>
             </View>
           </View>
         </Card>
 
-        {/* Summary Details */}
-        <Card style={{ marginBottom: spacing.lg }}>
-          <Text style={[typography.headlineSm, { color: colors.onSurface, marginBottom: spacing.xs }]}>
+        {/* Situation Report */}
+        <Card style={{ marginBottom: spacing.md }}>
+          <Text style={[typography.headlineSm, { color: colors.onSurface, fontWeight: '800', marginBottom: spacing.xs }]}>
             Situation Report
           </Text>
           <Text style={[typography.bodyMd, { color: colors.onSurfaceVariant, lineHeight: 22 }]}>
@@ -74,20 +99,38 @@ export default function SafetyAlertDetailScreen() {
           </Text>
         </Card>
 
-        {/* Local Emergency Guidance */}
-        <Card variant="outlined" style={{ marginBottom: spacing.lg }}>
-          <Text style={[typography.labelLg, { color: colors.error, fontWeight: '700', marginBottom: spacing.xs }]}>
-            🚨 Local Emergency Dispatch
+        {/* Local Emergency Dispatch */}
+        <Card variant="outlined" style={{ marginBottom: spacing.lg, borderColor: colors.error }}>
+          <View style={styles.emergencyHeader}>
+            <Text style={{ fontSize: 20 }}>🚨</Text>
+            <Text style={[typography.labelLg, { color: colors.error, fontWeight: '800', marginLeft: 6 }]}>
+              Local Emergency Hotlines
+            </Text>
+          </View>
+          <Text style={[typography.bodySm, { color: colors.onSurfaceVariant, marginVertical: spacing.xs }]}>
+            If you need immediate assistance in {alert.destination}:
           </Text>
-          <Text style={[typography.bodySm, { color: colors.onSurfaceVariant }]}>
-            In case of immediate medical or police assistance in {alert.destination}: dial{' '}
-            <Text style={{ fontWeight: '800', color: colors.onSurface }}>{alert.emergency_number}</Text>.
-          </Text>
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={handleCallEmergency}
+            style={[
+              styles.callBtn,
+              {
+                backgroundColor: colors.error,
+                borderRadius: rounded.xl,
+                paddingVertical: spacing.sm,
+              },
+            ]}
+          >
+            <Text style={[typography.labelSm, { color: '#ffffff', fontWeight: '800', textAlign: 'center' }]}>
+              📞 Dial Local Hotline ({alert.emergency_number})
+            </Text>
+          </TouchableOpacity>
         </Card>
 
         {/* Official Source Link */}
         <Button
-          title={`View on ${alert.source_name} ↗`}
+          title={`View Official Advisory on ${alert.source_name} ↗`}
           onPress={handleOpenSource}
           variant="outline"
           size="lg"
@@ -102,11 +145,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderBottomColor: '#edf1f5',
   },
   backBtn: {
     padding: 6,
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  emergencyHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  callBtn: {
+    marginTop: 8,
   },
 });
