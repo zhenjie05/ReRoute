@@ -1,163 +1,195 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
-import { Card, Badge, Button } from '@/shared/components';
-import { mockLanguageLessons } from '@/features/language/data/mock-language';
+import { mockLanguageLessons, useLanguageProgress } from '@/features/language/data/mock-language';
+import { LessonPhraseCard } from '@/features/trip-room/presentation/components/language/LessonPhraseCard';
+import { LessonQuizOptions } from '@/features/trip-room/presentation/components/language/LessonQuizOptions';
+import { LessonProgress } from '@/features/trip-room/presentation/components/language/LessonProgress';
+import { LessonCompletionCard } from '@/features/trip-room/presentation/components/language/LessonCompletionCard';
 
-export default function LessonQuizScreen() {
-  const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
-  const { colors, typography, spacing, rounded } = useTheme();
+export default function LessonDetailScreen() {
+  const { lessonId, roomId } = useLocalSearchParams<{ lessonId: string; roomId: string }>();
+  const { colors, typography, rounded } = useTheme();
   const router = useRouter();
 
-  const lesson = mockLanguageLessons.find((l) => l.id === lessonId) || mockLanguageLessons[0];
+  const lesson = mockLanguageLessons.find((l) => l.id === lessonId);
+  const { updateProgress, markLessonComplete } = useLanguageProgress();
+
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
-  const [isCorrect, setIsCorrect] = useState(false);
+  const [isLessonComplete, setIsLessonComplete] = useState(false);
+  const [correctAnswersCount, setCorrectAnswersCount] = useState(0);
+  const [timeSpentMs, setTimeSpentMs] = useState(0);
 
-  const question = lesson.quiz_questions[0];
+  // Use a ref to capture the initial mount time safely without triggering impure render warnings
+  const startTimeRef = React.useRef<number | null>(null);
+  if (startTimeRef.current === null) {
+    startTimeRef.current = Date.now();
+  }
 
-  const handleSelectOption = (optId: string, correct: boolean) => {
-    if (isAnswered) return;
-    setSelectedOptionId(optId);
+  if (!lesson) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>Lesson not found.</Text>
+      </View>
+    );
+  }
+
+  const questions = lesson.quiz_questions || [];
+  const totalQuestions = questions.length;
+  const currentQuestion = questions[currentIndex];
+  // Match the phrase based on index
+  const currentContent = lesson.lesson_content[currentIndex] || lesson.lesson_content[0];
+
+  const handleSelectOption = (optionId: string, isCorrect: boolean) => {
+    setSelectedOptionId(optionId);
     setIsAnswered(true);
-    setIsCorrect(correct);
+    
+    let newCorrectCount = correctAnswersCount;
+    if (isCorrect) {
+      newCorrectCount += 1;
+      setCorrectAnswersCount(newCorrectCount);
+    }
+
+    updateProgress(lesson.id, {
+      status: 'in_progress',
+      currentQuestionIndex: currentIndex,
+      answeredCount: currentIndex + 1,
+      correctCount: newCorrectCount,
+      progressPercent: Math.round(((currentIndex + 1) / totalQuestions) * 100),
+    });
   };
 
-  return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
-      {/* Header */}
-      <View style={[styles.header, { paddingHorizontal: spacing.lg, paddingVertical: spacing.md }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={{ fontSize: 20 }}>←</Text>
-        </TouchableOpacity>
-        <Text style={[typography.headlineSm, { color: colors.onSurface }]}>{lesson.title}</Text>
-        <View style={{ width: 32 }} />
-      </View>
+  const handleNext = () => {
+    if (currentIndex < totalQuestions - 1) {
+      setCurrentIndex(currentIndex + 1);
+      setSelectedOptionId(null);
+      setIsAnswered(false);
+    } else {
+      setTimeSpentMs(Date.now() - (startTimeRef.current || Date.now()));
+      setIsLessonComplete(true);
+      markLessonComplete(lesson.id);
+    }
+  };
 
-      <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: 100 }}>
-        {/* Vocabulary Review Cards */}
-        <Text style={[typography.headlineSm, { color: colors.onSurface, marginBottom: spacing.xs }]}>
-          Essential Phrases
-        </Text>
-        <Text style={[typography.bodySm, { color: colors.onSurfaceVariant, marginBottom: spacing.md }]}>
-          Review before testing your recall.
-        </Text>
+  const handlePrev = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+      setSelectedOptionId(null);
+      setIsAnswered(false);
+    }
+  };
 
-        <View style={{ gap: spacing.sm, marginBottom: spacing.xl }}>
-          {lesson.lesson_content.map((item, idx) => (
-            <Card key={idx} variant="season">
-              <Text style={[typography.labelLg, { color: colors.season.text, fontWeight: '800' }]}>
-                {item.phrase}
-              </Text>
-              <Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant, marginTop: 2 }]}>
-                🗣️ Pronounce: {item.romanization}
-              </Text>
-              <Text style={[typography.bodyMd, { color: colors.onSurface, marginTop: 4, fontWeight: '600' }]}>
-                Meaning: {item.translation}
-              </Text>
-            </Card>
-          ))}
-        </View>
+  if (isLessonComplete) {
+    const minutes = Math.floor(timeSpentMs / 60000);
+    const seconds = Math.floor((timeSpentMs % 60000) / 1000);
+    const timeSpentStr = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+    
+    // Cap at 100% just in case
+    const accuracy = totalQuestions > 0 ? Math.round((correctAnswersCount / totalQuestions) * 100) : 100;
 
-        {/* Interactive Quiz Section */}
-        <Card variant="outlined" style={{ borderColor: colors.primary, borderWidth: 2 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm }}>
-            <Badge label="🎯 Question 1 of 1" variant="season" />
-            <Text style={[typography.labelSm, { color: colors.primary, fontWeight: '700' }]}>
-              +{lesson.xp_reward} XP
+    return (
+      <ScrollView contentContainerStyle={{ flexGrow: 1, backgroundColor: colors.background, paddingBottom: 100 }}>
+        <LessonCompletionCard
+          subtitle={`You've mastered ${totalQuestions} new phrases today.`}
+          timeSpentStr={timeSpentStr}
+          accuracyPercent={accuracy}
+        />
+
+        <View style={{ paddingHorizontal: 16 }}>
+          <TouchableOpacity
+            style={[styles.primaryBtn, { backgroundColor: '#ff8f06', borderRadius: rounded['2xl'] }]}
+            onPress={() => router.back()}
+          >
+            <Text style={[typography.labelLg, { color: '#fff', fontWeight: 'bold' }]}>
+              Continue to Next Lesson →
             </Text>
-          </View>
+          </TouchableOpacity>
 
-          <Text style={[typography.headlineSm, { color: colors.onSurface, marginBottom: spacing.md }]}>
-            {question.prompt}
-          </Text>
-
-          <View style={{ gap: spacing.sm }}>
-            {question.options.map((opt) => {
-              const isSelected = selectedOptionId === opt.id;
-              let btnBg = colors.surfaceContainerLow;
-              if (isAnswered && isSelected) {
-                btnBg = opt.is_correct ? colors.successContainer : colors.errorContainer;
-              }
-
-              return (
-                <TouchableOpacity
-                  key={opt.id}
-                  onPress={() => handleSelectOption(opt.id, opt.is_correct)}
-                  style={[
-                    styles.optionBtn,
-                    {
-                      backgroundColor: btnBg,
-                      borderRadius: rounded.md,
-                      padding: spacing.md,
-                    },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      typography.bodyMd,
-                      {
-                        color:
-                          isAnswered && isSelected
-                            ? opt.is_correct
-                              ? colors.success
-                              : colors.error
-                            : colors.onSurface,
-                        fontWeight: '700',
-                      },
-                    ]}
-                  >
-                    {opt.text}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-
-          {isAnswered ? (
-            <View style={{ marginTop: spacing.md }}>
-              <Text
-                style={[
-                  typography.labelLg,
-                  {
-                    color: isCorrect ? colors.success : colors.error,
-                    fontWeight: '800',
-                    textAlign: 'center',
-                    marginBottom: spacing.md,
-                  },
-                ]}
-              >
-                {isCorrect ? '🎉 Correct! +50 XP Earned' : '❌ Try reviewing the phrase above!'}
-              </Text>
-              <Button
-                title="Complete Lesson"
-                onPress={() => router.back()}
-                variant="primary"
-                size="md"
-              />
-            </View>
-          ) : null}
-        </Card>
+          <TouchableOpacity
+            style={{ padding: 16, alignItems: 'center' }}
+            onPress={() => router.navigate(`/(tabs)/trip/room/${roomId}/languages` as any)}
+          >
+            <Text style={[typography.labelSm, { color: colors.outline, fontWeight: 'bold' }]}>
+              Back to Trip Rooms
+            </Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
-    </View>
+    );
+  }
+
+  return (
+    <ScrollView contentContainerStyle={{ flexGrow: 1, backgroundColor: colors.background, paddingBottom: 100 }}>
+      <LessonProgress current={currentIndex + (isAnswered ? 1 : 0)} total={totalQuestions} />
+
+      <LessonPhraseCard
+        phrase={currentContent.phrase}
+        romanization={currentContent.romanization}
+        onAudioPress={() => {
+          // Mock audio playback
+        }}
+      />
+
+      <Text style={[typography.labelLg, { color: colors.onSurface, textAlign: 'center', marginBottom: 16, fontWeight: 'bold' }]}>
+        {currentQuestion.prompt}
+      </Text>
+
+      <LessonQuizOptions
+        options={currentQuestion.options}
+        selectedOptionId={selectedOptionId}
+        isAnswered={isAnswered}
+        onSelectOption={handleSelectOption}
+      />
+
+      <View style={styles.navBar}>
+        <TouchableOpacity 
+          style={[styles.navBtn, { backgroundColor: colors.surfaceContainerLow }]}
+          onPress={handlePrev}
+          disabled={currentIndex === 0}
+        >
+          <Text style={{ fontSize: 18, color: currentIndex === 0 ? colors.onSurfaceVariant : colors.onSurface }}>←</Text>
+        </TouchableOpacity>
+
+        <Text style={[typography.utilityTiny, { color: colors.outline, fontWeight: 'bold' }]}>
+          Phrase {currentIndex + 1}
+        </Text>
+
+        <TouchableOpacity 
+          style={[
+            styles.navBtn, 
+            { backgroundColor: isAnswered ? '#ff8f06' : colors.surfaceContainerHighest }
+          ]}
+          onPress={handleNext}
+          disabled={!isAnswered}
+        >
+          <Text style={{ fontSize: 18, color: isAnswered ? '#fff' : colors.onSurfaceVariant }}>→</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
+  navBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#edf1f5',
+    paddingHorizontal: 24,
+    marginTop: 'auto',
   },
-  backBtn: {
-    padding: 6,
+  navBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  optionBtn: {
-    borderWidth: 1,
-    borderColor: '#dde3e7',
+  primaryBtn: {
+    paddingVertical: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
