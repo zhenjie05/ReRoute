@@ -4,51 +4,48 @@ Read:
 - docs/UI_REQUIREMENTS.md
 - frontend/docs/SCREEN_SPEC.md
 
-Rewrite the **Trip Room → Album** tab so it matches the reference screenshots below: a day-grouped photo grid with an Upload action, and a full-screen photo lightbox/carousel with uploader attribution and like/share actions.
+Implement the **Trip Room → Budget** tab: the Budget Dashboard, Add Expense Form, Receipt Scan (OCR) review flows, and the Settle Up list.
 
-Reference screenshots attached (2 images):
-1. `Album_Grid_DayGrouped.png` — Album tab main view: "Shared Photos" header + orange "Upload" pill top-right, photos grouped under day headers ("DAY 4 · KYOTO", "DAY 3 · TOKYO"), 3-column grid, an overflow tile ("+12 more") on days with more photos than fit.
-2. `Album_PhotoDetail_Lightbox.png` — full-screen photo detail: dark scrim, close (X) top-right, left/right arrows to page through the set, uploader name ("Sarah K.") + relative timestamp ("2 hours ago") bottom-left, a share icon bottom-right. **[CHG]** The reference screenshot also shows a heart/like icon next to share — per team decision, do not implement it (see Known mismatches below); share is the only bottom-right action.
+Crucial Context for this implementation:
+1. **Reference Screenshots:** The reference screenshots are located in the `frontend/Screenshots/Trip/Budget/` folder. Please review them carefully:
+   - `ReRoute Trip Room - Budget Tab.png` (Main dashboard)
+   - `ReRoute Add Expense Modal.png` (Add Expense sheet)
+   - `ReRoute OCR - Data Review & Edit.png` (OCR extracted data review)
+   - `ReRoute OCR - Confirmation & Split Setup.png` (OCR success and split configuration)
+   Match the spacing, typography, colors, and card radii shown in these images exactly.
 
 Use:
 - `frontend/docs/SCREEN_SPEC.md` for exact layout and component order.
-- `DESIGN.md` for styling/tokens — Units 1–12 and 14 only (Unit 13 IA is stale, same caveat as prior tasks).
-- `UI_REQUIREMENTS.md` for acceptance criteria per sub-section.
-- `AGENTS.md` for coding rules, folder structure, and the "Explicitly Out of Scope" list.
+- `DESIGN.md` for styling/tokens (card radii, seasonal accent usage, utility text sizes).
+- `UI_REQUIREMENTS.md` and `ReRoute_Workflow_Refined_v2_2.md` for acceptance criteria per sub-section below.
+- `AGENTS.md` for coding rules, folder structure, and out-of-scope items.
 
 Context:
-- Assume Auth, the core theme, shared components, Global Widgets, and the Trip Room shell (header card, in-room tab row, stage indicator, Room Settings) already exist — reuse, do not rebuild.
-- Data model (mock these shapes — no backend wiring yet):
-  - `photos` — id, room_id, itinerary_day_id (nullable), uploader_id, url, taken_at (EXIF), lat (nullable), lng (nullable), created_at
-- Folder placement: same convention as Discussion/Itinerary — place the photo grid, day-group header, upload sheet, and lightbox/carousel under `src/features/trip-room/presentation`.
+- Assume Auth, the core theme (`src/core/theme`), shared components (`src/shared/components`), and the Global Widgets (Top Bar, Notification Center, 3-tab Bottom Nav) already exist — reuse them, do not redesign them.
+- **Assume the Trip Room shell is already implemented**: the season-themed trip header card, the in-room tab row (Discussion / Itinerary / Maps / Budget / Album / Language), and the room stage indicator. Budget only implements the content *inside* the Budget tab.
+- **Data model** (from the shared schema): `budget_categories` (id, room_id, category_name, planned_amount), `expenses` (id, room_id, category_id, description, total_amount, currency, paid_by[], receipt_url, created_by, created_at), `expense_splits` (id, expense_id, user_id, split_type, share_value, amount_owed), `receipt_scans` (id, expense_id, image_url, ocr_status, extracted_data), and `settlements` (id, room_id, from_user_id, to_user_id, amount, method, settled_at). Mock these shapes; no backend wiring yet.
+- **Folder placement** — Budget is core Trip Room functionality: place the dashboard, expense forms, and OCR review components under `src/features/trip-room/presentation/budget`.
+- **Mixed Currency Edge Case** — When a room's expenses use more than one `currency`, the Budget Dashboard must show per-currency subtotals and visually flag the mix. Do not silently sum raw amounts of different currencies into one total.
 
-Requirements — Grid view:
-- Fetch the room's `photos`, group by `itinerary_day_id` (fall back to a date-derived "Unsorted"/location group if a photo has no day tag), most recent day first, each group headed by a "DAY N · LOCATION" label.
-- Render each group as a 3-column grid. If a group has more than 4 photos, show the first 4 photo cells plus a 5th "+N more" overlay tile (N = remaining count beyond the 4 shown); tapping it opens the full gallery for that day rather than the lightbox directly. Groups with 4 or fewer photos render with no overlay tile.
-- "Upload" pill button in the header opens the upload flow (camera/library picker). Since this entry point isn't tied to a specific Day Detail view, auto-resolve the uploaded photo's `itinerary_day_id` from its EXIF `taken_at` against the room's day date ranges; if no day matches, file it under the fallback "Unsorted" group rather than blocking the upload.
-
-Requirements — Photo detail (lightbox):
-- Tapping any grid photo opens a full-screen carousel starting at that photo, swipeable/arrow-navigable within the same day group's photo set.
-- Show uploader name + a relative timestamp ("2 hours ago") resolved from `uploader_id` + `created_at`.
-- A single share icon, wired per Assumption 1 below. No like/favorite affordance — confirmed cut, do not implement it even though the reference screenshot shows one.
-- Close (X) returns to the grid at the same scroll position.
-
-Do not build:
-- A duplicate Trip Room header, tab row, or stage indicator.
-- A per-itinerary-item comment thread (out of scope, unrelated to Album regardless).
-- A second upload flow inside Day Detail — if one already exists there per Itinerary Day Detail spec (tagging the photo with that `itinerary_day_id` directly), reuse the same upload component/hook here instead of forking it.
-
-Known mismatches / assumptions — flag, do not silently resolve:
-1. **Share icon isn't in Page.md's Album bullet at all.** Assumption: wire it to the OS-level share sheet (e.g. React Native `Share` API) to export/share the image outside the app — not a custom in-app share/repost feature. Flag for confirmation.
-2. **Archived-state Album isn't shown in any reference screenshot** (both screenshots show a "Live" header badge). Assumption: apply the same Archived-locking convention used elsewhere in Trip Room — hide/disable the Upload button and the share action, keep the grid and lightbox fully viewable (read-only history) — but this is inferred, not confirmed by a screenshot. Flag before building it.
-3. **5-cell grid cap is inferred from the screenshot, not stated in any doc.** The exact "4 photos + overflow tile" threshold is a guess based on counting the reference image; confirm with design whether it should instead be a fixed row count (e.g. always exactly one row) responsive to screen width.
-4. **Design(2).md Unit 13 IA is still stale** (4-tab nav, Community/Friends) vs. `ReRoute_Page_Refined_v2_2.md` (3-tab, friendship fully removed) — same caveat as prior tasks: use Design(2).md for tokens/shapes only (Units 1–12, 14), never Unit 13.
-
-**Resolved (no longer open):** Like/favorite icon on Album photos — team decision is to cut it entirely; the reference screenshot's heart icon is not implemented. Album's only per-photo interaction is share.
+Requirements:
+- **Budget Dashboard** (matches `ReRoute Trip Room - Budget Tab.png`): 
+  - Render total spent vs. planned progress bar.
+  - Render the current user's contribution, share, and owed summary block.
+  - Render individual Category progress bars (Accommodation, Food, Transport) comparing actual vs planned.
+  - Render Recent Expenses list and the Settle Up section.
+- **Add Expense Modal** (matches `ReRoute Add Expense Modal.png`): 
+  - Form fields for amount, currency dropdown, description, category dropdown, and multi-payer selection avatars.
+  - **Split Methods**: Implement a segmented control for Equal (default), Percentage, Shares, and Exact amount. Include mocked inline validation (e.g., Percentage must sum to 100%, exact amounts must sum to total).
+- **Receipt Scan / OCR Flow** (matches `ReRoute OCR - Data Review & Edit.png` and `ReRoute OCR - Confirmation & Split Setup.png`):
+  - Mock the upload/scan action to simulate an `ocr_status` processing delay.
+  - Build the **"Ocr Processing Review"** screen showing extracted items with delete icons, add missing item affordance, and a financial summary.
+  - Build the **"Split Item Assignment"** screen showing the OCR success banner and the split configuration applied to the extracted total.
+- **Settle Up**: Build the UI to allow recording a payment between two members, which updates the simplified debt balances.
+- Wire navigation only where needed between the Budget Dashboard and the Add Expense / OCR sheets.
+- Run `expo lint` and `tsc --noEmit`; fix errors before reporting completion.
 
 Before finishing, summarize:
 1. Files changed.
-2. Components created/reused (confirm no second upload flow was forked if one already exists in Itinerary Day Detail).
-3. Assumptions made (share behavior, Archived-state locking, grid overflow threshold).
-4. Confirmation that no duplicate Trip Room header/tab row/stage indicator/Global Widget was created, and that no like/favorite affordance was added.
-5. The 4 flagged mismatches above, so the team can confirm each before wireframe/UI review.
+2. Components created/reused, and which feature folder each lives in.
+3. Assumptions made regarding the mocked expense/OCR data shapes and client-side split calculation logic.
+4. Confirmation that no duplicate Trip Room header, tab row, or Global Widget was created.
