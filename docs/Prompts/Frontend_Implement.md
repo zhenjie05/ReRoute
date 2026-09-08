@@ -4,44 +4,64 @@ Read:
 - docs/UI_REQUIREMENTS.md
 - frontend/docs/SCREEN_SPEC.md
 
-Implement the **Trip Room → Discussion (Chat Room)** tab: the message feed (user / system / mascot messages), the Decision Card component (voting + anonymous tally), the Propose Vote action, and the Archived read-only state.
+Rewrite the **Trip Room → Itinerary** tab so it matches the reference screenshots below, across all applicable room stages: **Planning** (trip building — city search, day timeline, per-item voting, Landmark Detail with 3D/photos) and **Active/Live** (live route map, live member location, AI-suggested transport per leg, exact drop-off points, Reroute). Archived-state locking should reuse the pattern already built for the Discussion tab — do not build a second archived-banner/disabled-state implementation.
 
-Reference screenshots attached: `TripRoom_Discussion_Live.png` (Planning/Active state) and `TripRoom_Discussion_Archived.png` (Archived state) — match spacing, bubble alignment, and the archived-state banner/disabled-input treatment shown there.
+Reference screenshots attached (5 images):
+1. `Itinerary_Live_ArchivedBanner.png` — Live trip room header + Itinerary tab, showing an **archived banner** — ⚠ inconsistency flagged below, do not build this combination.
+2. `Itinerary_Live_SafetyBanner.png` — same Live trip, showing an **AI Safety Check banner** in place of the archived banner.
+3. `Itinerary_Planning_DayTimeline.png` — Planning stage: city search bar, illustrative country map, Day 1 timeline/stepper with per-stop vote status, "Complete Planning" CTA.
+4. `Itinerary_Planning_LandmarkTransition.png` — same Planning screen with a landmark hero image opened above the day timeline.
+5. `LandmarkDetail_3DModel.png` — Landmark Detail screen: 3D-model hero view, History + Notable Facts, "Add to Itinerary" CTA, bookmark icon.
 
 Use:
 - `frontend/docs/SCREEN_SPEC.md` for exact layout and component order.
-- `DESIGN.md` for styling/tokens (card radii, seasonal accent usage, badge/pill shapes, notification color states).
-- `UI_REQUIREMENTS.md` for acceptance criteria per sub-section below.
+- `DESIGN.md` for styling/tokens — **Units 1–12 and 14 only** (see Design(2).md Unit 13 mismatch below).
+- `UI_REQUIREMENTS.md` for acceptance criteria per sub-section.
 - `AGENTS.md` for coding rules, folder structure, and the "Explicitly Out of Scope" list.
 
 Context:
-- Assume Auth, the core theme (`src/core/theme`), shared components (`src/shared/components`), and the Global Widgets (Top Bar, Notification Center, SOS Floating Overlay, 3-tab Bottom Nav) already exist — reuse them, do not redesign them.
-- **Assume the Trip Room shell is already implemented**: the season-themed trip header card (name, dates, live badge, traveler avatars), the in-room tab row (Discussion / Itinerary / Maps / Budget / Album / Language), the Planning/Active/Archived stage indicator that gates the tabs, and Room Settings. Discussion only implements the content *inside* the Discussion tab — do not rebuild the header, tab row, or a second stage indicator.
-- **Data model** (from `decision_cards` / `messages` in the shared schema): `messages` — id, room_id, sender_id (nullable), sender_type (`user` / `system` / `mascot`), text, type, created_at. `decision_cards` — id, room_id, trigger_type (`disruption` / `conflict` / `safety_risk`), safety_alert_id (nullable FK), options[], status, anonymous (bool), created_at, resolved_at. `votes` — id, decision_card_id, user_id (hidden if anonymous), chosen_option. Mock these shapes; no backend wiring yet.
-- **Folder placement** — Discussion is core Trip Room functionality, not a separate feature: place the message feed, message bubble variants, Decision Card component, and Propose Vote compose sheet under `src/features/trip-room/presentation`. The Decision Card component must be reusable, since it's also the render target for auto-triggered `safety_risk` cards coming from the safety subsystem (`src/features/route-planning/presentation`) — build it once in `trip-room/presentation/components` and have both call sites use it; do not fork a second card component for the safety-triggered case.
-- **Mascot messages** need a visually distinct treatment from user/system messages (per FR-2-7/FR-9-2) — check `DESIGN.md` for an existing mascot/notification token before inventing a new color; if none exists, use a consistent tertiary/secondary accent + small mascot icon and flag this as an assumption.
-- **Archived stage locking**: when the room's `stage = archived`, the composer and Propose Vote icon are replaced with the disabled placeholder state ("Messages are no longer available for this trip"), an archived banner appears above the Decision Card ("This trip room is archived. You can view past discussions and polls, but new interactions are disabled."), and any open Decision Card's vote button becomes a disabled "Vote End" state — but existing messages/tallies remain fully visible (read-only history, not hidden).
-- **Known mismatch, do not silently resolve** — `Design (2).md` Unit 13 (page map / bottom nav) describes an older 4-tab IA with a separate Community/Friends section; `ReRoute_Page_Refined_v2_2.md` (3-tab Home/Trip/Profile, friendship fully removed) is the current source of truth for navigation and screen structure. Use Design(2).md strictly for Units 1–12 and 14 (tokens, spacing, card/button/badge shapes, modal pattern) — do not follow its Unit 13 IA.
-- **Known mismatch, flag rather than build** — the reference screenshots show a "Thread · Day 4 – Fushimi Inari sunrise · 2 replies" chip inside one chat bubble. There is no parent-message/reply field in the `messages` schema, and per-itinerary-item comment threads are explicitly removed in scope (all discussion is main-feed-only). Render this as a static, non-interactive reference chip that deep-links to the relevant Itinerary Day (no tap-to-expand replies, no reply composer) and flag in your summary that real threading isn't in the current data model — don't build a nested-reply backend for this task.
+- Assume Auth, the core theme, shared components, Global Widgets, and the **Trip Room shell** (season-themed header card, in-room tab row, Planning/Active/Archived stage indicator, Room Settings) already exist — reuse them, do not rebuild.
+- Assume the **Discussion tab** (message feed, shared Decision Card component, Propose Vote compose sheet, Archived-locking pattern) is already implemented under `src/features/trip-room/presentation`. The Decision Card component must be reused as-is for any itinerary-triggered voting — do not fork a second card component.
+- Data model (from shared schema, mock these shapes — no backend wiring yet):
+  - `itinerary_days` — id, room_id, day_number, trip_date, title, notes
+  - `itinerary_items` — id, room_id, day_id, name, lat, lng, scheduled_time, category (transportation / attraction / stay), sort_order, tags[], compromise_reason (nullable), booking_url (nullable)
+  - `landmarks` — id, name, lat, lng, model_asset_url (nullable), photo_urls[], dropoff_point (lat/lng), info_text, fun_facts[]
+  - `decision_cards` — id, room_id, trigger_type (disruption / conflict / safety_risk), safety_alert_id (nullable), options[], status, anonymous, created_at, resolved_at
+- Folder placement: Itinerary is core Trip Room functionality, same as Discussion — place Day List, the Day timeline/stepper, Landmark Detail, and the live Route/Map sub-view under `src/features/trip-room/presentation`. If the "AI-suggested transport" leg card is generalizable, put it under `trip-room/presentation/components` so a future reuse in the Maps tab doesn't fork it.
 
-Requirements:
-- **Message feed**: renders `user`, `system`, and `mascot` messages in one chronological feed, visually distinguished per sender_type (avatar + name for user; centered pill/notice style for system, e.g. "ReRoute Notice: Itinerary updated by Sarah"; mascot icon + distinct bubble tint for mascot). Own messages right-aligned with the user's own accent color; other members' messages left-aligned with avatar + name.
-- **Mascot optimistic placeholder (NFR-9-1)**: while a mocked mascot message is "generating," show an optimistic/placeholder bubble in the feed rather than blocking the composer or the rest of the feed.
-- **Decision Card component** (in-feed):
-  - Title, per-option horizontal tally bars with live percentages, anonymous-toggle indicator, aggregate vote count.
-  - Voting: tapping an option casts/updates the current user's vote; if `anonymous = true`, never reveal any individual member's choice — only the aggregate bars and total.
-  - `safety_risk`-type cards are tappable and navigate to the existing shared Safety Alert Detail screen (wire navigation only, do not rebuild that screen) resolved via `safety_alert_id`.
-  - Card in `resolved` status renders in a locked/read-only tally state (no vote button).
-- **Propose Vote action**: toolbar icon beside the message composer opens a compose sheet — trigger type is a choice of `disruption` or `conflict` only (`safety_risk` is auto-triggered elsewhere, never user-selectable here), add/remove option rows (minimum 2 options), anonymous toggle, submit posts a new open Decision Card into the feed.
-- **Archived state**: implement exactly as described in Context above — banner, disabled composer/Propose-Vote affordance, disabled "Vote End" card state, full read-only history preserved.
-- **Composer**: text input + attach affordance + send button in the live/Planning/Active state; fully replaced by the disabled placeholder text in Archived state (see reference screenshot).
-- Do not build: a per-itinerary-item comment thread screen (removed from scope), member "kick"/removal affordances, or any friend-scoped filtering of who can see the feed (friendship feature fully removed — Discussion is simply all current room members).
-- Wire navigation only where needed: `safety_risk` Decision Card → Safety Alert Detail; Thread reference chip → read-only deep link to the relevant Itinerary Day (no reply UI).
-- Run `expo lint` (or `eslint .` if no Expo lint script exists) and `tsc --noEmit`; fix errors before reporting completion.
+Requirements — Planning stage:
+- City/destination search bar above a stylized country-level overview map (see Assumption 1 below) with pins for candidate cities; selecting one focuses that city.
+- Day List renders as a vertical timeline/stepper. Each day section shows a day label + Draft/Planning badge, a date + arrival note, and its `itinerary_items` as stepper nodes.
+- Each item node shows time, name, a short note, a thumbnail photo, and one of three states:
+  - **Voted** — `✓ Voted (x/y agreed)` + "Locked in route" label, read-only.
+  - **Pending** — a "Suggest Vote" button.
+  - **Candidate stop** — dashed node, "+ Add Details" link, not yet a real `itinerary_items` row.
+- Tapping "Suggest Vote" on a Pending item opens the reused Propose Vote compose sheet from Discussion (see Assumption 3 on trigger_type).
+- Tapping an item's thumbnail/name opens **Landmark Detail**: a hero area that toggles Photos (default) / 3D model — the 3D toggle is hidden entirely (not an empty state) if `model_asset_url` is null, matching the existing landmark spec — followed by History text, Notable Facts cards, an "Add to Itinerary" primary CTA, and a bookmark icon (see Assumption 4).
+- "Complete Planning" CTA at the bottom of the Day List — do **not** wire this to the Planning→Active stage transition. That transition is the Owner-only "Start Trip" action in Room Settings (FR-2-2a). Treat "Complete Planning" as a day/itinerary-level "mark days as finalized" flag only, pending team confirmation of its real semantics.
+
+Requirements — Active/Live stage:
+- The Itinerary tab's map area switches to the live route map (reuse the existing Maps-tab implementation, do not fork a second map component) showing: the day's route, a "live" marker, other members' live locations gated by `trip_room_members.location_sharing_opt_in`, and a floating "Reroute" pill.
+- A "Suggested Routes" section below the map lists per-leg cards: time + from→to, then 2–3 transport option chips (mode, duration, price) with one AI-picked option visually tagged. Selecting a different chip must not discard the others.
+- Each leg card includes an "Exact Drop-off Point" sub-card: thumbnail photo, name, a walk-time note, and a "Street View Verified" checkmark — populate from `landmarks.dropoff_point` when the leg's destination is a known landmark; degrade gracefully (no crash, no placeholder error) when it isn't available.
+
+Do not build:
+- A second map engine for the Planning-stage overview — see Assumption 1, flag it rather than guessing the library.
+- A second Decision Card component — reuse Discussion's.
+- Per-itinerary-item comment threads (already out of scope per Requirements/Page docs).
+
+Known mismatches / assumptions — flag, do not silently resolve:
+1. **Two different "maps" in the screenshots.** The Planning-stage overview (search bar + a simplified, illustrative country map with a highlighted city pill) does not match the real Google-Maps-tile look of the Active-stage route map in the other screenshots. Requirements only specify the Google Maps API for route/live-location (Feature 1 / Maps tab). Assumption: build the Planning overview as a lightweight custom/vector map component, not a second live Google Maps instance — flag this for team confirmation.
+2. **Archived banner shown on a header badged "Live."** One screenshot shows the room header as "Live" while the tab content shows Discussion's archived banner ("This trip room is archived..."). Archived and Live are mutually exclusive stages. Treat this as a screenshot inconsistency, not a spec to implement — confirm with whoever supplied it which state is correct.
+3. **AI Safety Check banner inside Itinerary/Maps.** Not described in Page.md or Requirements, which only place safety content on Home's Recent News (informational tier) and as a `safety_risk` Decision Card in Discussion (actionable tier). This is a third surfacing point. Assumption: implement as a dismissible, read-only banner (no vote), sourced from the same `safety_alerts` feed — flag whether this duplicates Home's Recent News or should replace it while inside a live room.
+4. **Per-item vote status has no schema field.** "Voted (x/y agreed)" / "Locked in route" / "Pending" aren't columns on `itinerary_items` or `decision_cards` as currently modeled. Assumption: derive these locally from a linked `decision_card.status` + its `votes` tally rather than adding new schema columns — flag for the team to confirm the real item↔decision_card relationship.
+5. **Suggest-Vote trigger_type is ambiguous.** `decision_cards.trigger_type` is constrained to `disruption / conflict / safety_risk`; none clearly fits "should we include this candidate stop." Assumption: default to `conflict` as the closest existing type — flag as a guess, not a resolved decision.
+6. **Landmark bookmark icon vs. `starred_trips`.** The bookmark on Landmark Detail doesn't match the `starred_trips` mechanic (which stars Discover posts, not individual landmarks). Assumption: implement as local UI state only, no persistence call, until the team defines landmark-level saving.
+7. **Design(2).md Unit 13 IA is still stale** (4-tab nav, Community/Friends) vs. `ReRoute_Page_Refined_v2_2.md` (3-tab, friendship fully removed). Same caveat as the Discussion-tab task: use Design(2).md for tokens/shapes only (Units 1–12, 14), never Unit 13.
 
 Before finishing, summarize:
 1. Files changed.
-2. Components created/reused, and which feature folder each lives in (confirm the Decision Card is a single shared implementation used by both manual and safety_risk cards).
-3. Assumptions made (mocked message/decision-card data shapes, mascot visual treatment if not already defined in DESIGN.md, and the static-chip treatment of the Thread reference).
-4. Confirmation that no duplicate Trip Room header, tab row, stage indicator, or Global Widget was created, and that the Archived-state locking matches the reference screenshot (banner, disabled composer, disabled vote, preserved history).
-5. Explicit note flagging the Design(2).md Unit 13 IA mismatch and the Thread/reply data-model mismatch, so the team can confirm both before wireframe/UI review.
+2. Components created/reused (confirm the Planning-stage map is NOT a second Google Maps instance, and that the Decision Card is reused as-is).
+3. Assumptions made (Planning map library, item vote-status derivation, Suggest-Vote trigger_type default, safety-banner sourcing, bookmark behavior).
+4. Confirmation that no duplicate Trip Room header, tab row, stage indicator, or Global Widget was created.
+5. The 7 flagged mismatches above, so the team can confirm each before wireframe/UI review.

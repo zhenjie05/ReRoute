@@ -8,7 +8,6 @@ import { mockTripRooms } from '@/features/trip-room/data/mock-trip-room';
 const roomTabs = [
   { slug: 'chat', label: '💬 Chat' },
   { slug: 'itinerary', label: '📅 Itinerary' },
-  { slug: 'maps', label: '🗺️ Maps' },
   { slug: 'budget', label: '💰 Budget' },
   { slug: 'album', label: '📷 Album' },
   { slug: 'languages', label: '🗣️ Languages' },

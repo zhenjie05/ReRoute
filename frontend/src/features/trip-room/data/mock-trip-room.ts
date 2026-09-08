@@ -1,31 +1,8 @@
-import {
-  mockStandardTripRooms,
-  mockStandardRoomMembers,
-  mockStandardTripPreferences,
-  mockStandardItineraryDays,
-  mockStandardItineraryItems,
-  mockStandardMessages,
-  mockStandardDecisionCards,
-  mockStandardBudgetCategories,
-  mockStandardExpenses,
-  mockStandardSettlements,
-  mockStandardAlbumPhotos,
-} from '@/shared/data/standard-mock-data';
+import { mockStandardTripPreferences } from '@/shared/data/standard-mock-data';
 
-<<<<<<< HEAD
-export const mockTripRooms = mockStandardTripRooms;
-export const mockTripMembers = mockStandardRoomMembers;
 export const mockTripPreferences = mockStandardTripPreferences[0];
-export const mockItineraryDays = mockStandardItineraryDays;
-export const mockItineraryItems = mockStandardItineraryItems;
-export const mockMessages = mockStandardMessages;
-export const mockDecisionCards = mockStandardDecisionCards;
-export const mockBudgetCategories = mockStandardBudgetCategories;
-export const mockExpenses = mockStandardExpenses;
-export const mockSettlements = mockStandardSettlements;
-export const mockAlbumPhotos = mockStandardAlbumPhotos;
-=======
-export const mockTripRooms: TripRoom[] = [
+
+export const mockTripRooms = [
   {
     id: 'room-tokyo-2026',
     name: 'Tokyo Autumn Escape 🍁',
@@ -67,7 +44,7 @@ export const mockTripRooms: TripRoom[] = [
   },
 ];
 
-export const mockTripMembers: TripRoomMember[] = [
+export const mockTripMembers = [
   {
     room_id: 'room-tokyo-2026',
     user_id: 'demo-user-1',
@@ -106,7 +83,7 @@ export const mockTripMembers: TripRoomMember[] = [
   },
 ];
 
-export const mockItineraryDays: ItineraryDay[] = [
+export const mockItineraryDays = [
   {
     id: 'day-tokyo-1',
     room_id: 'room-tokyo-2026',
@@ -133,7 +110,7 @@ export const mockItineraryDays: ItineraryDay[] = [
   },
 ];
 
-export const mockItineraryItems: ItineraryItem[] = [
+export const mockItineraryItems = [
   {
     id: 'item-1',
     room_id: 'room-tokyo-2026',
@@ -200,8 +177,7 @@ export const mockItineraryItems: ItineraryItem[] = [
   },
 ];
 
-export const mockMessages: Message[] = [
-  // --- Tokyo Active Room Messages ---
+export const mockMessages = [
   {
     id: 'msg-1',
     room_id: 'room-tokyo-2026',
@@ -299,7 +275,6 @@ export const mockMessages: Message[] = [
     text: 'Yes, I added it to the budget tab. We should book it today. Also, regarding tomorrow\'s sunrise plan...',
     type: 'text',
     created_at: '2026-09-05T10:25:00Z',
-    // This message has a thread reference chip (static, non-interactive)
     payload: {
       thread_ref: {
         label: 'Thread · Day 4 – Fushimi Inari sunrise',
@@ -321,7 +296,6 @@ export const mockMessages: Message[] = [
       generating: true,
     },
   },
-  // --- Safety risk decision card posted by system/mascot ---
   {
     id: 'msg-10',
     room_id: 'room-tokyo-2026',
@@ -335,7 +309,6 @@ export const mockMessages: Message[] = [
     },
     created_at: '2026-09-06T08:00:00Z',
   },
-  // --- Bali Archived Room Messages ---
   {
     id: 'msg-bali-1',
     room_id: 'room-bali-2025',
@@ -394,7 +367,7 @@ export const mockMessages: Message[] = [
   },
 ];
 
-export const mockDecisionCards: DecisionCard[] = [
+export const mockDecisionCards = [
   {
     id: 'card-dinner-1',
     room_id: 'room-tokyo-2026',
@@ -445,14 +418,7 @@ export const mockDecisionCards: DecisionCard[] = [
   },
 ];
 
-export interface MockVote {
-  id: string;
-  decision_card_id: string;
-  user_id: string;
-  chosen_option: string;
-}
-
-export const mockVotes: MockVote[] = [
+export const mockVotes = [
   { id: 'vote-1', decision_card_id: 'card-dinner-1', user_id: 'demo-user-2', chosen_option: 'opt-1' },
   { id: 'vote-2', decision_card_id: 'card-dinner-1', user_id: 'demo-user-3', chosen_option: 'opt-2' },
   { id: 'vote-3', decision_card_id: 'card-rain-safety', user_id: 'demo-user-1', chosen_option: 'opt-rain-1' },
@@ -462,14 +428,14 @@ export const mockVotes: MockVote[] = [
   { id: 'vote-7', decision_card_id: 'card-bali-dinner', user_id: 'demo-user-3', chosen_option: 'opt-bali-2' },
 ];
 
-export const mockBudgetCategories: BudgetCategory[] = [
+export const mockBudgetCategories = [
   { id: 'cat-stay', room_id: 'room-tokyo-2026', category_name: 'Accommodation', planned_amount: 800, spent_amount: 560 },
   { id: 'cat-transit', room_id: 'room-tokyo-2026', category_name: 'Transit & Trains', planned_amount: 350, spent_amount: 215 },
   { id: 'cat-food', room_id: 'room-tokyo-2026', category_name: 'Food & Dining', planned_amount: 600, spent_amount: 420 },
   { id: 'cat-activities', room_id: 'room-tokyo-2026', category_name: 'Attractions & Tickets', planned_amount: 250, spent_amount: 110 },
 ];
 
-export const mockExpenses: Expense[] = [
+export const mockExpenses = [
   {
     id: 'exp-1',
     room_id: 'room-tokyo-2026',
@@ -495,7 +461,7 @@ export const mockExpenses: Expense[] = [
     category_name: 'Food & Dining',
     description: 'Tsukiji Outer Market Seafood Lunch',
     total_amount: 14500,
-    currency: 'JPY', // Mixed currency example per FR-2-9a
+    currency: 'JPY',
     paid_by: ['demo-user-2'],
     payer_names: ['Taylor Swift'],
     created_by: 'demo-user-2',
@@ -508,7 +474,7 @@ export const mockExpenses: Expense[] = [
   },
 ];
 
-export const mockSettlements: Settlement[] = [
+export const mockSettlements = [
   {
     id: 'set-1',
     room_id: 'room-tokyo-2026',
@@ -523,7 +489,7 @@ export const mockSettlements: Settlement[] = [
   },
 ];
 
-export const mockAlbumPhotos: AlbumPhoto[] = [
+export const mockAlbumPhotos = [
   {
     id: 'photo-1',
     room_id: 'room-tokyo-2026',
@@ -547,4 +513,154 @@ export const mockAlbumPhotos: AlbumPhoto[] = [
     caption: 'Giant red lantern of Kaminarimon Gate.',
   },
 ];
->>>>>>> f62b3600a4a49a3279f85a9f849439383a55f3d0
+
+// ==========================================
+// ITINERARY TAB — Additional Mock Data
+// ==========================================
+
+import {
+  mockStandardLandmarks,
+  mockStandardSafetyAlerts,
+} from '@/shared/data/standard-mock-data';
+
+/** Re-export landmarks & safety alerts for Itinerary tab convenience */
+export const mockLandmarks = mockStandardLandmarks;
+export const mockSafetyAlerts = mockStandardSafetyAlerts;
+
+/**
+ * Itinerary item → decision card linkage.
+ * Used to derive vote status per Assumption 4:
+ * - If linked card exists and status='resolved' → Voted
+ * - If linked card exists and status='active' → Pending
+ * - If no linked card → no vote status (item is just a confirmed stop)
+ */
+export const mockItineraryVoteStatus: Record<
+  string,
+  { decision_card_id: string; votes_for: number; votes_total: number }
+> = {
+  'item-1': {
+    decision_card_id: 'card-itinerary-monorail',
+    votes_for: 4,
+    votes_total: 5,
+  },
+  'item-3': {
+    decision_card_id: 'card-itinerary-shibuya',
+    votes_for: 3,
+    votes_total: 5,
+  },
+};
+
+/** Additional decision cards linked to itinerary items (resolved = voted/locked) */
+export const mockItineraryDecisionCards = [
+  {
+    id: 'card-itinerary-monorail',
+    room_id: 'room-tokyo-2026',
+    trigger_type: 'conflict' as const,
+    title: 'Include Tokyo Monorail in Day 1?',
+    description: 'Vote on whether to take the monorail from Haneda.',
+    options: [
+      { id: 'opt-im-1', label: 'Yes, take monorail', votes_count: 4 },
+      { id: 'opt-im-2', label: 'Take limousine bus instead', votes_count: 1 },
+    ],
+    status: 'resolved' as const,
+    anonymous: false,
+    created_at: '2026-09-04T10:00:00Z',
+    resolved_at: '2026-09-04T12:00:00Z',
+    winning_option_id: 'opt-im-1',
+  },
+  {
+    id: 'card-itinerary-shibuya',
+    room_id: 'room-tokyo-2026',
+    trigger_type: 'conflict' as const,
+    title: 'Add Shibuya Sky to Day 1?',
+    description: 'Vote on including the observation deck visit.',
+    options: [
+      { id: 'opt-is-1', label: 'Yes, sunset timing is perfect', votes_count: 3 },
+      { id: 'opt-is-2', label: 'Skip, too expensive', votes_count: 2 },
+    ],
+    status: 'resolved' as const,
+    anonymous: false,
+    created_at: '2026-09-04T14:00:00Z',
+    resolved_at: '2026-09-04T16:00:00Z',
+    winning_option_id: 'opt-is-1',
+  },
+];
+
+/**
+ * Candidate stops — not yet in itinerary_items, shown as dashed nodes.
+ * These represent user-proposed stops that haven't been voted on or confirmed.
+ */
+export const mockCandidateStops = [
+  {
+    id: 'candidate-1',
+    day_id: 'day-tokyo-1',
+    name: 'Meiji Jingu Shrine Evening Walk',
+    scheduled_time: '07:00 PM',
+    note: 'Candidate stop proposal',
+    sort_order: 99,
+  },
+  {
+    id: 'candidate-2',
+    day_id: 'day-tokyo-2',
+    name: 'Akihabara Electric Town',
+    scheduled_time: '03:00 PM',
+    note: 'Candidate stop proposal',
+    sort_order: 99,
+  },
+];
+
+/**
+ * Suggested routes for Active/Live stage.
+ * Each leg has 2-3 transport options with one AI-picked.
+ */
+export const mockSuggestedRoutes = [
+  {
+    id: 'leg-1',
+    room_id: 'room-tokyo-2026',
+    day_id: 'day-tokyo-1',
+    departure_time: '08:10',
+    from: 'Hotel Gracery',
+    to: 'Senso-ji Temple',
+    landmark_id: 'landmark-sensoji',
+    options: [
+      { id: 'opt-l1-1', mode: 'Train', icon: '🚆', duration: '45m', price: '$4', ai_picked: false },
+      { id: 'opt-l1-2', mode: 'Bus', icon: '🚌', duration: '1h', price: '$2', ai_picked: true },
+      { id: 'opt-l1-3', mode: 'Taxi', icon: '🚕', duration: '30m', price: '$15', ai_picked: false },
+    ],
+  },
+  {
+    id: 'leg-2',
+    room_id: 'room-tokyo-2026',
+    day_id: 'day-tokyo-1',
+    departure_time: '11:30',
+    from: 'Senso-ji Temple',
+    to: 'Shibuya Sky',
+    landmark_id: 'landmark-shibuya-sky',
+    options: [
+      { id: 'opt-l2-1', mode: 'Train', icon: '🚆', duration: '35m', price: '$3', ai_picked: true },
+      { id: 'opt-l2-2', mode: 'Bus', icon: '🚌', duration: '55m', price: '$2', ai_picked: false },
+    ],
+  },
+  {
+    id: 'leg-3',
+    room_id: 'room-tokyo-2026',
+    day_id: 'day-tokyo-2',
+    departure_time: '09:00',
+    from: 'Hotel Gracery',
+    to: 'Kinkaku-ji',
+    landmark_id: 'landmark-kinkakuji',
+    options: [
+      { id: 'opt-l3-1', mode: 'Train', icon: '🚆', duration: '2h 15m', price: '$95', ai_picked: true },
+      { id: 'opt-l3-2', mode: 'Bus', icon: '🚌', duration: '5h', price: '$30', ai_picked: false },
+    ],
+  },
+];
+
+/** Safety banner data for Active/Live stage (Assumption 3) */
+export const mockSafetyBanner = {
+  id: 'safety-banner-1',
+  alert_id: 'alert-tokyo-typhoon',
+  title: 'AI Safety Check',
+  message: 'Heavy rain expected in Kyoto area this afternoon. Consider indoor alternatives.',
+  dismissible: true,
+};
