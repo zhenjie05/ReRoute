@@ -2,7 +2,6 @@ import React from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { useTheme } from '@/core/theme';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { TopBar } from '@/shared/components/TopBar';
 
 // Feature-owned presentation sub-sections
 import { AIChatbox } from '@/features/route-planning/presentation/AIChatbox';
@@ -18,8 +17,6 @@ export default function HomeScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* 1. Global Persistent Top Bar */}
-      <TopBar />
 
       <ScrollView
         showsVerticalScrollIndicator={false}

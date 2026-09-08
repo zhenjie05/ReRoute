@@ -10,18 +10,24 @@ interface DiscoverPostCardProps {
   post: CommunityPost;
   onToggleStar: (postId: string) => void;
   onClone?: (postId: string) => void;
+  sourceTab?: string;
 }
 
 export const DiscoverPostCard: React.FC<DiscoverPostCardProps> = ({
   post,
   onToggleStar,
   onClone,
+  sourceTab,
 }) => {
   const { colors, typography, spacing, rounded, shadows } = useTheme();
   const router = useRouter();
 
   const handleCardPress = () => {
-    router.push(`/(tabs)/home/discover/${post.id}` as any);
+    if (sourceTab) {
+      router.push(`/(tabs)/home/discover/${post.id}?source=${sourceTab}` as any);
+    } else {
+      router.push(`/(tabs)/home/discover/${post.id}` as any);
+    }
   };
 
   const handleClonePress = () => {

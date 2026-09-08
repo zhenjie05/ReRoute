@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
-import { TopBar, Card, Badge, Button, EmptyState } from '@/shared/components';
+import { Card, Badge, Button, EmptyState } from '@/shared/components';
 import { mockTripRooms } from '@/features/trip-room/data/mock-trip-room';
 import { useLiveTrip } from '@/lib/hooks/useLiveTrip';
 
@@ -21,7 +21,6 @@ export default function TripHubScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <TopBar unreadCount={1} />
 
       <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: 120 }}>
         {/* Header Title & Actions */}

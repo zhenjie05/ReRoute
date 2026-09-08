@@ -6,7 +6,7 @@ import { Button, Badge, Card, Avatar } from '@/shared/components';
 import { mockDiscoverPosts } from '@/features/discover/data/mock-discover';
 
 export default function DiscoverPostDetailScreen() {
-  const { postId } = useLocalSearchParams<{ postId: string }>();
+  const { postId, source } = useLocalSearchParams<{ postId: string; source?: string }>();
   const { colors, typography, spacing, shadows } = useTheme();
   const router = useRouter();
 
@@ -40,7 +40,7 @@ export default function DiscoverPostDetailScreen() {
         ]}
       >
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={() => router.navigate('/(tabs)/profile' as any)}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           style={styles.backBtn}
         >
@@ -58,7 +58,7 @@ export default function DiscoverPostDetailScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 200 }}>
         {/* Hero Cover Image */}
         <Image source={{ uri: post.cover_image }} style={styles.heroImage} />
 
@@ -146,6 +146,7 @@ export default function DiscoverPostDetailScreen() {
             borderTopColor: colors.surfaceContainerHigh,
             paddingHorizontal: spacing.lg,
             paddingVertical: spacing.md,
+            bottom: 100, // Elevated above global Bottom Navigation Bar
             ...shadows.medium,
           },
         ]}

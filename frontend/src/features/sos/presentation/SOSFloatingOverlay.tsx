@@ -1,6 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { View, TouchableOpacity, Image, StyleSheet, Animated, PanResponder } from 'react-native';
-import { useTheme } from '@/core/theme';
+import React, { useState } from 'react';
+import { TouchableOpacity, Image, StyleSheet, Animated, PanResponder } from 'react-native';
 import { useLiveTrip } from '@/lib/hooks/useLiveTrip';
 import { SOSConfirmationModal, SOSReason } from './SOSConfirmationModal';
 import { SOSQuickDialModal } from './SOSQuickDialModal';
@@ -17,9 +16,9 @@ export const SOSFloatingOverlay: React.FC<SOSFloatingOverlayProps> = ({ forceVis
   const [quickDialVisible, setQuickDialVisible] = useState(false);
   const [selectedReason, setSelectedReason] = useState<SOSReason>('Accident');
 
-  const pan = useRef(new Animated.ValueXY()).current;
+  const [pan] = useState(() => new Animated.ValueXY());
 
-  const panResponder = useRef(
+  const [panResponder] = useState(() =>
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, gestureState) => {
         return Math.abs(gestureState.dx) > 2 || Math.abs(gestureState.dy) > 2;
@@ -32,7 +31,7 @@ export const SOSFloatingOverlay: React.FC<SOSFloatingOverlayProps> = ({ forceVis
         pan.extractOffset();
       },
     })
-  ).current;
+  );
 
   // Per specification: Only render while the user has a live trip
   if (!hasLiveTrip && !forceVisible) {
@@ -65,7 +64,7 @@ export const SOSFloatingOverlay: React.FC<SOSFloatingOverlayProps> = ({ forceVis
         {...panResponder.panHandlers}
         style={[
           styles.fabContainer,
-          { transform: [{ translateX: pan.x }, { translateY: pan.y }] }
+          { transform: pan.getTranslateTransform() }
         ]} 
         pointerEvents="box-none"
       >

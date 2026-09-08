@@ -1,74 +1,87 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Switch, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
-import { Card, Button } from '@/shared/components';
-import { useAuth } from '@/lib/hooks/useAuth';
 
-export default function AppSettingsScreen() {
+export default function SettingsScreen() {
   const { colors, typography, spacing } = useTheme();
-  const { signOut } = useAuth();
   const router = useRouter();
 
-  const handleLogout = async () => {
-    await signOut();
-    router.replace('/(auth)/login');
-  };
+  const [safetyAlerts, setSafetyAlerts] = useState(true);
+  const [decisionCards, setDecisionCards] = useState(true);
+  const [mascotNotifications, setMascotNotifications] = useState(true);
+  const [sosAlerts, setSosAlerts] = useState(true);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
-      <View style={[styles.header, { paddingHorizontal: spacing.lg, paddingVertical: spacing.md }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={{ fontSize: 20 }}>←</Text>
+      <View style={[styles.header, { borderBottomColor: colors.surfaceContainerHigh }]}>
+        <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+          <Text style={{ fontSize: 24, color: colors.onSurface }}>←</Text>
         </TouchableOpacity>
-        <Text style={[typography.headlineSm, { color: colors.onSurface }]}>App Settings</Text>
-        <View style={{ width: 32 }} />
+        <Text style={[typography.headlineSm, { color: colors.onSurface, fontWeight: 'bold' }]}>
+          Settings
+        </Text>
+        <View style={{ width: 24 }} />
       </View>
 
-      <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: 100 }}>
-        {/* Account & Preferences */}
-        <Card style={{ marginBottom: spacing.lg }}>
-          <Text style={[typography.headlineSm, { color: colors.onSurface, marginBottom: spacing.sm }]}>
-            Preferences
-          </Text>
-
-          <View style={styles.settingRow}>
-            <Text style={[typography.bodyMd, { color: colors.onSurface }]}>🔔 Push Notifications</Text>
-            <Text style={[typography.labelSm, { color: colors.primary }]}>Enabled</Text>
+      <ScrollView contentContainerStyle={{ padding: spacing.lg }}>
+        <Text style={[typography.labelLg, { color: colors.onSurfaceVariant, marginBottom: spacing.md, marginTop: spacing.md }]}>
+          NOTIFICATIONS
+        </Text>
+        
+        <View style={[styles.section, { backgroundColor: colors.surfaceContainerLow, borderRadius: 12 }]}>
+          <View style={[styles.row, { borderBottomColor: colors.surfaceContainerHigh, borderBottomWidth: 1 }]}>
+            <Text style={[typography.bodyLg, { color: colors.onSurface }]}>Safety & Weather Alerts</Text>
+            <Switch
+              value={safetyAlerts}
+              onValueChange={setSafetyAlerts}
+              trackColor={{ false: colors.surfaceContainerHigh, true: colors.primary }}
+              thumbColor="#ffffff"
+            />
           </View>
-
-          <View style={styles.settingRow}>
-            <Text style={[typography.bodyMd, { color: colors.onSurface }]}>📍 Location Tracking</Text>
-            <Text style={[typography.labelSm, { color: colors.primary }]}>When In Use</Text>
+          <View style={[styles.row, { borderBottomColor: colors.surfaceContainerHigh, borderBottomWidth: 1 }]}>
+            <Text style={[typography.bodyLg, { color: colors.onSurface }]}>Decision Cards</Text>
+            <Switch
+              value={decisionCards}
+              onValueChange={setDecisionCards}
+              trackColor={{ false: colors.surfaceContainerHigh, true: colors.primary }}
+              thumbColor="#ffffff"
+            />
           </View>
-
-          <View style={styles.settingRow}>
-            <Text style={[typography.bodyMd, { color: colors.onSurface }]}>🌐 Language & Units</Text>
-            <Text style={[typography.labelSm, { color: colors.onSurfaceVariant }]}>English (Metric)</Text>
+          <View style={[styles.row, { borderBottomColor: colors.surfaceContainerHigh, borderBottomWidth: 1 }]}>
+            <Text style={[typography.bodyLg, { color: colors.onSurface }]}>Mascot-delivered Notifications</Text>
+            <Switch
+              value={mascotNotifications}
+              onValueChange={setMascotNotifications}
+              trackColor={{ false: colors.surfaceContainerHigh, true: colors.primary }}
+              thumbColor="#ffffff"
+            />
           </View>
-        </Card>
+          <View style={styles.row}>
+            <Text style={[typography.bodyLg, { color: colors.onSurface }]}>SOS Alerts</Text>
+            <Switch
+              value={sosAlerts}
+              onValueChange={setSosAlerts}
+              trackColor={{ false: colors.surfaceContainerHigh, true: colors.error }}
+              thumbColor="#ffffff"
+            />
+          </View>
+        </View>
 
-        {/* Legal & Hackathon Info */}
-        <Card variant="outlined" style={{ marginBottom: spacing.xl }}>
-          <Text style={[typography.labelLg, { color: colors.onSurface, fontWeight: '700' }]}>
-            About ReRoute
-          </Text>
-          <Text style={[typography.bodySm, { color: colors.onSurfaceVariant, marginTop: 4 }]}>
-            CodeNection 2026 — Lifestyle Track: Planning an Escape
-          </Text>
-          <Text style={[typography.utilityTiny, { color: colors.outline, marginTop: 4 }]}>
-            Version 1.0.0 (Expo React Native + Supabase)
-          </Text>
-        </Card>
-
-        {/* Logout Action */}
-        <Button
-          title="Log Out of ReRoute"
-          onPress={handleLogout}
-          variant="danger"
-          size="lg"
-        />
+        <Text style={[typography.labelLg, { color: colors.onSurfaceVariant, marginBottom: spacing.md, marginTop: spacing.xl }]}>
+          ACCOUNT
+        </Text>
+        
+        <View style={[styles.section, { backgroundColor: colors.surfaceContainerLow, borderRadius: 12 }]}>
+          <TouchableOpacity style={[styles.row, { borderBottomColor: colors.surfaceContainerHigh, borderBottomWidth: 1 }]}>
+            <Text style={[typography.bodyLg, { color: colors.onSurface }]}>Edit Profile</Text>
+            <Text style={{ color: colors.onSurfaceVariant }}>→</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.row}>
+            <Text style={[typography.bodyLg, { color: colors.error }]}>Delete Account</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </View>
   );
@@ -79,19 +92,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#ffffff',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#edf1f5',
   },
-  backBtn: {
-    padding: 6,
+  section: {
+    overflow: 'hidden',
   },
-  settingRow: {
+  row: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#edf1f5',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
   },
 });
