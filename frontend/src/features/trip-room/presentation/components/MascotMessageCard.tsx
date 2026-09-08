@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { useTheme } from '@/core/theme';
 import { Message } from '@/models/chat';
@@ -17,7 +17,7 @@ interface MascotMessageCardProps {
 export const MascotMessageCard: React.FC<MascotMessageCardProps> = ({ message }) => {
   const { colors, typography, spacing, rounded, shadows } = useTheme();
   const isGenerating = message.payload?.generating === true;
-  const pulseAnim = useRef(new Animated.Value(0.4)).current;
+  const [pulseAnim] = useState(() => new Animated.Value(0.4));
 
   useEffect(() => {
     if (isGenerating) {

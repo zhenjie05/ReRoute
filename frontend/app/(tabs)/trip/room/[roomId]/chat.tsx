@@ -1,6 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
 import {
-  View,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
@@ -24,7 +23,7 @@ import {
   ProposeVoteSheet,
 } from '@/features/trip-room/presentation/components';
 import { Message } from '@/models/chat';
-import { DecisionCard, DecisionTriggerType } from '@/models/decision';
+import { DecisionCard, DecisionTriggerType, Vote } from '@/models/decision';
 
 /**
  * Discussion (Chat Room) tab — Screen 15 per SCREEN_SPEC.
@@ -51,8 +50,8 @@ export default function TripChatScreen() {
   const [decisionCards, setDecisionCards] = useState<DecisionCard[]>(
     mockDecisionCards.filter((c) => c.room_id === (roomId || room.id)),
   );
-  const [votes, setVotes] = useState(
-    mockVotes.filter((v) =>
+  const [votes, setVotes] = useState<Vote[]>(
+    mockVotes.filter((v: Vote) =>
       mockDecisionCards
         .filter((c) => c.room_id === (roomId || room.id))
         .some((c) => c.id === v.decision_card_id),
@@ -66,7 +65,7 @@ export default function TripChatScreen() {
   const getUserVoteForCard = useCallback(
     (cardId: string): string | null => {
       const vote = votes.find(
-        (v) => v.decision_card_id === cardId && v.user_id === (user?.id || 'demo-user-1'),
+        (v: Vote) => v.decision_card_id === cardId && v.user_id === (user?.id || 'demo-user-1'),
       );
       return vote?.chosen_option || null;
     },
@@ -104,13 +103,13 @@ export default function TripChatScreen() {
       if (existingVote) {
         // Update existing vote
         const oldOption = existingVote.chosen_option;
-        setVotes((prev) =>
-          prev.map((v) =>
+        setVotes((prev: Vote[]) =>
+          prev.map((v: Vote) =>
             v.id === existingVote.id ? { ...v, chosen_option: optionId } : v,
           ),
         );
         // Adjust counts
-        setDecisionCards((prev) =>
+        setDecisionCards((prev: DecisionCard[]) =>
           prev.map((card) => {
             if (card.id !== cardId) return card;
             return {
@@ -129,16 +128,17 @@ export default function TripChatScreen() {
         );
       } else {
         // New vote
-        setVotes((prev) => [
+        setVotes((prev: Vote[]) => [
           ...prev,
           {
             id: `vote-${Date.now()}`,
             decision_card_id: cardId,
             user_id: userId,
             chosen_option: optionId,
+            created_at: new Date().toISOString(),
           },
         ]);
-        setDecisionCards((prev) =>
+        setDecisionCards((prev: DecisionCard[]) =>
           prev.map((card) => {
             if (card.id !== cardId) return card;
             return {
