@@ -709,3 +709,142 @@ This document specifies the comprehensive functional, visual, and behavioral UI 
 
 3. **Outbound Booking Link Provider Source:**
    - External links for Accommodation default to standard OTA web searches (e.g. Google Hotels / Booking.com query URL), and Transportation links route to transit carrier searches based on origin/destination. No payment APIs required.
+
+---
+
+## 11. Standardized Mock Data & Backend Simulation Contract
+
+### 11.1 The Single-Source-of-Truth Mandate (Anti-Fragmentation Rules)
+
+To prevent fragmented, conflicting, or unlinked UI presentations across screens, all presentation components, screen routes, and hooks must strictly adhere to the following architecture rules:
+
+1. **Absolute Prohibition of In-Component Hardcoding:**
+   - No React screen or component may define inline mock objects, ad-hoc mock arrays, or unverified stub data within its file.
+   - Prohibited pattern:
+     ```tsx
+     // ❌ STRICTLY FORBIDDEN
+     const [posts] = useState([
+       { id: '1', title: 'Hardcoded Title', author: 'Random Author' }
+     ]);
+     ```
+   - Correct pattern:
+     ```tsx
+     // ✅ MANDATORY STANDARD
+     import { mockDiscoverPosts } from '@/features/discover/data/mock-discover';
+     // OR via asynchronous Pretending API Service:
+     import { MockApiService } from '@/lib/services/mock-api-service';
+     ```
+
+2. **Canonical Data Hubs:**
+   - All shared seed data is declared exclusively in [`frontend/src/shared/data/standard-mock-data.ts`](file:///c:/Users/ganru/ReRoute/frontend/src/shared/data/standard-mock-data.ts).
+   - Domain-specific feature modules (`/features/*/data/mock-*.ts`) must re-export directly from `standard-mock-data.ts`.
+   - The asynchronous pretending API service is implemented in [`frontend/src/lib/services/mock-api-service.ts`](file:///c:/Users/ganru/ReRoute/frontend/src/lib/services/mock-api-service.ts).
+
+3. **Phase 1 Execution Boundary:**
+   - **Supabase Auth:** Real Supabase Auth sessions manage user registration, login, session tokens, and password reset (`FR-0-1` to `FR-0-5`).
+   - **Simulated Backend API:** All other entities (`trip_rooms`, `itinerary_items`, `decision_cards`, `expenses`, `safety_alerts`, `landmarks`, etc.) are backed by `MockApiService` simulating real-world network latency (80–300ms) and in-memory state mutations.
+
+---
+
+### 11.2 Relational Integrity & Entity Cohesion Matrix
+
+All mock entities share strict relational integrity with zero orphaned IDs or dangling foreign keys:
+
+```mermaid
+erDiagram
+    USERS ||--o{ TRIP_ROOM_MEMBERS : "joins"
+    USERS ||--o{ COMMUNITY_POSTS : "authors"
+    USERS ||--o{ BADGES : "earns"
+    USERS ||--o{ STARRED_TRIPS : "saves"
+    TRIP_ROOMS ||--|{ TRIP_ROOM_MEMBERS : "has"
+    TRIP_ROOMS ||--o{ TRIP_PREFERENCES : "configures"
+    TRIP_ROOMS ||--|{ ITINERARY_DAYS : "contains"
+    ITINERARY_DAYS ||--|{ ITINERARY_ITEMS : "schedules"
+    TRIP_ROOMS ||--o{ DECISION_CARDS : "triggers"
+    DECISION_CARDS ||--o{ VOTES : "collects"
+    TRIP_ROOMS ||--o{ MESSAGES : "chats"
+    TRIP_ROOMS ||--o{ BUDGET_CATEGORIES : "budgets"
+    TRIP_ROOMS ||--o{ EXPENSES : "logs"
+    EXPENSES ||--|{ EXPENSE_SPLITS : "splits"
+    TRIP_ROOMS ||--o{ SETTLEMENTS : "settles"
+    TRIP_ROOMS ||--o{ ALBUM_PHOTOS : "stores"
+    COMMUNITY_POSTS ||--o{ STARRED_TRIPS : "receives"
+    COMMUNITY_POSTS ||--o| TRIP_ROOMS : "links_room"
+```
+
+#### Canonical Entity ID Registry:
+- **Canonical Demo User (Current Session):**
+  - ID: `00000000-0000-0000-0000-000000000001`
+  - Name: `Alex Chen`, Country: `Singapore`, Email: `alex@example.com`
+- **Co-Traveler Demo Users:**
+  - `00000000-0000-0000-0000-000000000002` → `Taylor Swift` (USA)
+  - `00000000-0000-0000-0000-000000000003` → `Sam Lee` (Malaysia)
+  - `00000000-0000-0000-0000-000000000004` → `Elena Rostova` (Canada)
+  - `00000000-0000-0000-0000-000000000005` → `Kenji Sato` (Japan)
+- **Standard Trip Rooms:**
+  - `room-tokyo-2026`: Active live trip room (`is_live_for_user = true` for Alex Chen). Stage: `active`, Theme: Autumn `#FB8C00`.
+  - `room-swiss-2027`: Future winter trip room. Stage: `planning`, Theme: Winter `#C9DEEF`.
+  - `room-bali-2025`: Completed summer trip room. Stage: `archived`, Theme: Summer `#697E50`.
+  - `room-kyoto-clone`: Cloned community itinerary. Stage: `planning`, Theme: Spring `#FEB1C6`.
+
+---
+
+### 11.3 Pretending API Service Contract (`MockApiService`)
+
+The frontend leverages [`MockApiService`](file:///c:/Users/ganru/ReRoute/frontend/src/lib/services/mock-api-service.ts) to simulate real RESTful / RPC Supabase endpoints.
+
+| Sub-Service Gateway | Primary Methods | Simulated Latency | Target Domain Models |
+|---|---|---|---|
+| `MockApiService.user` | `getCurrentUser`, `getUserById`, `updateUserProfile` | ~80ms | `User` |
+| `MockApiService.tripRoom` | `getTripRooms`, `getTripRoomById`, `getActiveLiveRoom`, `createTripRoom`, `updateTripRoom`, `getRoomMembers`, `updateRoomPreferences` | ~80ms | `TripRoom`, `TripRoomMember`, `TripPreferences` |
+| `MockApiService.itinerary` | `getItineraryDays`, `getItineraryItems`, `createItineraryItem`, `updateItineraryItem`, `deleteItineraryItem`, `reorderItineraryItems` | ~80ms | `ItineraryDay`, `ItineraryItem` |
+| `MockApiService.chatDecision`| `getMessages`, `sendMessage`, `getDecisionCards`, `getDecisionCardById`, `castVote` | ~80ms | `Message`, `DecisionCard`, `Vote` |
+| `MockApiService.budget` | `getCategories`, `getExpenses`, `createExpense`, `getExpenseSplits`, `getReceiptScans`, `getSettlements`, `createSettlement`, `updateSettlementStatus` | ~80ms | `BudgetCategory`, `Expense`, `ExpenseSplit`, `ReceiptScan`, `Settlement` |
+| `MockApiService.album` | `getAlbumPhotos`, `uploadPhoto`, `deletePhoto` | ~80ms | `AlbumPhoto` |
+| `MockApiService.discover` | `getCommunityPosts`, `getCommunityPostById`, `toggleStarPost`, `getStarredTrips` | ~80ms | `CommunityPost`, `StarredTrip` |
+| `MockApiService.landmark` | `getLandmarks`, `getLandmarkById` | ~80ms | `Landmark` |
+| `MockApiService.safety` | `getSafetyAlerts`, `getEmergencyDirectory` | ~80ms | `SafetyAlert` |
+| `MockApiService.language` | `getLanguageLessons`, `getLessonById`, `completeLesson` | ~80ms | `LanguageLesson` |
+| `MockApiService.profileBadge`| `getUserBadges`, `getUnifiedProfile` | ~80ms | `Badge`, `User`, `TripRoom` |
+| `MockApiService.notification`| `getNotifications`, `markAsRead`, `markAllAsRead`, `clearNotification` | ~80ms | `AppNotification` |
+
+---
+
+### 11.4 Standard Mock Data Entity Dictionary (22 Entities)
+
+All 22 core domain entities defined in `ReRoute_Requirements_Refined_v2_2.md` are completely standardized:
+
+1. **`users`**: 5 canonical profiles with avatar URLs, nationality, and auth providers.
+2. **`trip_rooms`**: 4 canonical rooms spanning `active`, `planning`, and `archived` stages.
+3. **`trip_room_members`**: 7 membership records linking users to rooms with roles and live-trip flags.
+4. **`trip_preferences`**: Preference configs across companions, styles (`cultural`, `nature`), and paces (`moderate`).
+5. **`itinerary_days`**: 5 sequential days for `room-tokyo-2026` with title and notes.
+6. **`itinerary_items`**: Modular items categorized as `transportation`, `attraction`, and `stay` with coordinates, sort order, and outbound booking URLs.
+7. **`decision_cards`**: Voting cards for conflicts and severe weather proposals with anonymous voting modes.
+8. **`votes`**: Cast votes linked to decision cards and user IDs.
+9. **`messages`**: Chat feed entries with `user`, `mascot`, and `system_event` sender types.
+10. **`budget_categories`**: `Accommodation`, `Transit & Trains`, `Food & Dining`, `Attractions & Tickets`.
+11. **`expenses`**: Multi-payer expense entries with receipts and currency tracking (`USD`, `JPY`).
+12. **`expense_splits`**: Equal and share-based debt calculations for room members.
+13. **`receipt_scans`**: Simulated OCR receipts with merchant names and parsed line-item totals.
+14. **`settlements`**: Member-to-member debt settlement transfers and settlement timestamps.
+15. **`album_photos`**: Group photos tagged with coordinates, itinerary days, and uploader identities.
+16. **`landmarks`**: Landmark information, drop-off taxi points, and 3D model asset availability (`sensoji_optimized.glb`).
+17. **`safety_alerts`**: Weather and typhoon advisories with danger tiers (`moderate`) and live weather snapshots.
+18. **`community_posts`**: Public cloneable itineraries and trip recaps with star counters.
+19. **`starred_trips`**: Saved community guides linking users to discover posts.
+20. **`language_lessons`**: Destination micro-lessons with phrases, romanizations, and interactive quizzes.
+21. **`badges`**: Gamified achievement awards (*First Escape*, *3 Countries Visited*, *Language Scholar*, *Route Master*, *Budget Guru*).
+22. **`notifications`**: Persistent app notifications across safety alerts, decision cards, mascot tips, budget alerts, and SOS system logs.
+
+---
+
+### 11.5 Developer Enforcement Checklist
+
+Before creating PRs or finalizing any screen:
+- [x] **No Inline Data:** Component contains zero local arrays representing backend entities.
+- [x] **Full Type-Safety:** All data props strictly adhere to `@/models/*` TypeScript interfaces.
+- [x] **Relational Coherence:** All IDs (`roomId`, `userId`, `cardId`, `postId`) match the standard mock registry.
+- [x] **Mock API Compliance:** Screen data fetching utilizes `MockApiService` or the standardized feature data re-exports.
+- [x] **Zero Linter/Typecheck Errors:** Project successfully passes `npx tsc --noEmit` and `npx eslint .`.
+

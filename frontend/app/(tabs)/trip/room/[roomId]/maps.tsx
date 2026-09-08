@@ -5,6 +5,7 @@ import { useTheme } from '@/core/theme';
 import { Button, Card, Badge } from '@/shared/components';
 import { mockLandmarks } from '@/features/route-planning/data/mock-route-planning';
 import { mockTripMembers } from '@/features/trip-room/data/mock-trip-room';
+import { TripRoomMember } from '@/models/trip-room';
 
 export default function TripMapsScreen() {
   const { roomId } = useLocalSearchParams<{ roomId: string }>();
@@ -40,7 +41,7 @@ export default function TripMapsScreen() {
           {/* Live Member Pin Simulators (FR-2-8) */}
           {liveLocationEnabled ? (
             <View style={styles.memberPinArea}>
-              {mockTripMembers.map((m, idx) => (
+              {mockTripMembers.map((m: TripRoomMember, _idx: number) => (
                 <View
                   key={m.user_id}
                   style={[
