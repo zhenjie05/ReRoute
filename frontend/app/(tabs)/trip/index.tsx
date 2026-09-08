@@ -5,14 +5,16 @@ import { useTheme } from '@/core/theme';
 import { Card, Badge, Button, EmptyState } from '@/shared/components';
 import { mockTripRooms } from '@/features/trip-room/data/mock-trip-room';
 import { useLiveTrip } from '@/lib/hooks/useLiveTrip';
+import { CreateRoomSheet, RoomSheetMode } from '@/features/trip-room/presentation/CreateRoomSheet';
 
-export default function TripHubScreen() {
+export default function TripHubScreen({ initialSheet = null }: { initialSheet?: RoomSheetMode | null } = {}) {
   const { colors, typography, spacing, rounded } = useTheme();
   const router = useRouter();
   const { hasLiveTrip, liveTrip } = useLiveTrip();
 
   const [selectedStage, setSelectedStage] = useState<'all' | 'planning' | 'active' | 'archived'>('all');
   const [rooms] = useState(mockTripRooms);
+  const [roomSheet, setRoomSheet] = useState<RoomSheetMode | null>(initialSheet);
 
   const filteredRooms = rooms.filter((r) => {
     if (selectedStage === 'all') return true;
@@ -35,13 +37,13 @@ export default function TripHubScreen() {
           <View style={{ flexDirection: 'row', gap: spacing.xs }}>
             <Button
               title="Join 🔗"
-              onPress={() => router.push('/(tabs)/trip/join' as any)}
+              onPress={() => setRoomSheet('join')}
               variant="outline"
               size="sm"
             />
             <Button
               title="+ New Trip"
-              onPress={() => router.push('/(tabs)/trip/create' as any)}
+              onPress={() => setRoomSheet('create')}
               variant="primary"
               size="sm"
             />
@@ -117,7 +119,7 @@ export default function TripHubScreen() {
             title="No trips in this stage"
             description="Create a new adventure or join with an invite code."
             actionTitle="+ Create Trip"
-            onAction={() => router.push('/(tabs)/trip/create' as any)}
+            onAction={() => setRoomSheet('create')}
           />
         ) : (
           <View style={{ gap: spacing.md }}>
@@ -158,6 +160,7 @@ export default function TripHubScreen() {
           </View>
         )}
       </ScrollView>
+      {roomSheet && <CreateRoomSheet mode={roomSheet} onClose={() => setRoomSheet(null)} />}
     </View>
   );
 }

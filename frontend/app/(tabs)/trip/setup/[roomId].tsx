@@ -7,7 +7,9 @@ import { mockModularSuggestions } from '@/features/route-planning/data/mock-rout
 import { TravelCompanions, TravelStyle, TravelPace } from '@/models/trip-room';
 
 export default function TripSetupScreen() {
-  const { roomId } = useLocalSearchParams<{ roomId: string }>();
+  const { roomId, name, destination, timing, seasonYear, startDate, endDate } = useLocalSearchParams<{
+    roomId: string; name?: string; destination?: string; timing?: string; seasonYear?: string; startDate?: string; endDate?: string;
+  }>();
   const { colors, typography, spacing, rounded } = useTheme();
   const router = useRouter();
 
@@ -57,6 +59,17 @@ export default function TripSetupScreen() {
       </View>
 
       <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: 100 }}>
+        {name && destination ? (
+          <Card style={{ marginBottom: spacing.md }}>
+            <Text style={[typography.headlineSm, { color: colors.onSurface }]}>{name}</Text>
+            <Text style={[typography.bodySm, { color: colors.onSurfaceVariant, marginTop: spacing.xs }]}>
+              {destination} · Planning
+            </Text>
+            <Text style={[typography.bodySm, { color: colors.onSurfaceVariant, marginTop: spacing.xs }]}>
+              {timing === 'custom' ? `${startDate} — ${endDate}` : `${timing === 'summer' ? 'Summer' : 'Spring'} ${seasonYear} · Exact dates flexible`}
+            </Text>
+          </Card>
+        ) : null}
         {step === 'preferences' ? (
           // STEP 1: PREFERENCES FORM (FR-1-3, FR-1-3a)
           <>
