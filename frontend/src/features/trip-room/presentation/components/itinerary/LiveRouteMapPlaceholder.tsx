@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '@/core/theme';
-import { Badge } from '@/shared/components';
 
 interface LiveRouteMapPlaceholderProps {
   dayNumber?: number;

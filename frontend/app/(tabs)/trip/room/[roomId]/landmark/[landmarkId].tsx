@@ -7,14 +7,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
-  Dimensions,
 } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { Card, Badge } from '@/shared/components';
 import { mockLandmarks } from '@/features/trip-room/data/mock-trip-room';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 /**
  * Landmark Detail screen — bottom-sheet-style presentation.
@@ -34,7 +31,6 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 export default function LandmarkDetailScreen() {
   const { landmarkId } = useLocalSearchParams<{ landmarkId: string }>();
   const { colors, typography, spacing, rounded, shadows } = useTheme();
-  const router = useRouter();
 
   const landmark = mockLandmarks.find((l) => l.id === landmarkId) || mockLandmarks[0];
 
@@ -46,7 +42,7 @@ export default function LandmarkDetailScreen() {
   const [bookmarked, setBookmarked] = useState(false);
 
   // Photo index for gallery
-  const [photoIndex, setPhotoIndex] = useState(0);
+  const photoIndex = 0;
 
   // Extract fun facts with emoji icons
   const factIcons = ['🏅', '🌊', '🎌', '⛩️', '🍃'];

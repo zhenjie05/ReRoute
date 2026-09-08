@@ -21,7 +21,7 @@ export const DropoffPointCard: React.FC<DropoffPointCardProps> = ({
   photoUrl,
   verified = true,
 }) => {
-  const { colors, typography, spacing, rounded, shadows } = useTheme();
+  const { colors, typography, spacing, rounded } = useTheme();
 
   if (!name) return null;
 

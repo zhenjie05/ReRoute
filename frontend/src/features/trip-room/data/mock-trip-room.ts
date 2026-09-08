@@ -1,4 +1,8 @@
-import { mockStandardTripPreferences } from '@/shared/data/standard-mock-data';
+import {
+  mockStandardTripPreferences,
+  mockStandardLandmarks,
+  mockStandardSafetyAlerts,
+} from '@/shared/data/standard-mock-data';
 
 export const mockTripPreferences = mockStandardTripPreferences[0];
 
@@ -502,6 +506,61 @@ export const mockAlbumPhotos = [
     caption: 'Sunset across Tokyo skyline!',
   },
   {
+    id: 'photo-1b',
+    room_id: 'room-tokyo-2026',
+    uploaded_by: 'demo-user-2',
+    uploader_name: 'Taylor Swift',
+    url: 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?w=800&fit=crop',
+    taken_at: '2026-10-10T18:00:00Z',
+    location_name: 'Shibuya Sky',
+    itinerary_day_id: 'day-tokyo-1',
+    caption: 'Great view!',
+  },
+  {
+    id: 'photo-1c',
+    room_id: 'room-tokyo-2026',
+    uploaded_by: 'demo-user-3',
+    uploader_name: 'Sam Lee',
+    url: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&fit=crop',
+    taken_at: '2026-10-10T19:30:00Z',
+    location_name: 'Shibuya',
+    itinerary_day_id: 'day-tokyo-1',
+    caption: 'Dinner time',
+  },
+  {
+    id: 'photo-1d',
+    room_id: 'room-tokyo-2026',
+    uploaded_by: 'demo-user-1',
+    uploader_name: 'Alex Chen',
+    url: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&fit=crop',
+    taken_at: '2026-10-10T20:15:00Z',
+    location_name: 'Shibuya',
+    itinerary_day_id: 'day-tokyo-1',
+    caption: 'Night walk',
+  },
+  {
+    id: 'photo-1e',
+    room_id: 'room-tokyo-2026',
+    uploaded_by: 'demo-user-2',
+    uploader_name: 'Taylor Swift',
+    url: 'https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=800&fit=crop',
+    taken_at: '2026-10-10T20:45:00Z',
+    location_name: 'Shinjuku',
+    itinerary_day_id: 'day-tokyo-1',
+    caption: 'Neon lights',
+  },
+  {
+    id: 'photo-1f',
+    room_id: 'room-tokyo-2026',
+    uploaded_by: 'demo-user-3',
+    uploader_name: 'Sam Lee',
+    url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&fit=crop',
+    taken_at: '2026-10-10T21:00:00Z',
+    location_name: 'Shinjuku',
+    itinerary_day_id: 'day-tokyo-1',
+    caption: 'Dessert!',
+  },
+  {
     id: 'photo-2',
     room_id: 'room-tokyo-2026',
     uploaded_by: 'demo-user-2',
@@ -517,11 +576,6 @@ export const mockAlbumPhotos = [
 // ==========================================
 // ITINERARY TAB — Additional Mock Data
 // ==========================================
-
-import {
-  mockStandardLandmarks,
-  mockStandardSafetyAlerts,
-} from '@/shared/data/standard-mock-data';
 
 /** Re-export landmarks & safety alerts for Itinerary tab convenience */
 export const mockLandmarks = mockStandardLandmarks;

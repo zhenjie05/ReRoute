@@ -4,64 +4,51 @@ Read:
 - docs/UI_REQUIREMENTS.md
 - frontend/docs/SCREEN_SPEC.md
 
-Rewrite the **Trip Room → Itinerary** tab so it matches the reference screenshots below, across all applicable room stages: **Planning** (trip building — city search, day timeline, per-item voting, Landmark Detail with 3D/photos) and **Active/Live** (live route map, live member location, AI-suggested transport per leg, exact drop-off points, Reroute). Archived-state locking should reuse the pattern already built for the Discussion tab — do not build a second archived-banner/disabled-state implementation.
+Rewrite the **Trip Room → Album** tab so it matches the reference screenshots below: a day-grouped photo grid with an Upload action, and a full-screen photo lightbox/carousel with uploader attribution and like/share actions.
 
-Reference screenshots attached (5 images):
-1. `Itinerary_Live_ArchivedBanner.png` — Live trip room header + Itinerary tab, showing an **archived banner** — ⚠ inconsistency flagged below, do not build this combination.
-2. `Itinerary_Live_SafetyBanner.png` — same Live trip, showing an **AI Safety Check banner** in place of the archived banner.
-3. `Itinerary_Planning_DayTimeline.png` — Planning stage: city search bar, illustrative country map, Day 1 timeline/stepper with per-stop vote status, "Complete Planning" CTA.
-4. `Itinerary_Planning_LandmarkTransition.png` — same Planning screen with a landmark hero image opened above the day timeline.
-5. `LandmarkDetail_3DModel.png` — Landmark Detail screen: 3D-model hero view, History + Notable Facts, "Add to Itinerary" CTA, bookmark icon.
+Reference screenshots attached (2 images):
+1. `Album_Grid_DayGrouped.png` — Album tab main view: "Shared Photos" header + orange "Upload" pill top-right, photos grouped under day headers ("DAY 4 · KYOTO", "DAY 3 · TOKYO"), 3-column grid, an overflow tile ("+12 more") on days with more photos than fit.
+2. `Album_PhotoDetail_Lightbox.png` — full-screen photo detail: dark scrim, close (X) top-right, left/right arrows to page through the set, uploader name ("Sarah K.") + relative timestamp ("2 hours ago") bottom-left, a share icon bottom-right. **[CHG]** The reference screenshot also shows a heart/like icon next to share — per team decision, do not implement it (see Known mismatches below); share is the only bottom-right action.
 
 Use:
 - `frontend/docs/SCREEN_SPEC.md` for exact layout and component order.
-- `DESIGN.md` for styling/tokens — **Units 1–12 and 14 only** (see Design(2).md Unit 13 mismatch below).
+- `DESIGN.md` for styling/tokens — Units 1–12 and 14 only (Unit 13 IA is stale, same caveat as prior tasks).
 - `UI_REQUIREMENTS.md` for acceptance criteria per sub-section.
 - `AGENTS.md` for coding rules, folder structure, and the "Explicitly Out of Scope" list.
 
 Context:
-- Assume Auth, the core theme, shared components, Global Widgets, and the **Trip Room shell** (season-themed header card, in-room tab row, Planning/Active/Archived stage indicator, Room Settings) already exist — reuse them, do not rebuild.
-- Assume the **Discussion tab** (message feed, shared Decision Card component, Propose Vote compose sheet, Archived-locking pattern) is already implemented under `src/features/trip-room/presentation`. The Decision Card component must be reused as-is for any itinerary-triggered voting — do not fork a second card component.
-- Data model (from shared schema, mock these shapes — no backend wiring yet):
-  - `itinerary_days` — id, room_id, day_number, trip_date, title, notes
-  - `itinerary_items` — id, room_id, day_id, name, lat, lng, scheduled_time, category (transportation / attraction / stay), sort_order, tags[], compromise_reason (nullable), booking_url (nullable)
-  - `landmarks` — id, name, lat, lng, model_asset_url (nullable), photo_urls[], dropoff_point (lat/lng), info_text, fun_facts[]
-  - `decision_cards` — id, room_id, trigger_type (disruption / conflict / safety_risk), safety_alert_id (nullable), options[], status, anonymous, created_at, resolved_at
-- Folder placement: Itinerary is core Trip Room functionality, same as Discussion — place Day List, the Day timeline/stepper, Landmark Detail, and the live Route/Map sub-view under `src/features/trip-room/presentation`. If the "AI-suggested transport" leg card is generalizable, put it under `trip-room/presentation/components` so a future reuse in the Maps tab doesn't fork it.
+- Assume Auth, the core theme, shared components, Global Widgets, and the Trip Room shell (header card, in-room tab row, stage indicator, Room Settings) already exist — reuse, do not rebuild.
+- Data model (mock these shapes — no backend wiring yet):
+  - `photos` — id, room_id, itinerary_day_id (nullable), uploader_id, url, taken_at (EXIF), lat (nullable), lng (nullable), created_at
+- Folder placement: same convention as Discussion/Itinerary — place the photo grid, day-group header, upload sheet, and lightbox/carousel under `src/features/trip-room/presentation`.
 
-Requirements — Planning stage:
-- City/destination search bar above a stylized country-level overview map (see Assumption 1 below) with pins for candidate cities; selecting one focuses that city.
-- Day List renders as a vertical timeline/stepper. Each day section shows a day label + Draft/Planning badge, a date + arrival note, and its `itinerary_items` as stepper nodes.
-- Each item node shows time, name, a short note, a thumbnail photo, and one of three states:
-  - **Voted** — `✓ Voted (x/y agreed)` + "Locked in route" label, read-only.
-  - **Pending** — a "Suggest Vote" button.
-  - **Candidate stop** — dashed node, "+ Add Details" link, not yet a real `itinerary_items` row.
-- Tapping "Suggest Vote" on a Pending item opens the reused Propose Vote compose sheet from Discussion (see Assumption 3 on trigger_type).
-- Tapping an item's thumbnail/name opens **Landmark Detail**: a hero area that toggles Photos (default) / 3D model — the 3D toggle is hidden entirely (not an empty state) if `model_asset_url` is null, matching the existing landmark spec — followed by History text, Notable Facts cards, an "Add to Itinerary" primary CTA, and a bookmark icon (see Assumption 4).
-- "Complete Planning" CTA at the bottom of the Day List — do **not** wire this to the Planning→Active stage transition. That transition is the Owner-only "Start Trip" action in Room Settings (FR-2-2a). Treat "Complete Planning" as a day/itinerary-level "mark days as finalized" flag only, pending team confirmation of its real semantics.
+Requirements — Grid view:
+- Fetch the room's `photos`, group by `itinerary_day_id` (fall back to a date-derived "Unsorted"/location group if a photo has no day tag), most recent day first, each group headed by a "DAY N · LOCATION" label.
+- Render each group as a 3-column grid. If a group has more than 4 photos, show the first 4 photo cells plus a 5th "+N more" overlay tile (N = remaining count beyond the 4 shown); tapping it opens the full gallery for that day rather than the lightbox directly. Groups with 4 or fewer photos render with no overlay tile.
+- "Upload" pill button in the header opens the upload flow (camera/library picker). Since this entry point isn't tied to a specific Day Detail view, auto-resolve the uploaded photo's `itinerary_day_id` from its EXIF `taken_at` against the room's day date ranges; if no day matches, file it under the fallback "Unsorted" group rather than blocking the upload.
 
-Requirements — Active/Live stage:
-- The Itinerary tab's map area switches to the live route map (reuse the existing Maps-tab implementation, do not fork a second map component) showing: the day's route, a "live" marker, other members' live locations gated by `trip_room_members.location_sharing_opt_in`, and a floating "Reroute" pill.
-- A "Suggested Routes" section below the map lists per-leg cards: time + from→to, then 2–3 transport option chips (mode, duration, price) with one AI-picked option visually tagged. Selecting a different chip must not discard the others.
-- Each leg card includes an "Exact Drop-off Point" sub-card: thumbnail photo, name, a walk-time note, and a "Street View Verified" checkmark — populate from `landmarks.dropoff_point` when the leg's destination is a known landmark; degrade gracefully (no crash, no placeholder error) when it isn't available.
+Requirements — Photo detail (lightbox):
+- Tapping any grid photo opens a full-screen carousel starting at that photo, swipeable/arrow-navigable within the same day group's photo set.
+- Show uploader name + a relative timestamp ("2 hours ago") resolved from `uploader_id` + `created_at`.
+- A single share icon, wired per Assumption 1 below. No like/favorite affordance — confirmed cut, do not implement it even though the reference screenshot shows one.
+- Close (X) returns to the grid at the same scroll position.
 
 Do not build:
-- A second map engine for the Planning-stage overview — see Assumption 1, flag it rather than guessing the library.
-- A second Decision Card component — reuse Discussion's.
-- Per-itinerary-item comment threads (already out of scope per Requirements/Page docs).
+- A duplicate Trip Room header, tab row, or stage indicator.
+- A per-itinerary-item comment thread (out of scope, unrelated to Album regardless).
+- A second upload flow inside Day Detail — if one already exists there per Itinerary Day Detail spec (tagging the photo with that `itinerary_day_id` directly), reuse the same upload component/hook here instead of forking it.
 
 Known mismatches / assumptions — flag, do not silently resolve:
-1. **Two different "maps" in the screenshots.** The Planning-stage overview (search bar + a simplified, illustrative country map with a highlighted city pill) does not match the real Google-Maps-tile look of the Active-stage route map in the other screenshots. Requirements only specify the Google Maps API for route/live-location (Feature 1 / Maps tab). Assumption: build the Planning overview as a lightweight custom/vector map component, not a second live Google Maps instance — flag this for team confirmation.
-2. **Archived banner shown on a header badged "Live."** One screenshot shows the room header as "Live" while the tab content shows Discussion's archived banner ("This trip room is archived..."). Archived and Live are mutually exclusive stages. Treat this as a screenshot inconsistency, not a spec to implement — confirm with whoever supplied it which state is correct.
-3. **AI Safety Check banner inside Itinerary/Maps.** Not described in Page.md or Requirements, which only place safety content on Home's Recent News (informational tier) and as a `safety_risk` Decision Card in Discussion (actionable tier). This is a third surfacing point. Assumption: implement as a dismissible, read-only banner (no vote), sourced from the same `safety_alerts` feed — flag whether this duplicates Home's Recent News or should replace it while inside a live room.
-4. **Per-item vote status has no schema field.** "Voted (x/y agreed)" / "Locked in route" / "Pending" aren't columns on `itinerary_items` or `decision_cards` as currently modeled. Assumption: derive these locally from a linked `decision_card.status` + its `votes` tally rather than adding new schema columns — flag for the team to confirm the real item↔decision_card relationship.
-5. **Suggest-Vote trigger_type is ambiguous.** `decision_cards.trigger_type` is constrained to `disruption / conflict / safety_risk`; none clearly fits "should we include this candidate stop." Assumption: default to `conflict` as the closest existing type — flag as a guess, not a resolved decision.
-6. **Landmark bookmark icon vs. `starred_trips`.** The bookmark on Landmark Detail doesn't match the `starred_trips` mechanic (which stars Discover posts, not individual landmarks). Assumption: implement as local UI state only, no persistence call, until the team defines landmark-level saving.
-7. **Design(2).md Unit 13 IA is still stale** (4-tab nav, Community/Friends) vs. `ReRoute_Page_Refined_v2_2.md` (3-tab, friendship fully removed). Same caveat as the Discussion-tab task: use Design(2).md for tokens/shapes only (Units 1–12, 14), never Unit 13.
+1. **Share icon isn't in Page.md's Album bullet at all.** Assumption: wire it to the OS-level share sheet (e.g. React Native `Share` API) to export/share the image outside the app — not a custom in-app share/repost feature. Flag for confirmation.
+2. **Archived-state Album isn't shown in any reference screenshot** (both screenshots show a "Live" header badge). Assumption: apply the same Archived-locking convention used elsewhere in Trip Room — hide/disable the Upload button and the share action, keep the grid and lightbox fully viewable (read-only history) — but this is inferred, not confirmed by a screenshot. Flag before building it.
+3. **5-cell grid cap is inferred from the screenshot, not stated in any doc.** The exact "4 photos + overflow tile" threshold is a guess based on counting the reference image; confirm with design whether it should instead be a fixed row count (e.g. always exactly one row) responsive to screen width.
+4. **Design(2).md Unit 13 IA is still stale** (4-tab nav, Community/Friends) vs. `ReRoute_Page_Refined_v2_2.md` (3-tab, friendship fully removed) — same caveat as prior tasks: use Design(2).md for tokens/shapes only (Units 1–12, 14), never Unit 13.
+
+**Resolved (no longer open):** Like/favorite icon on Album photos — team decision is to cut it entirely; the reference screenshot's heart icon is not implemented. Album's only per-photo interaction is share.
 
 Before finishing, summarize:
 1. Files changed.
-2. Components created/reused (confirm the Planning-stage map is NOT a second Google Maps instance, and that the Decision Card is reused as-is).
-3. Assumptions made (Planning map library, item vote-status derivation, Suggest-Vote trigger_type default, safety-banner sourcing, bookmark behavior).
-4. Confirmation that no duplicate Trip Room header, tab row, stage indicator, or Global Widget was created.
-5. The 7 flagged mismatches above, so the team can confirm each before wireframe/UI review.
+2. Components created/reused (confirm no second upload flow was forked if one already exists in Itinerary Day Detail).
+3. Assumptions made (share behavior, Archived-state locking, grid overflow threshold).
+4. Confirmation that no duplicate Trip Room header/tab row/stage indicator/Global Widget was created, and that no like/favorite affordance was added.
+5. The 4 flagged mismatches above, so the team can confirm each before wireframe/UI review.

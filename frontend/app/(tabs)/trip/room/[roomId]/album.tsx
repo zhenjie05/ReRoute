@@ -1,75 +1,137 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, Image } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Alert, Share, StyleSheet } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useTheme } from '@/core/theme';
-import { Card, Badge, Button } from '@/shared/components';
-import { mockAlbumPhotos } from '@/features/trip-room/data/mock-trip-room';
+import { mockAlbumPhotos, mockTripRooms, mockItineraryDays } from '@/features/trip-room/data/mock-trip-room';
 import { AlbumPhoto } from '@/models/album';
+import { AlbumPhotoGrid, AlbumLightbox } from '@/features/trip-room/presentation/components/album';
 
 export default function GroupAlbumScreen() {
   const { roomId } = useLocalSearchParams<{ roomId: string }>();
-  const { colors, typography, spacing } = useTheme();
+  const { colors, typography, spacing, rounded, shadows } = useTheme();
 
-  const [photos, setPhotos] = useState<AlbumPhoto[]>(mockAlbumPhotos);
+  const room = mockTripRooms.find((r) => r.id === roomId) || mockTripRooms[0];
+  const isArchived = room.stage === 'archived';
+
+  // State
+  const [photos, setPhotos] = useState<AlbumPhoto[]>(
+    mockAlbumPhotos.filter(p => p.room_id === (roomId || room.id))
+  );
+  
+  // Lightbox state
+  const [lightboxVisible, setLightboxVisible] = useState(false);
+  const [initialPhotoId, setInitialPhotoId] = useState<string | null>(null);
+
+  // Group expansion state (for +N more) - track which day groups are expanded
+  const [expandedGroups, setExpandedGroups] = useState<Set<string | null>>(new Set());
 
   const handleUploadPhoto = () => {
+    if (isArchived) return;
+
+    // Simulate finding matching day based on current date (mock EXIF taken_at)
+    const now = new Date().toISOString();
+    // Simplified logic: just assign to day 1 for the mock if available
+    const matchedDay = mockItineraryDays.find(d => d.room_id === room.id);
+    const dayId = matchedDay ? matchedDay.id : null;
+
     const newPhoto: AlbumPhoto = {
       id: `photo-${Date.now()}`,
-      room_id: (roomId as string) || 'room-tokyo-2026',
+      room_id: (roomId as string) || room.id,
       uploaded_by: 'demo-user-1',
       uploader_name: 'Alex Chen',
       url: 'https://images.unsplash.com/photo-1538485399081-7191377e8241?w=800&fit=crop',
-      taken_at: new Date().toISOString(),
-      location_name: 'Harajuku Takeshita Street',
-      caption: 'Crepes and street fashion walk!',
+      taken_at: now,
+      created_at: now,
+      location_name: 'Tokyo',
+      itinerary_day_id: dayId,
     };
+    
     setPhotos((prev) => [newPhoto, ...prev]);
   };
 
+  const handlePhotoPress = useCallback((photoId: string) => {
+    setInitialPhotoId(photoId);
+    setLightboxVisible(true);
+  }, []);
+
+  const handleExpandGroup = useCallback((dayId: string | null) => {
+    setExpandedGroups(prev => {
+      const next = new Set(prev);
+      next.add(dayId);
+      return next;
+    });
+  }, []);
+
+  const handleShare = useCallback(async (photo: AlbumPhoto) => {
+    try {
+      await Share.share({
+        message: `Check out this photo from our trip: ${photo.url}`,
+        url: photo.url, // URL might only work well on iOS for Share
+      });
+    } catch (error: any) {
+      Alert.alert('Error', error.message);
+    }
+  }, []);
+
+  // Prepare photos for grid, applying expansion logic handled by AlbumPhotoGrid
+  
   return (
-    <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: 100 }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md }}>
-        <View>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
+        {/* Gallery Header Row */}
+        <View style={[styles.headerRow, { paddingHorizontal: spacing.lg, marginVertical: spacing.md }]}>
           <Text style={[typography.headlineSm, { color: colors.onSurface }]}>
-            Shared Group Album 📷
+            Shared Photos
           </Text>
-          <Text style={[typography.bodySm, { color: colors.onSurfaceVariant }]}>
-            Auto-grouped by day & geotag location
-          </Text>
+
+          {!isArchived && (
+            <TouchableOpacity
+              onPress={handleUploadPhoto}
+              style={[
+                styles.uploadBtn,
+                {
+                  backgroundColor: '#ff8f06',
+                  borderRadius: rounded.full,
+                  paddingHorizontal: 14,
+                  paddingVertical: 6,
+                }
+              ]}
+            >
+              <Text style={[typography.labelSm, { color: '#ffffff', fontWeight: '800' }]}>
+                📷 Upload
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
 
-        <Button
-          title="+ Upload"
-          onPress={handleUploadPhoto}
-          variant="primary"
-          size="sm"
+        {/* The Grid Component */}
+        <AlbumPhotoGrid 
+          photos={photos} 
+          expandedGroups={expandedGroups}
+          onPhotoPress={handlePhotoPress}
+          onExpandGroup={handleExpandGroup}
         />
-      </View>
+      </ScrollView>
 
-      {/* Grouped by Location / Day */}
-      <View style={{ gap: spacing.lg }}>
-        {photos.map((photo) => (
-          <Card key={photo.id} style={{ padding: 0, overflow: 'hidden' }}>
-            <Image source={{ uri: photo.url }} style={{ width: '100%', height: 220 }} />
-            <View style={{ padding: spacing.md }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Badge label={`📍 ${photo.location_name || 'Tokyo'}`} variant="season" />
-                <Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant }]}>
-                  {photo.taken_at.slice(0, 10)}
-                </Text>
-              </View>
-              {photo.caption ? (
-                <Text style={[typography.bodyMd, { color: colors.onSurface, marginTop: spacing.xs }]}>
-                  {photo.caption}
-                </Text>
-              ) : null}
-              <Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant, marginTop: 4 }]}>
-                Uploaded by {photo.uploader_name || 'Group Member'}
-              </Text>
-            </View>
-          </Card>
-        ))}
-      </View>
-    </ScrollView>
+      <AlbumLightbox
+        visible={lightboxVisible}
+        photos={photos}
+        initialPhotoId={initialPhotoId}
+        isArchived={isArchived}
+        onClose={() => setLightboxVisible(false)}
+        onShare={handleShare}
+      />
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  uploadBtn: {
+    //
+  }
+});

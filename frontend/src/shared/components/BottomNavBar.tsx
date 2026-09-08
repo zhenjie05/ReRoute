@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
-import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useTheme } from '@/core/theme';
 import { useLiveTrip } from '@/lib/hooks/useLiveTrip';
 
@@ -42,9 +41,11 @@ const TABS: TabItemConfig[] = [
 interface StandaloneBottomNavBarProps {
   activeTab?: TabKey;
   onTabPress?: (tab: TabKey) => void;
+  state?: any;
+  navigation?: any;
 }
 
-export const BottomNavBar: React.FC<Partial<BottomTabBarProps> & StandaloneBottomNavBarProps> = (
+export const BottomNavBar: React.FC<StandaloneBottomNavBarProps> = (
   props
 ) => {
   const { colors, typography, spacing, rounded, shadows } = useTheme();

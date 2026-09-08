@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { useTheme } from '@/core/theme';
 import { useLiveTrip } from '@/lib/hooks/useLiveTrip';
 import { SOSConfirmationModal, SOSReason } from './SOSConfirmationModal';
@@ -11,7 +11,7 @@ interface SOSFloatingOverlayProps {
 }
 
 export const SOSFloatingOverlay: React.FC<SOSFloatingOverlayProps> = ({ forceVisible = false }) => {
-  const { colors, typography, rounded, shadows } = useTheme();
+  const { colors, rounded, shadows } = useTheme();
   const { hasLiveTrip } = useLiveTrip();
 
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
@@ -60,10 +60,11 @@ export const SOSFloatingOverlay: React.FC<SOSFloatingOverlayProps> = ({ forceVis
             },
           ]}
         >
-          <Text style={styles.fabIcon}>🚨</Text>
-          <Text style={[typography.utilityTiny, styles.fabText]}>
-            SOS
-          </Text>
+          <Image 
+            source={require('../../../../assets/icons/sos-icon.png')} 
+            style={styles.fabIconImage} 
+            resizeMode="contain" 
+          />
         </TouchableOpacity>
       </View>
 
@@ -97,14 +98,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  fabIcon: {
-    fontSize: 24,
-    color: '#ffffff',
-  },
-  fabText: {
-    color: '#ffffff',
-    fontWeight: '900',
-    marginTop: -2,
-    letterSpacing: 0.5,
+  fabIconImage: {
+    width: 28,
+    height: 28,
+    tintColor: '#ffffff',
   },
 });

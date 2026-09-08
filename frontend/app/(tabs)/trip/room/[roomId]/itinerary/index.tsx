@@ -2,7 +2,6 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
-import { Badge } from '@/shared/components';
 import {
   mockTripRooms,
   mockItineraryDays,
@@ -13,7 +12,6 @@ import {
   mockSuggestedRoutes,
   mockSafetyBanner,
   mockLandmarks,
-  mockDecisionCards,
 } from '@/features/trip-room/data/mock-trip-room';
 import {
   ArchivedBanner,
@@ -54,7 +52,6 @@ export default function ItineraryScreen() {
 
   // State
   const [voteSheetVisible, setVoteSheetVisible] = useState(false);
-  const [voteSheetItemId, setVoteSheetItemId] = useState<string | null>(null);
   const [planningComplete, setPlanningComplete] = useState(false);
 
   // Build timeline items for each day
@@ -131,15 +128,10 @@ export default function ItineraryScreen() {
     []
   );
 
-  // Generate day title helper
-  const getDayArrivalNote = (dayNumber: number): string => {
-    if (dayNumber === 1) return 'Arrival Day';
-    return '';
-  };
+
 
   // Handle "Suggest Vote" — opens reused ProposeVoteSheet
   const handleSuggestVote = useCallback((itemId: string) => {
-    setVoteSheetItemId(itemId);
     setVoteSheetVisible(true);
   }, []);
 

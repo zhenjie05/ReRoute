@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { useTheme } from '@/core/theme';
 import { Message } from '@/models/chat';
@@ -17,11 +17,11 @@ interface MascotMessageCardProps {
 export const MascotMessageCard: React.FC<MascotMessageCardProps> = ({ message }) => {
   const { colors, typography, spacing, rounded, shadows } = useTheme();
   const isGenerating = message.payload?.generating === true;
-  const pulseAnim = useRef(new Animated.Value(0.4)).current;
+  const [pulseAnim] = useState(() => new Animated.Value(0.4));
 
   useEffect(() => {
     if (isGenerating) {
-      const pulse = Animated.loop(
+      Animated.loop(
         Animated.sequence([
           Animated.timing(pulseAnim, {
             toValue: 1,
@@ -33,10 +33,11 @@ export const MascotMessageCard: React.FC<MascotMessageCardProps> = ({ message })
             duration: 800,
             useNativeDriver: true,
           }),
-        ]),
-      );
-      pulse.start();
-      return () => pulse.stop();
+        ])
+      ).start();
+    } else {
+      pulseAnim.stopAnimation();
+      pulseAnim.setValue(1);
     }
   }, [isGenerating, pulseAnim]);
 
