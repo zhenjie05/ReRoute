@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, TouchableOpacity, Image, StyleSheet, Animated, PanResponder } from 'react-native';
 import { useTheme } from '@/core/theme';
 import { useLiveTrip } from '@/lib/hooks/useLiveTrip';
 import { SOSConfirmationModal, SOSReason } from './SOSConfirmationModal';
@@ -11,12 +11,28 @@ interface SOSFloatingOverlayProps {
 }
 
 export const SOSFloatingOverlay: React.FC<SOSFloatingOverlayProps> = ({ forceVisible = false }) => {
-  const { colors, rounded, shadows } = useTheme();
   const { hasLiveTrip } = useLiveTrip();
 
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [quickDialVisible, setQuickDialVisible] = useState(false);
   const [selectedReason, setSelectedReason] = useState<SOSReason>('Accident');
+
+  const pan = useRef(new Animated.ValueXY()).current;
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gestureState) => {
+        return Math.abs(gestureState.dx) > 2 || Math.abs(gestureState.dy) > 2;
+      },
+      onPanResponderMove: Animated.event(
+        [null, { dx: pan.x, dy: pan.y }],
+        { useNativeDriver: false }
+      ),
+      onPanResponderRelease: () => {
+        pan.extractOffset();
+      },
+    })
+  ).current;
 
   // Per specification: Only render while the user has a live trip
   if (!hasLiveTrip && !forceVisible) {
@@ -45,28 +61,28 @@ export const SOSFloatingOverlay: React.FC<SOSFloatingOverlayProps> = ({ forceVis
   return (
     <>
       {/* Persistent SOS Floating Action Button (Squircle above Bottom Nav Bar) */}
-      <View style={styles.fabContainer} pointerEvents="box-none">
+      <Animated.View 
+        {...panResponder.panHandlers}
+        style={[
+          styles.fabContainer,
+          { transform: [{ translateX: pan.x }, { translateY: pan.y }] }
+        ]} 
+        pointerEvents="box-none"
+      >
         <TouchableOpacity
           activeOpacity={0.85}
           onPress={handleOpenConfirm}
           accessibilityLabel="Emergency SOS Button"
           accessibilityRole="button"
-          style={[
-            styles.fab,
-            {
-              backgroundColor: colors.error,
-              borderRadius: rounded['2xl'],
-              ...shadows.medium,
-            },
-          ]}
+          style={styles.fab}
         >
           <Image 
             source={require('../../../../assets/icons/sos-icon.png')} 
-            style={styles.fabIconImage} 
+            style={{ width: '100%', height: '100%' }} 
             resizeMode="contain" 
           />
         </TouchableOpacity>
-      </View>
+      </Animated.View>
 
       {/* Step 1: SOS Confirmation & Reason Selector Modal */}
       <SOSConfirmationModal
@@ -88,19 +104,25 @@ export const SOSFloatingOverlay: React.FC<SOSFloatingOverlayProps> = ({ forceVis
 const styles = StyleSheet.create({
   fabContainer: {
     position: 'absolute',
+    bottom: 100,
     right: 20,
-    bottom: 96,
-    zIndex: 999,
+    zIndex: 9999,
   },
   fab: {
-    width: 62,
-    height: 62,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    overflow: 'hidden',
+    backgroundColor: 'transparent',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  fabIconImage: {
-    width: 28,
-    height: 28,
-    tintColor: '#ffffff',
   },
 });

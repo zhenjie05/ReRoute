@@ -1,4 +1,5 @@
 import React from 'react';
+import { View } from 'react-native';
 import { Stack } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -16,19 +17,21 @@ export default function RootLayout() {
         <AuthProvider>
           <LiveTripProvider>
             <NotificationsProvider>
-              <StatusBar style="dark" />
-              <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
-                <Stack.Screen name="(auth)/register" options={{ headerShown: false }} />
-                <Stack.Screen name="(auth)/forgot-password" options={{ headerShown: false }} />
-              </Stack>
+              <View style={{ flex: 1 }}>
+                <StatusBar style="dark" />
+                <Stack screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                  <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
+                  <Stack.Screen name="(auth)/register" options={{ headerShown: false }} />
+                  <Stack.Screen name="(auth)/forgot-password" options={{ headerShown: false }} />
+                </Stack>
 
-              {/* Global Persistent SOS Floating Overlay (Feature 4, visible when user has a live trip) */}
-              <SOSFloatingOverlay />
+                {/* Global Persistent SOS Floating Overlay (Feature 4, visible when user has a live trip) */}
+                <SOSFloatingOverlay />
 
-              {/* Global Shared Notification Center Modal Sheet */}
-              <NotificationCenter />
+                {/* Global Shared Notification Center Modal Sheet */}
+                <NotificationCenter />
+              </View>
             </NotificationsProvider>
           </LiveTripProvider>
         </AuthProvider>
