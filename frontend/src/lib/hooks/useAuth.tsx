@@ -26,6 +26,15 @@ const mapSupabaseUser = (authUser: any): User => ({
   auth_provider: (authUser.app_metadata?.provider as any) || 'email',
   avatar: authUser.user_metadata?.avatar_url || null,
   home_country: authUser.user_metadata?.home_country || 'Singapore',
+  preferences: authUser.user_metadata?.preferences || {
+    travelCompanions: 'Friends',
+    travelStyle: 'Cultural',
+    travelPace: 'Moderate',
+    safetyAlerts: true,
+    decisionCards: true,
+    mascotNotifications: true,
+    sosAlerts: true,
+  },
   created_at: authUser.created_at || new Date().toISOString(),
 });
 
@@ -159,6 +168,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           name: updates.name,
           avatar_url: updates.avatar,
           home_country: updates.home_country,
+          preferences: updates.preferences,
         },
       });
 

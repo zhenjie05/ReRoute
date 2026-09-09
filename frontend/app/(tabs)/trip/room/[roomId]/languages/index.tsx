@@ -9,11 +9,11 @@ import { LessonCategoryCard } from '@/features/trip-room/presentation/components
 import { getRoomLanguageLessons, useLanguageProgress } from '@/features/language/data/mock-language';
 
 export default function LanguagesHubScreen() {
-  const { roomId } = useLocalSearchParams<{ roomId: string }>();
+  const { roomId, tab } = useLocalSearchParams<{ roomId: string; tab?: string }>();
   const { colors, typography, spacing } = useTheme();
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<LanguageTab>('translator');
+  const [activeTab, setActiveTab] = useState<LanguageTab>((tab as LanguageTab) || 'translator');
   const { progressState, streakData } = useLanguageProgress();
 
   const mockLanguageLessons = getRoomLanguageLessons(roomId);

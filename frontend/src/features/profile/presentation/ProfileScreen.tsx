@@ -1,26 +1,24 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, TextInput, Image } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { Card } from '@/shared/components/Card';
 import { Avatar } from '@/shared/components/Avatar';
 import { Badge } from '@/shared/components/Badge';
-import { ModalSheet } from '@/shared/components/ModalSheet';
-import { Button } from '@/shared/components/Button';
 import { DiscoverPostCard } from '@/features/discover/presentation/DiscoverPostCard';
 import { toggleStarPost, cloneDiscoverItinerary } from '@/features/discover/data/mock-discover';
 import { useProfileMockData } from '../data/useProfileMockData';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { mockStandardUsers } from '@/shared/data/standard-mock-data';
-import * as ImagePicker from 'expo-image-picker';
-import { Feather } from '@expo/vector-icons';
+import { useLiveTrip } from '@/lib/hooks/useLiveTrip';
+import { EditProfileModal } from './components/EditProfileModal';
 
 export const ProfileScreen: React.FC = () => {
   const { colors, typography, spacing, rounded } = useTheme();
   const router = useRouter();
   
   // Use global auth state to keep header in sync
-  const { user: authUser, updateProfile, updateLocalProfile } = useAuth();
+  const { user: authUser } = useAuth();
+  const { liveTrip } = useLiveTrip();
 
   const {
     user: mockUser,
@@ -36,42 +34,9 @@ export const ProfileScreen: React.FC = () => {
   const avatarUrl = authUser?.avatar || mockUser.avatar_url || undefined;
 
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-  const [editName, setEditName] = useState(displayName);
-  const [editAvatar, setEditAvatar] = useState(avatarUrl);
-  const [isSaving, setIsSaving] = useState(false);
 
   const handleEditProfile = () => {
-    setEditName(displayName);
-    setEditAvatar(avatarUrl);
     setIsEditModalVisible(true);
-  };
-
-  const handleSaveProfile = async () => {
-    setIsSaving(true);
-    await updateProfile({ name: editName, avatar: editAvatar });
-    setIsSaving(false);
-    setIsEditModalVisible(false);
-  };
-
-  const handlePickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission needed', 'Sorry, we need camera roll permissions to make this work!');
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.5,
-    });
-
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      const selectedUri = result.assets[0].uri;
-      setEditAvatar(selectedUri);
-      updateLocalProfile({ avatar: selectedUri });
-    }
   };
 
   const handleLogout = () => {
@@ -107,10 +72,6 @@ export const ProfileScreen: React.FC = () => {
           
           <Text style={[typography.headlineMd, { color: colors.onSurface, fontWeight: 'bold', marginTop: spacing.md }]}>
             {displayName}
-          </Text>
-          
-          <Text style={[typography.bodySm, { color: colors.onSurfaceVariant, marginTop: spacing.xs }]}>
-            Level 12 Traveller · {mockUser.trip_count} trips · {mockUser.country_count} countries
           </Text>
           
           <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md }}>
@@ -240,7 +201,15 @@ export const ProfileScreen: React.FC = () => {
             <Text style={[typography.utilityTiny, { color: '#8b4b00' }]}>
               {languageProgress.mastery_percent}% Mastered
             </Text>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                if (liveTrip) {
+                  router.push(`/(tabs)/trip/room/${liveTrip.id}/languages?tab=lessons` as any);
+                } else {
+                  router.push('/(tabs)/trip?mode=list' as any);
+                }
+              }}
+            >
               <Text style={[typography.labelSm, { color: '#8b4b00', fontWeight: 'bold' }]}>
                 Continue learning →
               </Text>
@@ -262,92 +231,12 @@ export const ProfileScreen: React.FC = () => {
 
       </ScrollView>
 
-      {/* Edit Profile Modal */}
-      <ModalSheet
+      <EditProfileModal
         visible={isEditModalVisible}
         onClose={() => setIsEditModalVisible(false)}
-        title="Edit Profile"
-      >
-        <View style={{ gap: spacing.xl }}>
-          {/* Avatar Picker */}
-          <View>
-            <Text style={[typography.labelSm, { color: colors.onSurface, marginBottom: spacing.sm }]}>Choose Avatar</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.md }}>
-              <TouchableOpacity
-                onPress={handlePickImage}
-                style={[
-                  styles.uploadButton,
-                  { backgroundColor: colors.surfaceContainerHighest, borderColor: colors.outlineVariant }
-                ]}
-              >
-                <Feather name="camera" size={24} color={colors.onSurfaceVariant} />
-                <Text style={[typography.labelSm, { color: colors.onSurface, fontWeight: '700' }]}>Upload from Gallery</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                onPress={() => setEditAvatar(undefined)}
-                style={[
-                  styles.avatarOption,
-                  !editAvatar && { borderColor: colors.primary, borderWidth: 3 }
-                ]}
-              >
-                <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: colors.surfaceContainerHighest, alignItems: 'center', justifyContent: 'center' }}>
-                  <Text style={{ color: colors.onSurfaceVariant, fontWeight: 'bold' }}>{editName?.slice(0, 2).toUpperCase() || 'U'}</Text>
-                </View>
-              </TouchableOpacity>
-              {mockStandardUsers.filter((u): u is typeof u & { avatar: string } => Boolean(u.avatar)).slice(0, 5).map(u => (
-                <TouchableOpacity
-                  key={u.id}
-                  onPress={() => setEditAvatar(u.avatar)}
-                  style={[
-                    styles.avatarOption,
-                    editAvatar === u.avatar && { borderColor: colors.primary, borderWidth: 3 }
-                  ]}
-                >
-                  <Image source={{ uri: u.avatar }} style={{ width: 64, height: 64, borderRadius: 32 }} />
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-
-          {/* Name Input */}
-          <View>
-            <Text style={[typography.labelSm, { color: colors.onSurface, marginBottom: spacing.xs }]}>Display Name</Text>
-            <TextInput
-              style={[
-                typography.bodyLg,
-                styles.inputField,
-                {
-                  backgroundColor: colors.surface,
-                  borderColor: colors.outlineVariant,
-                  color: colors.onSurface,
-                  borderRadius: rounded.md,
-                  padding: spacing.md,
-                }
-              ]}
-              value={editName}
-              onChangeText={setEditName}
-              placeholder="Enter your name"
-              placeholderTextColor={colors.onSurfaceVariant}
-            />
-          </View>
-
-          {/* Action Buttons */}
-          <View style={{ gap: spacing.sm, marginTop: spacing.md }}>
-            <Button 
-              title={isSaving ? "Saving..." : "Save Changes"}
-              onPress={handleSaveProfile} 
-              disabled={isSaving}
-            />
-            <Button 
-              title="Cancel" 
-              variant="outline" 
-              onPress={() => setIsEditModalVisible(false)} 
-              disabled={isSaving}
-            />
-          </View>
-        </View>
-      </ModalSheet>
+        initialName={displayName}
+        initialAvatar={avatarUrl}
+      />
     </View>
   );
 };
@@ -369,27 +258,5 @@ const styles = StyleSheet.create({
     height: 70,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  avatarOption: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: 'transparent',
-  },
-  uploadButton: {
-    minHeight: 70,
-    paddingHorizontal: 18,
-    borderRadius: 18,
-    borderWidth: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-  },
-  inputField: {
-    borderWidth: 1,
   },
 });

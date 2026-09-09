@@ -22,7 +22,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   unreadCount: customUnreadCount,
   onNotificationPress,
 }) => {
-  const { colors, typography, spacing, rounded, season } = useTheme();
+  const { colors, typography, spacing, rounded } = useTheme();
   const { user } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -49,20 +49,6 @@ export const TopBar: React.FC<TopBarProps> = ({
     }
   };
 
-  const getSeasonLabel = () => {
-    switch (season) {
-      case 'spring':
-        return '🌸 Spring';
-      case 'summer':
-        return '🌿 Summer';
-      case 'autumn':
-        return '🍁 Autumn';
-      case 'winter':
-        return '❄️ Winter';
-      default:
-        return '🍁 Autumn';
-    }
-  };
 
   return (
     <View
@@ -92,28 +78,6 @@ export const TopBar: React.FC<TopBarProps> = ({
         <View style={styles.titleRow}>
           <Text style={[typography.headlineSm, { color: colors.primary, fontWeight: '900', letterSpacing: -0.5 }]}>
             {title}
-          </Text>
-        </View>
-
-        {/* 
-          TODO: Open Item from ReRoute_Page_Refined_v2_1.md:
-          Decision pending between app-level light/dark mode toggle vs. automatic weather/season-driven Trip Room theming.
-          Currently rendered as an informational indicator placeholder without interactive toggle logic.
-        */}
-        <View
-          style={[
-            styles.themePlaceholderChip,
-            {
-              backgroundColor: colors.season.soft,
-              borderColor: colors.season.main,
-              borderRadius: rounded.full,
-              paddingHorizontal: spacing.sm,
-              paddingVertical: 2,
-            },
-          ]}
-        >
-          <Text style={[typography.utilityTiny, { color: colors.season.text, fontWeight: '700' }]}>
-            {getSeasonLabel()}
           </Text>
         </View>
       </View>
@@ -176,11 +140,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  themePlaceholderChip: {
-    borderWidth: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+
   mascotButton: {
     width: 40,
     height: 40,
