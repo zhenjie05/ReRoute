@@ -1,20 +1,29 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, TextInput, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { Card } from '@/shared/components/Card';
 import { Avatar } from '@/shared/components/Avatar';
 import { Badge } from '@/shared/components/Badge';
+import { ModalSheet } from '@/shared/components/ModalSheet';
+import { Button } from '@/shared/components/Button';
 import { DiscoverPostCard } from '@/features/discover/presentation/DiscoverPostCard';
 import { toggleStarPost, cloneDiscoverItinerary } from '@/features/discover/data/mock-discover';
 import { useProfileMockData } from '../data/useProfileMockData';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { mockStandardUsers } from '@/shared/data/standard-mock-data';
+import * as ImagePicker from 'expo-image-picker';
+import { Feather } from '@expo/vector-icons';
 
 export const ProfileScreen: React.FC = () => {
   const { colors, typography, spacing, rounded } = useTheme();
   const router = useRouter();
   
+  // Use global auth state to keep header in sync
+  const { user: authUser, updateProfile } = useAuth();
+
   const {
-    user,
+    user: mockUser,
     badges,
     userBadges,
     starredTrips,
@@ -22,8 +31,45 @@ export const ProfileScreen: React.FC = () => {
     archivedTrips,
   } = useProfileMockData();
 
+  // Combine auth user with mock user for standard fields
+  const displayName = authUser?.name || mockUser.display_name;
+  const avatarUrl = authUser?.avatar || mockUser.avatar_url || undefined;
+
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [editName, setEditName] = useState(displayName);
+  const [editAvatar, setEditAvatar] = useState(avatarUrl);
+  const [isSaving, setIsSaving] = useState(false);
+
   const handleEditProfile = () => {
-    Alert.alert('Edit Profile', 'Edit profile modal would open here.');
+    setEditName(displayName);
+    setEditAvatar(avatarUrl);
+    setIsEditModalVisible(true);
+  };
+
+  const handleSaveProfile = async () => {
+    setIsSaving(true);
+    await updateProfile({ name: editName, avatar: editAvatar });
+    setIsSaving(false);
+    setIsEditModalVisible(false);
+  };
+
+  const handlePickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission needed', 'Sorry, we need camera roll permissions to make this work!');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setEditAvatar(result.assets[0].uri);
+    }
   };
 
   const handleLogout = () => {
@@ -47,9 +93,9 @@ export const ProfileScreen: React.FC = () => {
         <View style={{ backgroundColor: colors.surfaceContainerLow, borderRadius: rounded.xl, padding: spacing.xl, alignItems: 'center', marginBottom: spacing.xl }}>
           <TouchableOpacity onPress={handleEditProfile} style={{ position: 'relative' }}>
             <Avatar 
-              uri={user.avatar_url || undefined} 
+              uri={avatarUrl} 
               size={96} 
-              name={user.display_name} 
+              name={displayName} 
             />
             {/* Edit Badge overlay */}
             <View style={{ position: 'absolute', bottom: 0, right: 0, backgroundColor: colors.surface, borderRadius: 12, padding: 4, elevation: 2 }}>
@@ -58,11 +104,11 @@ export const ProfileScreen: React.FC = () => {
           </TouchableOpacity>
           
           <Text style={[typography.headlineMd, { color: colors.onSurface, fontWeight: 'bold', marginTop: spacing.md }]}>
-            {user.display_name}
+            {displayName}
           </Text>
           
           <Text style={[typography.bodySm, { color: colors.onSurfaceVariant, marginTop: spacing.xs }]}>
-            Level 12 Traveller · {user.trip_count} trips · {user.country_count} countries
+            Level 12 Traveller · {mockUser.trip_count} trips · {mockUser.country_count} countries
           </Text>
           
           <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md }}>
@@ -213,6 +259,92 @@ export const ProfileScreen: React.FC = () => {
         </View>
 
       </ScrollView>
+
+      {/* Edit Profile Modal */}
+      <ModalSheet
+        visible={isEditModalVisible}
+        onClose={() => setIsEditModalVisible(false)}
+        title="Edit Profile"
+      >
+        <View style={{ gap: spacing.xl }}>
+          {/* Avatar Picker */}
+          <View>
+            <Text style={[typography.labelSm, { color: colors.onSurface, marginBottom: spacing.sm }]}>Choose Avatar</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.md }}>
+              <TouchableOpacity
+                onPress={handlePickImage}
+                style={[
+                  styles.avatarOption,
+                  { backgroundColor: colors.surfaceContainerHighest }
+                ]}
+              >
+                <Feather name="camera" size={24} color={colors.onSurfaceVariant} />
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                onPress={() => setEditAvatar(undefined)}
+                style={[
+                  styles.avatarOption,
+                  !editAvatar && { borderColor: colors.primary, borderWidth: 3 }
+                ]}
+              >
+                <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: colors.surfaceContainerHighest, alignItems: 'center', justifyContent: 'center' }}>
+                  <Text style={{ color: colors.onSurfaceVariant, fontWeight: 'bold' }}>{editName?.slice(0, 2).toUpperCase() || 'U'}</Text>
+                </View>
+              </TouchableOpacity>
+              {mockStandardUsers.slice(0, 5).map(u => (
+                <TouchableOpacity
+                  key={u.id}
+                  onPress={() => setEditAvatar(u.avatar)}
+                  style={[
+                    styles.avatarOption,
+                    editAvatar === u.avatar && { borderColor: colors.primary, borderWidth: 3 }
+                  ]}
+                >
+                  <Image source={{ uri: u.avatar }} style={{ width: 64, height: 64, borderRadius: 32 }} />
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+
+          {/* Name Input */}
+          <View>
+            <Text style={[typography.labelSm, { color: colors.onSurface, marginBottom: spacing.xs }]}>Display Name</Text>
+            <TextInput
+              style={[
+                typography.bodyLg,
+                styles.inputField,
+                {
+                  backgroundColor: colors.surface,
+                  borderColor: colors.outlineVariant,
+                  color: colors.onSurface,
+                  borderRadius: rounded.md,
+                  padding: spacing.md,
+                }
+              ]}
+              value={editName}
+              onChangeText={setEditName}
+              placeholder="Enter your name"
+              placeholderTextColor={colors.onSurfaceVariant}
+            />
+          </View>
+
+          {/* Action Buttons */}
+          <View style={{ gap: spacing.sm, marginTop: spacing.md }}>
+            <Button 
+              title={isSaving ? "Saving..." : "Save Changes"}
+              onPress={handleSaveProfile} 
+              disabled={isSaving}
+            />
+            <Button 
+              title="Cancel" 
+              variant="outline" 
+              onPress={() => setIsEditModalVisible(false)} 
+              disabled={isSaving}
+            />
+          </View>
+        </View>
+      </ModalSheet>
     </View>
   );
 };
@@ -234,5 +366,17 @@ const styles = StyleSheet.create({
     height: 70,
     justifyContent: 'center',
     alignItems: 'center',
-  }
+  },
+  avatarOption: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: 'transparent',
+  },
+  inputField: {
+    borderWidth: 1,
+  },
 });

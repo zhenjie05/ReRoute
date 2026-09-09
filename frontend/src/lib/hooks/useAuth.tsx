@@ -147,6 +147,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return { error: 'Not authenticated' };
 
     try {
+      // For demo users, bypass supabase and just update local state
+      if (user.id === currentDemoUser.id) {
+        setUser((prev) => (prev ? { ...prev, ...updates } : null));
+        return {};
+      }
+
       const { error } = await supabase.auth.updateUser({
         data: {
           name: updates.name,
