@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, Image, TouchableOpacity, StyleSheet, Dimensions, SafeAreaView, Linking } from 'react-native';
 import { useTheme } from '@/core/theme';
 import { AlbumPhoto } from '@/models/album';
+import { Feather } from '@expo/vector-icons';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -12,6 +13,8 @@ interface AlbumLightboxProps {
   isArchived?: boolean;
   onClose: () => void;
   onShare: (photo: AlbumPhoto) => void;
+  onDelete?: (photoId: string) => void;
+  themeColor?: string;
 }
 
 export const AlbumLightbox: React.FC<AlbumLightboxProps> = ({
@@ -21,12 +24,15 @@ export const AlbumLightbox: React.FC<AlbumLightboxProps> = ({
   isArchived = false,
   onClose,
   onShare,
+  onDelete,
+  themeColor = '#ff8f06',
 }) => {
   const { typography } = useTheme();
   
   // Find initial index based on passed photoId
   const initialIndex = Math.max(0, photos.findIndex(p => p.id === initialPhotoId));
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
 
   // Update index when visible or initialPhotoId changes
   useEffect(() => {
@@ -54,6 +60,19 @@ export const AlbumLightbox: React.FC<AlbumLightboxProps> = ({
     if (diffHours < 1) return 'Just now';
     if (diffHours < 24) return `${diffHours} hours ago`;
     return `${Math.round(diffHours / 24)} days ago`;
+  };
+
+  const handleDeletePress = () => {
+    if (!currentPhoto || !onDelete) return;
+    setIsConfirmDeleteVisible(true);
+  };
+
+  const confirmDelete = () => {
+    if (currentPhoto && onDelete) {
+      onDelete(currentPhoto.id);
+    }
+    setIsConfirmDeleteVisible(false);
+    onClose();
   };
 
   return (
@@ -105,9 +124,14 @@ export const AlbumLightbox: React.FC<AlbumLightboxProps> = ({
 
             {currentPhoto?.caption && <Text style={{ color: '#fff', fontSize: 11, flex: 1 }}>{currentPhoto.caption}</Text>}
             {currentPhoto?.source_url && <TouchableOpacity accessibilityRole="link" onPress={() => Linking.openURL(currentPhoto.source_url!)}><Text style={{ color: '#fff', padding: 8 }}>Photo source ↗</Text></TouchableOpacity>}
-            {/* Actions: Share only, hidden if archived */}
+            {/* Actions: Share and Delete, hidden if archived */}
             {!isArchived && (
               <View style={styles.bottomActions}>
+                {onDelete && (
+                  <TouchableOpacity onPress={handleDeletePress} style={styles.actionBtn}>
+                    <Feather name="trash-2" size={24} color="white" />
+                  </TouchableOpacity>
+                )}
                 <TouchableOpacity onPress={() => onShare(currentPhoto)} style={styles.actionBtn}>
                   {/* Mocking share icon with emoji */}
                   <Text style={{ fontSize: 24, color: '#ffffff' }}>↗️</Text>
@@ -118,6 +142,34 @@ export const AlbumLightbox: React.FC<AlbumLightboxProps> = ({
 
         </SafeAreaView>
       </View>
+
+      {/* Custom Delete Confirmation Modal */}
+      <Modal visible={isConfirmDeleteVisible} transparent animationType="fade">
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' }}>
+          <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 24, width: '80%', maxWidth: 320, alignItems: 'center' }}>
+            <Text style={[typography.titleMd, { color: '#333', marginBottom: 8, fontWeight: '700' }]}>Delete Photo?</Text>
+            <Text style={[typography.bodyMd, { color: '#666', textAlign: 'center', marginBottom: 24 }]}>
+              Are you sure you want to remove this photo from the album?
+            </Text>
+            
+            <View style={{ flexDirection: 'row', gap: 12, width: '100%' }}>
+              <TouchableOpacity 
+                style={{ flex: 1, paddingVertical: 12, borderRadius: 8, backgroundColor: '#f5f5f5', alignItems: 'center' }}
+                onPress={() => setIsConfirmDeleteVisible(false)}
+              >
+                <Text style={{ color: '#666', fontWeight: '600' }}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={{ flex: 1, paddingVertical: 12, borderRadius: 8, backgroundColor: themeColor, alignItems: 'center' }}
+                onPress={confirmDelete}
+              >
+                <Text style={{ color: '#fff', fontWeight: '600' }}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </Modal>
   );
 };

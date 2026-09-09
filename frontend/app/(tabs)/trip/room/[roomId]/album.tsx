@@ -1,6 +1,6 @@
 import { ArchivedBanner } from '@/features/trip-room/presentation/components';
 import { useRoomSessionState } from '@/features/trip-room/data/useRoomSessionState';
-import { createDemoAlbum, demoAlbumImages } from '@/features/trip-room/data/demo-album';
+import { createDemoAlbum } from '@/features/trip-room/data/demo-album';
 import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert, Share, StyleSheet } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
@@ -8,6 +8,8 @@ import { useTheme } from '@/core/theme';
 import { mockAlbumPhotos, mockTripRooms, mockItineraryDays } from '@/features/trip-room/data/mock-trip-room';
 import { AlbumPhoto } from '@/models/album';
 import { AlbumPhotoGrid, AlbumLightbox } from '@/features/trip-room/presentation/components/album';
+import { Feather } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function GroupAlbumScreen() {
   const { roomId } = useLocalSearchParams<{ roomId: string }>();
@@ -18,6 +20,7 @@ export default function GroupAlbumScreen() {
 
   // State
   const [photos, setPhotos] = useRoomSessionState<AlbumPhoto[]>(room.id, 'photos', () => {
+    if (room.stage === 'planning') return [];
     const existing = mockAlbumPhotos.filter(p => p.room_id === room.id);
     return existing.length ? existing : createDemoAlbum(room, mockItineraryDays);
   });
@@ -29,29 +32,48 @@ export default function GroupAlbumScreen() {
   // Group expansion state (for +N more) - track which day groups are expanded
   const [expandedGroups, setExpandedGroups] = useState<Set<string | null>>(new Set());
 
-  const handleUploadPhoto = () => {
+  const handleUploadPhoto = async () => {
     if (isArchived) return;
 
-    // Simulate finding matching day based on current date (mock EXIF taken_at)
-    const now = new Date().toISOString();
-    // Simplified logic: just assign to day 1 for the mock if available
-    const matchedDay = mockItineraryDays.find(d => d.room_id === room.id);
-    const dayId = matchedDay ? matchedDay.id : null;
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Sorry', 'We need camera roll permissions to make this work!');
+      return;
+    }
 
-    const newPhoto: AlbumPhoto = {
-      id: `photo-${Date.now()}`,
-      room_id: (roomId as string) || room.id,
-      uploaded_by: 'demo-user-1',
-      uploader_name: 'Alex Chen',
-      url: demoAlbumImages[photos.length % demoAlbumImages.length].url,
-      taken_at: now,
-      created_at: now,
-      location_name: room.destination,
-      itinerary_day_id: dayId,
-    };
-    
-    setPhotos((prev) => [newPhoto, ...prev]);
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.8,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const selectedUri = result.assets[0].uri;
+
+      // Simulate finding matching day based on current date (mock EXIF taken_at)
+      const now = new Date().toISOString();
+      // Simplified logic: just assign to day 1 for the mock if available
+      const matchedDay = mockItineraryDays.find(d => d.room_id === room.id);
+      const dayId = matchedDay ? matchedDay.id : null;
+
+      const newPhoto: AlbumPhoto = {
+        id: `photo-${Date.now()}`,
+        room_id: (roomId as string) || room.id,
+        uploaded_by: 'demo-user-1',
+        uploader_name: 'Alex Chen',
+        url: selectedUri,
+        taken_at: now,
+        created_at: now,
+        location_name: room.destination,
+        itinerary_day_id: dayId,
+      };
+      
+      setPhotos((prev) => [newPhoto, ...prev]);
+    }
   };
+
+  const handleDeletePhoto = useCallback((photoId: string) => {
+    setPhotos(prev => prev.filter(p => p.id !== photoId));
+  }, [setPhotos]);
 
   const handlePhotoPress = useCallback((photoId: string) => {
     setInitialPhotoId(photoId);
@@ -109,13 +131,22 @@ export default function GroupAlbumScreen() {
           )}
         </View>
 
-        {/* The Grid Component */}
-        <AlbumPhotoGrid 
-          photos={photos} 
-          expandedGroups={expandedGroups}
-          onPhotoPress={handlePhotoPress}
-          onExpandGroup={handleExpandGroup}
-        />
+        {/* The Grid Component or Empty State */}
+        {room.stage === 'planning' || photos.length === 0 ? (
+          <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 100, paddingHorizontal: spacing.lg }}>
+            <Feather name="image" size={64} color={colors.onSurfaceVariant} style={{ opacity: 0.5, marginBottom: spacing.md }} />
+            <Text style={[typography.bodyLg, { color: colors.onSurfaceVariant, textAlign: 'center' }]}>
+              No photos yet. Start your journey to capture memories!
+            </Text>
+          </View>
+        ) : (
+          <AlbumPhotoGrid 
+            photos={photos} 
+            expandedGroups={expandedGroups}
+            onPhotoPress={handlePhotoPress}
+            onExpandGroup={handleExpandGroup}
+          />
+        )}
       </ScrollView>
 
       <AlbumLightbox
@@ -125,6 +156,8 @@ export default function GroupAlbumScreen() {
         isArchived={isArchived}
         onClose={() => setLightboxVisible(false)}
         onShare={handleShare}
+        onDelete={handleDeletePhoto}
+        themeColor={room.theme_color}
       />
     </View>
   );

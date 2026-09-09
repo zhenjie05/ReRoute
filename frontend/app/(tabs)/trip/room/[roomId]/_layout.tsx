@@ -5,13 +5,14 @@ import { useTheme } from '@/core/theme';
 import { Badge } from '@/shared/components';
 import { mockTripRooms } from '@/features/trip-room/data/mock-trip-room';
 import ArchivedItinerary from '@/features/trip-room/presentation/itinerary-demo/ArchivedItinerary';
+import { Feather } from '@expo/vector-icons';
 
 const roomTabs = [
   { slug: 'chat', label: '💬 Discussion' },
-  { slug: 'itinerary', label: '📅 Itinerary' },
+  { slug: 'itinerary', label: '🗺️ Itinerary' },
   { slug: 'budget', label: '💰 Budget' },
-  { slug: 'album', label: '📷 Album' },
-  { slug: 'languages', label: '🗣️ Language' },
+  { slug: 'album', label: '📸 Album' },
+  { slug: 'languages', label: '🎤 Language' },
 ];
 
 export default function TripRoomLayout() {
@@ -65,7 +66,7 @@ export default function TripRoomLayout() {
             onPress={() => router.push(`/(tabs)/trip/room/${room.id}/settings` as any)}
             style={{ padding: 6 }}
           >
-            <Text style={{ fontSize: 20 }}>⚙️</Text>
+            <Feather name="settings" size={24} color="#333" />
           </TouchableOpacity>
         </View>
 

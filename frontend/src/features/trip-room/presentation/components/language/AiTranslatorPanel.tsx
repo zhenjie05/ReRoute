@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { useTheme } from '@/core/theme';
 import { TranslatorResult } from '@/models/language';
+import { Feather } from '@expo/vector-icons';
 
 export function AiTranslatorPanel({ destination = 'Japan' }: { destination?: string }) {
   const { colors, typography, spacing, rounded, shadows } = useTheme();
@@ -87,9 +88,9 @@ export function AiTranslatorPanel({ destination = 'Japan' }: { destination?: str
           onChangeText={setInputText}
         />
         
-        {/* Mock Microphone Icon */}
+        {/* Microphone Icon */}
         <TouchableOpacity style={[styles.micBtn, { backgroundColor: '#ffe0b2' }]}>
-          <Text style={{ fontSize: 16 }}>🎤</Text>
+          <Feather name="mic" size={20} color="#333" />
         </TouchableOpacity>
 
         <View style={styles.inputFooter}>
