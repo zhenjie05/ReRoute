@@ -1,3 +1,4 @@
+// fallow-ignore-file unused-file
 export interface MascotTip {
   id: string;
   category: 'safety' | 'budget' | 'weather' | 'itinerary';

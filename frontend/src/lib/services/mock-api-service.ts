@@ -1,3 +1,4 @@
+// fallow-ignore-file unused-file
 import { User } from '@/models/user';
 import { TripRoom, TripRoomMember, TripPreferences, TravelCompanions, TravelStyle, TravelPace } from '@/models/trip-room';
 import { ItineraryDay, ItineraryItem } from '@/models/itinerary';

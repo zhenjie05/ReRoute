@@ -1,18 +1,12 @@
 import {
   mockStandardTripRooms,
   mockStandardRoomMembers,
-  mockStandardTripPreferences,
   mockStandardItineraryDays,
   mockStandardItineraryItems,
   mockStandardMessages,
   mockStandardDecisionCards,
   mockStandardVotes,
-  mockStandardBudgetCategories,
-  mockStandardExpenses,
-  mockStandardSettlements,
   mockStandardAlbumPhotos,
-  mockStandardLandmarks,
-  mockStandardSafetyAlerts,
   currentDemoUser,
 } from '@/shared/data/standard-mock-data';
 import { TripRoom, TripRoomMember } from '@/models/trip-room';
@@ -20,18 +14,12 @@ import { CommunityPost } from '@/models/discover';
 
 export const mockTripRooms = mockStandardTripRooms;
 export const mockTripMembers = mockStandardRoomMembers;
-export const mockTripPreferences = mockStandardTripPreferences[0];
 export const mockItineraryDays = mockStandardItineraryDays;
 export const mockItineraryItems = mockStandardItineraryItems;
 export const mockMessages = mockStandardMessages;
 export const mockDecisionCards = mockStandardDecisionCards;
 export const mockVotes = mockStandardVotes;
-export const mockBudgetCategories = mockStandardBudgetCategories;
-export const mockExpenses = mockStandardExpenses;
-export const mockSettlements = mockStandardSettlements;
 export const mockAlbumPhotos = mockStandardAlbumPhotos;
-export const mockLandmarks = mockStandardLandmarks;
-export const mockSafetyAlerts = mockStandardSafetyAlerts;
 
 export const mockItineraryVoteStatus: Record<
   string,

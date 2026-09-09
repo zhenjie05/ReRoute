@@ -11,8 +11,8 @@ import {
   mockCandidateStops,
   mockSuggestedRoutes,
   mockSafetyBanner,
-  mockLandmarks,
 } from '@/features/trip-room/data/mock-trip-room';
+import { mockLandmarks } from '@/features/route-planning/data/mock-route-planning';
 import {
   ArchivedBanner,
   ProposeVoteSheet,

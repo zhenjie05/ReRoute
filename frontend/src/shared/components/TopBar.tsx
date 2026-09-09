@@ -79,7 +79,7 @@ export const TopBar: React.FC<TopBarProps> = ({
       {/* Left: User Avatar */}
       <TouchableOpacity
         activeOpacity={0.8}
-        onPress={() => router.push('/(tabs)/profile' as any)}
+        onPress={() => router.navigate('/(tabs)/profile' as any)}
         accessibilityLabel="View Profile"
         accessibilityRole="button"
         style={styles.avatarWrapper}

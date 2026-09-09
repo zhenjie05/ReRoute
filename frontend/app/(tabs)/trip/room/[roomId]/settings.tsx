@@ -24,7 +24,7 @@ export default function RoomSettingsScreen() {
   const handleArchiveTrip = () => {
     setStage('archived');
     endTrip();
-    router.replace('/(tabs)/trip' as any);
+    router.replace('/(tabs)/trip?mode=list' as any);
   };
 
   return (
@@ -130,7 +130,7 @@ export default function RoomSettingsScreen() {
         {/* Leave Room Action (FR-2-5) */}
         <Button
           title="Leave Room"
-          onPress={() => router.replace('/(tabs)/trip' as any)}
+          onPress={() => router.replace('/(tabs)/trip?mode=list' as any)}
           variant="danger"
           size="md"
         />

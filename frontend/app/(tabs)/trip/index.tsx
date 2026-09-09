@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams, Redirect } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { Card, Badge, Button, EmptyState } from '@/shared/components';
 import { mockTripRooms } from '@/features/trip-room/data/mock-trip-room';
@@ -10,11 +10,17 @@ import { CreateRoomSheet, RoomSheetMode } from '@/features/trip-room/presentatio
 export default function TripHubScreen({ initialSheet = null }: { initialSheet?: RoomSheetMode | null } = {}) {
   const { colors, typography, spacing, rounded } = useTheme();
   const router = useRouter();
+  const { mode } = useLocalSearchParams<{ mode?: string }>();
   const { hasLiveTrip, liveTrip } = useLiveTrip();
 
   const [selectedStage, setSelectedStage] = useState<'all' | 'planning' | 'active' | 'archived'>('all');
   const [rooms] = useState(mockTripRooms);
   const [roomSheet, setRoomSheet] = useState<RoomSheetMode | null>(initialSheet);
+
+  // FR-2-4: Live-trip bypass - if current user has a live trip, route directly into that room
+  if (hasLiveTrip && liveTrip && mode !== 'list' && !initialSheet) {
+    return <Redirect href={`/(tabs)/trip/room/${liveTrip.id}/chat` as any} />;
+  }
 
   const filteredRooms = rooms.filter((r) => {
     if (selectedStage === 'all') return true;

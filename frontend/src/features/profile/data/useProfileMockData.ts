@@ -24,7 +24,6 @@ export interface UserBadge {
   unlocked_at: string | null;
 }
 
-export type { StarredTrip };
 
 export interface LanguageProgress {
   user_id: string;

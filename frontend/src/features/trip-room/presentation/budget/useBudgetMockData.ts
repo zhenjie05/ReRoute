@@ -1,55 +1,9 @@
 import { useState } from 'react';
 import { User } from '@/models/user';
-
-export interface BudgetCategory {
-  id: string;
-  room_id: string;
-  category_name: string;
-  planned_amount: number;
-}
-
-export interface Expense {
-  id: string;
-  room_id: string;
-  category_id: string;
-  description: string;
-  total_amount: number;
-  currency: string;
-  paid_by: string[]; // User IDs
-  receipt_url?: string;
-  created_by: string;
-  created_at: string;
-}
-
-export interface ExpenseSplit {
-  id: string;
-  expense_id: string;
-  user_id: string;
-  split_type: 'equal' | 'percentage' | 'shares' | 'exact';
-  share_value: number;
-  amount_owed: number;
-}
-
-export interface ReceiptScan {
-  id: string;
-  expense_id?: string;
-  image_url: string;
-  ocr_status: 'pending' | 'processing' | 'success' | 'failed';
-  extracted_data?: any;
-}
-
-export interface Settlement {
-  id: string;
-  room_id: string;
-  from_user_id: string;
-  to_user_id: string;
-  amount: number;
-  method: string;
-  settled_at: string;
-}
+import { BudgetCategory, Expense, ExpenseSplit, Settlement } from '@/models/budget';
 
 // Mock Users
-export const mockTravelers: User[] = [
+const mockTravelers: User[] = [
   { id: 'u1', name: 'Alex Chen', email: 'alex@example.com', auth_provider: 'email', home_country: 'US', created_at: '2024-01-01', avatar: null },
   { id: 'u2', name: 'Sarah Jenkins', email: 'sarah@example.com', auth_provider: 'email', home_country: 'US', created_at: '2024-01-02', avatar: null },
   { id: 'u3', name: 'Kenji Sato', email: 'kenji@example.com', auth_provider: 'email', home_country: 'JP', created_at: '2024-01-03', avatar: null },

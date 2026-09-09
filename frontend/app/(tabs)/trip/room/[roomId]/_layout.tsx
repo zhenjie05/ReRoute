@@ -37,7 +37,7 @@ export default function TripRoomLayout() {
         ]}
       >
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <TouchableOpacity onPress={() => router.push('/(tabs)/trip' as any)} style={{ padding: 4 }}>
+          <TouchableOpacity onPress={() => router.push('/(tabs)/trip?mode=list' as any)} style={{ padding: 4 }}>
             <Text style={{ fontSize: 18 }}>←</Text>
           </TouchableOpacity>
 

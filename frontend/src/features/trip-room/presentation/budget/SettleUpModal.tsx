@@ -19,8 +19,9 @@ export const SettleUpModal: React.FC<{ roomId: string }> = ({ roomId }) => {
       from_user_id: travelers[1].id,
       to_user_id: travelers[0].id,
       amount,
+      currency: 'USD',
       method: 'cash',
-      settled_at: new Date().toISOString()
+      settled_at: new Date().toISOString(),
     });
     setSettled(true);
     setTimeout(() => {

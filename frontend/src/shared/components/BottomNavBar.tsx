@@ -85,19 +85,23 @@ export const BottomNavBar: React.FC<StandaloneBottomNavBarProps> = (
   const handlePress = (tab: TabItemConfig, index: number) => {
     if (props.navigation && props.state) {
       const isFocused = props.state.index === index;
+      const targetRoute =
+        props.state.routes.find((r: any) => r.name === tab.key) ||
+        props.state.routes[index];
+
       const event = props.navigation.emit({
         type: 'tabPress',
-        target: props.state.routes[index]?.key,
+        target: targetRoute?.key,
         canPreventDefault: true,
       });
 
       if (!isFocused && !event.defaultPrevented) {
-        router.push(tab.route as any);
+        props.navigation.navigate(targetRoute ? targetRoute.name : tab.key);
       }
     } else if (props.onTabPress) {
       props.onTabPress(tab.key);
     } else {
-      router.push(tab.route as any);
+      router.navigate(tab.route as any);
     }
   };
 

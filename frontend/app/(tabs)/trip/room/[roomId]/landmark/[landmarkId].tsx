@@ -11,7 +11,7 @@ import {
 import { useLocalSearchParams } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { Badge } from '@/shared/components';
-import { mockLandmarks } from '@/features/trip-room/data/mock-trip-room';
+import { mockLandmarks } from '@/features/route-planning/data/mock-route-planning';
 
 /**
  * Landmark Detail screen — bottom-sheet-style presentation.
