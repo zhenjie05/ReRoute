@@ -1,3 +1,4 @@
+import { useRoomSessionState } from '@/features/trip-room/data/useRoomSessionState';
 import React, { useState, useRef, useCallback } from 'react';
 import {
   ScrollView,
@@ -23,6 +24,7 @@ import {
   ProposeVoteSheet,
 } from '@/features/trip-room/presentation/components';
 import { Message } from '@/models/chat';
+import { useDemoPlan, voteOnStop } from '@/features/trip-room/presentation/itinerary-demo/demo-store';
 import { DecisionCard, DecisionTriggerType, Vote } from '@/models/decision';
 
 /**
@@ -42,12 +44,13 @@ export default function TripChatScreen() {
   // Resolve room and its stage
   const room = mockTripRooms.find((r) => r.id === roomId) || mockTripRooms[0];
   const isArchived = room.stage === 'archived';
+  const demoPlan = useDemoPlan(room.id);
 
   // Filter messages and cards for this room
-  const [messages, setMessages] = useState<Message[]>(
+  const [messages, setMessages] = useRoomSessionState<Message[]>(room.id, 'messages', () =>
     mockMessages.filter((m) => m.room_id === (roomId || room.id)),
   );
-  const [decisionCards, setDecisionCards] = useState<DecisionCard[]>(
+  const [decisionCards, setDecisionCards] = useRoomSessionState<DecisionCard[]>(room.id, 'decisions', () =>
     mockDecisionCards.filter((c) => c.room_id === (roomId || room.id)),
   );
   const [votes, setVotes] = useState(
@@ -89,7 +92,7 @@ export default function TripChatScreen() {
     setMessages((prev) => [...prev, newMsg]);
     setInputText('');
     setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
-  }, [inputText, isArchived, roomId, room.id, user]);
+  }, [inputText, isArchived, roomId, room.id, user, setMessages]);
 
   // Cast / update a vote
   const handleCastVote = useCallback(
@@ -153,7 +156,7 @@ export default function TripChatScreen() {
         );
       }
     },
-    [isArchived, votes, user],
+    [isArchived, votes, user, setDecisionCards],
   );
 
   // Publish a new vote from the Propose Vote sheet
@@ -200,7 +203,7 @@ export default function TripChatScreen() {
       setVoteModalVisible(false);
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
     },
-    [isArchived, roomId, room.id, user],
+    [isArchived, roomId, room.id, user, setDecisionCards, setMessages],
   );
 
   // Navigate to Safety Alert Detail
@@ -282,18 +285,28 @@ export default function TripChatScreen() {
         {/* Archived State Banner */}
         {isArchived && <ArchivedBanner />}
 
+        {/* Itinerary proposals share the same local state as the planning board. */}
+        {demoPlan.polls.map((poll) => (
+          <DecisionPollCard
+            key={poll.card.id}
+            card={poll.card}
+            isArchived={isArchived}
+            userVoteOptionId={poll.userVotes[user?.id || 'demo-user-1'] || null}
+            onVote={(cardId, optionId) => !isArchived && voteOnStop(room.id, cardId, optionId, user?.id || 'demo-user-1')}
+          />
+        ))}
         {/* Chronological message feed */}
         {messages.map(renderFeedItem)}
       </ScrollView>
 
       {/* Composer / Archived disabled state */}
-      <MessageComposer
+      {!isArchived && <MessageComposer
         isArchived={isArchived}
         inputText={inputText}
         onChangeText={setInputText}
         onSend={handleSendMessage}
         onProposeVote={() => setVoteModalVisible(true)}
-      />
+      />}
 
       {/* Propose Vote Modal Sheet (FR-2-6a) */}
       {!isArchived && (

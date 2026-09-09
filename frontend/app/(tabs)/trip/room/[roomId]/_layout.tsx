@@ -1,25 +1,28 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { Slot, useLocalSearchParams, useRouter, usePathname } from 'expo-router';
+import { Slot, useRouter, usePathname } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { Badge } from '@/shared/components';
 import { mockTripRooms } from '@/features/trip-room/data/mock-trip-room';
+import ArchivedItinerary from '@/features/trip-room/presentation/itinerary-demo/ArchivedItinerary';
 
 const roomTabs = [
-  { slug: 'chat', label: '💬 Chat' },
+  { slug: 'chat', label: '💬 Discussion' },
   { slug: 'itinerary', label: '📅 Itinerary' },
   { slug: 'budget', label: '💰 Budget' },
   { slug: 'album', label: '📷 Album' },
-  { slug: 'languages', label: '🗣️ Languages' },
+  { slug: 'languages', label: '🗣️ Language' },
 ];
 
 export default function TripRoomLayout() {
-  const { roomId } = useLocalSearchParams<{ roomId: string }>();
   const { colors, typography, spacing, rounded } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
+  // Slot layouts can retain local params when switching between rooms.
+  const roomId = decodeURIComponent(pathname.split('/room/')[1]?.split('/')[0] || '');
 
   const room = mockTripRooms.find((r) => r.id === roomId) || mockTripRooms[0];
+  const stageLabel = room.stage.toUpperCase();
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -47,7 +50,7 @@ export default function TripRoomLayout() {
             </Text>
             <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center', marginTop: 2 }}>
               <Badge
-                label={room.stage.toUpperCase()}
+                label={stageLabel}
                 variant={room.stage === 'active' ? 'season' : 'outline'}
               />
               <Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant }]}>
@@ -106,7 +109,7 @@ export default function TripRoomLayout() {
 
       {/* Screen Slot */}
       <View style={{ flex: 1 }}>
-        <Slot />
+        {room.stage === 'archived' && /\/budget\/(add-expense|settle-up)/.test(pathname) ? <View style={{ padding: 24 }}><Text>Archived trip — expenses and settlements are read-only.</Text></View> : room.stage === 'archived' && /\/itinerary\/.+/.test(pathname) ? <ArchivedItinerary roomId={room.id} /> : <Slot key={roomId} />}
       </View>
     </View>
   );

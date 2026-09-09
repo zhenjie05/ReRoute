@@ -191,8 +191,8 @@ const styles = StyleSheet.create({
     overflow: 'visible',
   },
   mascotImage: {
-    width: 28,
-    height: 28,
+    width: 38,
+    height: 38,
   },
   badgePill: {
     position: 'absolute',

@@ -1,3 +1,5 @@
+import { ArchivedBanner } from '@/features/trip-room/presentation/components';
+import { useRoomSessionState } from '@/features/trip-room/data/useRoomSessionState';
 import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert, Share, StyleSheet } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
@@ -14,7 +16,7 @@ export default function GroupAlbumScreen() {
   const isArchived = room.stage === 'archived';
 
   // State
-  const [photos, setPhotos] = useState<AlbumPhoto[]>(
+  const [photos, setPhotos] = useRoomSessionState<AlbumPhoto[]>(room.id, 'photos', () =>
     mockAlbumPhotos.filter(p => p.room_id === (roomId || room.id))
   );
   
@@ -41,7 +43,8 @@ export default function GroupAlbumScreen() {
       uploader_name: 'Alex Chen',
       url: 'https://images.unsplash.com/photo-1538485399081-7191377e8241?w=800&fit=crop',
       taken_at: now,
-      location_name: 'Tokyo',
+      created_at: now,
+      location_name: room.destination,
       itinerary_day_id: dayId,
     };
     
@@ -77,6 +80,7 @@ export default function GroupAlbumScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
+        {isArchived && <ArchivedBanner />}
         {/* Gallery Header Row */}
         <View style={[styles.headerRow, { paddingHorizontal: spacing.lg, marginVertical: spacing.md }]}>
           <Text style={[typography.headlineSm, { color: colors.onSurface }]}>

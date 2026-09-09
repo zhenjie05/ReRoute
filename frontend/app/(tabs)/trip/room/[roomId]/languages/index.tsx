@@ -6,7 +6,7 @@ import { LanguageSubTabs, LanguageTab } from '@/features/trip-room/presentation/
 import { AiTranslatorPanel } from '@/features/trip-room/presentation/components/language/AiTranslatorPanel';
 import { LessonStreakCard } from '@/features/trip-room/presentation/components/language/LessonStreakCard';
 import { LessonCategoryCard } from '@/features/trip-room/presentation/components/language/LessonCategoryCard';
-import { mockLanguageLessons, useLanguageProgress } from '@/features/language/data/mock-language';
+import { getRoomLanguageLessons, useLanguageProgress } from '@/features/language/data/mock-language';
 
 export default function LanguagesHubScreen() {
   const { roomId } = useLocalSearchParams<{ roomId: string }>();
@@ -16,7 +16,8 @@ export default function LanguagesHubScreen() {
   const [activeTab, setActiveTab] = useState<LanguageTab>('lessons');
   const { progressState, streakData } = useLanguageProgress();
 
-  // Assuming all mock lessons are for the same destination in this demo
+  const mockLanguageLessons = getRoomLanguageLessons(roomId);
+  const destination = mockLanguageLessons[0]?.destination || '';
   const destinationLanguage = mockLanguageLessons[0]?.language_name || 'Japanese';
 
   return (
@@ -26,12 +27,12 @@ export default function LanguagesHubScreen() {
         <LanguageSubTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
         {activeTab === 'translator' ? (
-          <AiTranslatorPanel />
+          <AiTranslatorPanel key={destination} destination={destination} />
         ) : (
           <>
             <LessonStreakCard
               days={streakData.days}
-              subtext="Keep it up! You're ready for Tokyo."
+              subtext={`Keep it up! You're ready for ${destination}.`}
             />
 
             <View style={{ alignItems: 'center', marginBottom: spacing.lg }}>

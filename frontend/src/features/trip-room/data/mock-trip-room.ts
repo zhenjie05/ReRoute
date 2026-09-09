@@ -1,3 +1,7 @@
+import { roomMessages, chinaDays, chinaItems, chinaPhotos } from './room-history';
+import type { ItineraryDay, ItineraryItem } from '@/models/itinerary';
+import type { AlbumPhoto } from '@/models/album';
+import type { DecisionCard } from '@/models/decision';
 import {
   mockStandardTripRooms,
   mockStandardRoomMembers,
@@ -7,6 +11,8 @@ import {
   mockStandardDecisionCards,
   mockStandardVotes,
   mockStandardAlbumPhotos,
+  mockStandardLandmarks,
+  mockStandardSafetyAlerts,
   currentDemoUser,
 } from '@/shared/data/standard-mock-data';
 import { TripRoom, TripRoomMember } from '@/models/trip-room';
@@ -20,6 +26,9 @@ export const mockMessages = mockStandardMessages;
 export const mockDecisionCards = mockStandardDecisionCards;
 export const mockVotes = mockStandardVotes;
 export const mockAlbumPhotos = mockStandardAlbumPhotos;
+export const mockLandmarks = mockStandardLandmarks;
+export const mockSafetyAlerts = mockStandardSafetyAlerts;
+
 
 export const mockItineraryVoteStatus: Record<
   string,

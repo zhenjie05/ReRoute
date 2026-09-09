@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
-import { mockLanguageLessons, useLanguageProgress } from '@/features/language/data/mock-language';
+import { getRoomLanguageLessons, useLanguageProgress } from '@/features/language/data/mock-language';
 import { LessonPhraseCard } from '@/features/trip-room/presentation/components/language/LessonPhraseCard';
 import { LessonQuizOptions } from '@/features/trip-room/presentation/components/language/LessonQuizOptions';
 import { LessonProgress } from '@/features/trip-room/presentation/components/language/LessonProgress';
@@ -13,7 +13,7 @@ export default function LessonDetailScreen() {
   const { colors, typography, rounded } = useTheme();
   const router = useRouter();
 
-  const lesson = mockLanguageLessons.find((l) => l.id === lessonId);
+  const lesson = getRoomLanguageLessons(roomId).find((l) => l.id === lessonId);
   const { updateProgress, markLessonComplete } = useLanguageProgress();
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -25,10 +25,8 @@ export default function LessonDetailScreen() {
 
   const startTimeRef = React.useRef<number | null>(null);
   React.useEffect(() => {
-    if (startTimeRef.current === null) {
-      startTimeRef.current = Date.now();
-    }
-  }, []);
+    startTimeRef.current = Date.now();
+  }, [lessonId]);
 
   if (!lesson) {
     return (

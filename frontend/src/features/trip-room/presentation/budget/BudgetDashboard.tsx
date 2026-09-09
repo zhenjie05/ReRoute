@@ -1,3 +1,5 @@
+import { mockTripRooms } from '@/features/trip-room/data/mock-trip-room';
+import { ArchivedBanner } from '../components';
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme } from '@/core/theme';
@@ -8,7 +10,8 @@ import { useRouter } from 'expo-router';
 export const BudgetDashboard: React.FC<{ roomId: string }> = ({ roomId }) => {
   const { colors, typography, spacing, rounded } = useTheme();
   const router = useRouter();
-  const { expenses } = useBudgetMockData();
+  const isArchived = mockTripRooms.find(room => room.id === roomId)?.stage === 'archived';
+  const { expenses, categories, settlements } = useBudgetMockData();
 
   // Mocked totals from screenshot
   const totalSpent = 2450;
@@ -22,10 +25,12 @@ export const BudgetDashboard: React.FC<{ roomId: string }> = ({ roomId }) => {
   const hasMixedCurrencies = currencies.length > 1;
 
   const handleAddExpense = () => {
+    if (isArchived) return;
     router.push(`/(tabs)/trip/room/${roomId}/budget/add-expense` as any);
   };
 
   const handleSettle = () => {
+    if (isArchived) return;
     // Open settle up modal/screen
     router.push(`/(tabs)/trip/room/${roomId}/budget/settle-up` as any);
   };
@@ -34,6 +39,7 @@ export const BudgetDashboard: React.FC<{ roomId: string }> = ({ roomId }) => {
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: 180 }}>
         
+        {isArchived && <ArchivedBanner />}
         {hasMixedCurrencies ? (
           <Card variant="season" style={{ marginBottom: spacing.md, borderLeftWidth: 4, borderLeftColor: colors.warning }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -162,6 +168,7 @@ export const BudgetDashboard: React.FC<{ roomId: string }> = ({ roomId }) => {
               </View>
            </View>
            <TouchableOpacity 
+             disabled={isArchived}
              onPress={handleSettle}
              style={{ paddingHorizontal: 16, paddingVertical: 8, borderRadius: 16, borderWidth: 1, borderColor: colors.outline }}
            >
@@ -175,6 +182,7 @@ export const BudgetDashboard: React.FC<{ roomId: string }> = ({ roomId }) => {
       <View style={{ position: 'absolute', bottom: 100, left: 16, right: 16 }}>
         <Button
           title="+ Add Expense"
+          disabled={isArchived}
           onPress={handleAddExpense}
           variant="primary"
           style={{ backgroundColor: '#FF8A00', borderRadius: rounded.md }}

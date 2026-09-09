@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Modal, Image, TouchableOpacity, StyleSheet, Dimensions, SafeAreaView } from 'react-native';
+import { View, Text, Modal, Image, TouchableOpacity, StyleSheet, Dimensions, SafeAreaView, Linking } from 'react-native';
 import { useTheme } from '@/core/theme';
 import { AlbumPhoto } from '@/models/album';
 
@@ -103,6 +103,8 @@ export const AlbumLightbox: React.FC<AlbumLightboxProps> = ({
                </Text>
             </View>
 
+            {currentPhoto?.caption && <Text style={{ color: '#fff', fontSize: 11, flex: 1 }}>{currentPhoto.caption}</Text>}
+            {currentPhoto?.source_url && <TouchableOpacity accessibilityRole="link" onPress={() => Linking.openURL(currentPhoto.source_url!)}><Text style={{ color: '#fff', padding: 8 }}>Photo source ↗</Text></TouchableOpacity>}
             {/* Actions: Share only, hidden if archived */}
             {!isArchived && (
               <View style={styles.bottomActions}>

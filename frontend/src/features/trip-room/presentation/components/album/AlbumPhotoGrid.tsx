@@ -77,6 +77,8 @@ export const AlbumPhotoGrid: React.FC<AlbumPhotoGridProps> = ({
               {visiblePhotos.map(photo => (
                 <TouchableOpacity
                   key={photo.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={`View photo: ${photo.location_name || 'Trip memory'}`}
                   activeOpacity={0.8}
                   onPress={() => onPhotoPress(photo.id)}
                   style={{ width: cellWidth, aspectRatio: 1, marginBottom: '2%' }}
