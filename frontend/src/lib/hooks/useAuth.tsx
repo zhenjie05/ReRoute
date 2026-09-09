@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '@/models/user';
 import { supabase } from '@/lib/supabase/client';
+import { authService } from '@/features/auth/data/auth-service';
+import { currentDemoUser } from '@/shared/data/standard-mock-data';
 
 interface AuthContextType {
   user: User | null;
@@ -11,117 +13,120 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<User>) => Promise<{ error?: string }>;
+  demoSignIn?: () => void;
 }
-
-const mockUser: User = {
-  id: 'demo-user-1',
-  email: 'alex@example.com',
-  name: 'Alex Chen',
-  auth_provider: 'email',
-  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop',
-  home_country: 'Singapore',
-  created_at: new Date().toISOString(),
-};
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+const mapSupabaseUser = (authUser: any): User => ({
+  id: authUser.id,
+  email: authUser.email || '',
+  name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'Traveler',
+  auth_provider: (authUser.app_metadata?.provider as any) || 'email',
+  avatar: authUser.user_metadata?.avatar_url || null,
+  home_country: authUser.user_metadata?.home_country || 'Singapore',
+  created_at: authUser.created_at || new Date().toISOString(),
+});
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(mockUser);
-  const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkSession = async () => {
+    let isMounted = true;
+
+    // 1. Initial session verification
+    const checkInitialSession = async () => {
       try {
-        const { data } = await supabase.auth.getSession();
-        if (data.session?.user) {
-          const authUser = data.session.user;
-          setUser({
-            id: authUser.id,
-            email: authUser.email || '',
-            name: authUser.user_metadata?.name || 'Alex Chen',
-            auth_provider: (authUser.app_metadata?.provider as any) || 'email',
-            avatar: authUser.user_metadata?.avatar_url || mockUser.avatar,
-            home_country: authUser.user_metadata?.home_country || 'Singapore',
-            created_at: authUser.created_at,
-          });
+        const { data, error } = await supabase.auth.getSession();
+        if (error) {
+          console.warn('[useAuth] getSession error:', error.message);
         }
-      } catch {
-        // Fallback to mock user
+        if (isMounted) {
+          if (data.session?.user) {
+            setUser(mapSupabaseUser(data.session.user));
+          } else {
+            setUser(null);
+          }
+        }
+      } catch (err) {
+        console.warn('[useAuth] Exception checking session:', err);
+        if (isMounted) setUser(null);
+      } finally {
+        if (isMounted) setIsLoading(false);
       }
     };
-    checkSession();
+
+    checkInitialSession();
+
+    // 2. Real-time auth state listener
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!isMounted) return;
+      if (session?.user) {
+        setUser(mapSupabaseUser(session.user));
+      } else {
+        setUser(null);
+      }
+      setIsLoading(false);
+    });
+
+    return () => {
+      isMounted = false;
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
-  const signIn = async (email: string, password?: string) => {
+  const signIn = async (email: string, password?: string): Promise<{ error?: string }> => {
+    if (!password) {
+      return { error: 'Please enter your password.' };
+    }
+
     setIsLoading(true);
     try {
-      if (password) {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-          setUser({ ...mockUser, email });
-          return {};
-        }
-        if (data.user) {
-          setUser({
-            id: data.user.id,
-            email: data.user.email || email,
-            name: data.user.user_metadata?.name || 'Alex Chen',
-            auth_provider: 'email',
-            avatar: data.user.user_metadata?.avatar_url || mockUser.avatar,
-            home_country: 'Singapore',
-            created_at: data.user.created_at,
-          });
-        }
-      } else {
-        setUser({ ...mockUser, email });
+      const { data, error } = await authService.loginWithEmail(email, password);
+      if (error) {
+        return { error };
+      }
+      if (data?.user) {
+        setUser(mapSupabaseUser(data.user));
       }
       return {};
-    } catch (err: any) {
-      return { error: err.message || 'Login failed' };
     } finally {
       setIsLoading(false);
     }
   };
 
-  const signUp = async (email: string, password?: string, name?: string) => {
+  const signUp = async (
+    email: string,
+    password?: string,
+    name?: string
+  ): Promise<{ error?: string }> => {
+    if (!password) {
+      return { error: 'Please enter a password.' };
+    }
+
     setIsLoading(true);
     try {
-      if (password) {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { data: { name: name || 'Traveler' } },
-        });
-        if (error) {
-          setUser({ ...mockUser, email, name: name || 'Alex Chen' });
-          return {};
-        }
-        if (data.user) {
-          setUser({
-            id: data.user.id,
-            email: data.user.email || email,
-            name: name || 'Traveler',
-            auth_provider: 'email',
-            avatar: null,
-            home_country: 'Singapore',
-            created_at: data.user.created_at,
-          });
-        }
-      } else {
-        setUser({ ...mockUser, email, name: name || 'Alex Chen' });
+      const { data, error } = await authService.registerWithEmail(email, password, name);
+      if (error) {
+        return { error };
+      }
+      if (data?.user) {
+        setUser(mapSupabaseUser(data.user));
       }
       return {};
-    } catch (err: any) {
-      return { error: err.message || 'Registration failed' };
     } finally {
       setIsLoading(false);
     }
   };
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = async (): Promise<{ error?: string }> => {
     setIsLoading(true);
     try {
-      setUser(mockUser);
+      const { error } = await authService.loginWithGoogle();
+      if (error) {
+        return { error };
+      }
       return {};
     } finally {
       setIsLoading(false);
@@ -129,18 +134,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
+    setIsLoading(true);
     try {
-      await supabase.auth.signOut();
-    } catch {
-      // Ignore
+      await authService.logout();
+      setUser(null);
+    } finally {
+      setIsLoading(false);
     }
-    setUser(null);
   };
 
-  const updateProfile = async (updates: Partial<User>) => {
+  const updateProfile = async (updates: Partial<User>): Promise<{ error?: string }> => {
     if (!user) return { error: 'Not authenticated' };
-    setUser({ ...user, ...updates });
-    return {};
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          name: updates.name,
+          avatar_url: updates.avatar,
+          home_country: updates.home_country,
+        },
+      });
+
+      if (error) {
+        return { error: error.message };
+      }
+
+      setUser((prev) => (prev ? { ...prev, ...updates } : null));
+      return {};
+    } catch (err: any) {
+      return { error: err.message || 'Profile update failed' };
+    }
+  };
+
+  const demoSignIn = () => {
+    setUser({ ...currentDemoUser });
   };
 
   return (
@@ -154,6 +181,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signInWithGoogle,
         signOut,
         updateProfile,
+        demoSignIn,
       }}
     >
       {children}
