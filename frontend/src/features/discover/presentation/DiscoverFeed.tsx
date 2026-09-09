@@ -6,16 +6,22 @@ import {
   ScrollView,
   StyleSheet,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
-import { mockDiscoverPosts } from '@/features/discover/data/mock-discover';
+import { useDiscoverStore } from '@/features/discover/data/mock-discover';
 import { DiscoverPostCard } from './DiscoverPostCard';
 
 type FilterOption = 'All' | 'Cloneable' | 'Cultural' | 'Nature';
 
 export const DiscoverFeed: React.FC = () => {
   const { colors, typography, spacing, rounded } = useTheme();
-  const [posts, setPosts] = useState(mockDiscoverPosts);
+  const router = useRouter();
   const [selectedFilter, setSelectedFilter] = useState<FilterOption>('All');
+
+  const { posts, toggleStar } = useDiscoverStore({
+    type: selectedFilter === 'Cloneable' ? 'cloneable' : undefined,
+    travelStyle: selectedFilter === 'Cultural' ? 'Cultural' : selectedFilter === 'Nature' ? 'Nature' : undefined,
+  });
 
   const filterOptions: { key: FilterOption; label: string; icon: string }[] = [
     { key: 'All', label: 'All', icon: '🌐' },
@@ -24,29 +30,9 @@ export const DiscoverFeed: React.FC = () => {
     { key: 'Nature', label: 'Nature', icon: '🌲' },
   ];
 
-  const handleToggleStar = (postId: string) => {
-    setPosts((prev) =>
-      prev.map((p) => {
-        if (p.id === postId) {
-          const isStarred = !p.is_starred;
-          return {
-            ...p,
-            is_starred: isStarred,
-            stars_count: isStarred ? p.stars_count + 1 : p.stars_count - 1,
-          };
-        }
-        return p;
-      })
-    );
+  const handleMorePress = () => {
+    router.push('/(tabs)/home/discover' as any);
   };
-
-  const filteredPosts = posts.filter((p) => {
-    if (selectedFilter === 'All') return true;
-    if (selectedFilter === 'Cloneable') return p.type === 'cloneable_itinerary';
-    if (selectedFilter === 'Cultural') return p.travel_style === 'Cultural';
-    if (selectedFilter === 'Nature') return p.travel_style === 'Nature';
-    return true;
-  });
 
   return (
     <View style={{ marginHorizontal: spacing.lg, marginVertical: spacing.md }}>
@@ -60,6 +46,7 @@ export const DiscoverFeed: React.FC = () => {
         </View>
         <TouchableOpacity
           activeOpacity={0.8}
+          onPress={handleMorePress}
           style={[
             styles.moreBtn,
             { backgroundColor: colors.primary, borderRadius: rounded.full },
@@ -113,7 +100,7 @@ export const DiscoverFeed: React.FC = () => {
 
       {/* Cards List */}
       <View style={{ marginTop: spacing.sm }}>
-        {filteredPosts.length === 0 ? (
+        {posts.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Text style={{ fontSize: 28, marginBottom: 4 }}>🔍</Text>
             <Text style={[typography.labelSm, { color: colors.onSurface, fontWeight: '700' }]}>
@@ -124,11 +111,11 @@ export const DiscoverFeed: React.FC = () => {
             </Text>
           </View>
         ) : (
-          filteredPosts.map((post) => (
+          posts.slice(0, 3).map((post) => (
             <DiscoverPostCard
               key={post.id}
               post={post}
-              onToggleStar={handleToggleStar}
+              onToggleStar={toggleStar}
             />
           ))
         )}

@@ -6,6 +6,7 @@ import { Card } from '@/shared/components/Card';
 import { Avatar } from '@/shared/components/Avatar';
 import { Badge } from '@/shared/components/Badge';
 import { DiscoverPostCard } from '@/features/discover/presentation/DiscoverPostCard';
+import { toggleStarPost, cloneDiscoverItinerary } from '@/features/discover/data/mock-discover';
 import { useProfileMockData } from '../data/useProfileMockData';
 
 export const ProfileScreen: React.FC = () => {
@@ -118,16 +119,27 @@ export const ProfileScreen: React.FC = () => {
             </Text>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.md }}>
-            {starredTrips.map(st => (
-              <View key={st.id} style={{ width: 280 }}>
-                <DiscoverPostCard 
-                  post={st.post} 
-                  onToggleStar={() => {}} 
-                  onClone={() => Alert.alert('Clone Trip', `Cloning ${st.post.title}...`)}
-                  sourceTab="profile"
-                />
-              </View>
-            ))}
+            {starredTrips
+              .filter((st): st is typeof st & { post: NonNullable<typeof st.post> } => Boolean(st.post))
+              .map(st => (
+                <View key={st.id} style={{ width: 280 }}>
+                  <DiscoverPostCard 
+                    post={st.post} 
+                    onToggleStar={(id) => toggleStarPost(id)} 
+                    onClone={(id) => {
+                      const newRoom = cloneDiscoverItinerary(id);
+                      Alert.alert('Itinerary Cloned! 🎉', `"${st.post.title}" has been cloned into your planning trips.`, [
+                        {
+                          text: 'View Itinerary 📅',
+                          onPress: () => router.push(`/(tabs)/trip/room/${newRoom.id}/itinerary` as any),
+                        },
+                        { text: 'Stay Here', style: 'cancel' },
+                      ]);
+                    }}
+                    sourceTab="profile"
+                  />
+                </View>
+              ))}
           </ScrollView>
         </View>
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, usePathname } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useNotifications } from '@/lib/hooks/useNotifications';
@@ -25,7 +25,19 @@ export const TopBar: React.FC<TopBarProps> = ({
   const { colors, typography, spacing, rounded, season } = useTheme();
   const { user } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const { unreadCount: hookUnreadCount, openNotificationCenter } = useNotifications();
+
+  // Hide TopBar on detail screens that provide their own custom header
+  const isDetailScreen =
+    pathname.includes('/discover/') ||
+    pathname.includes('/room/') ||
+    pathname.includes('/setup/') ||
+    pathname.includes('/safety-alert');
+
+  if (isDetailScreen) {
+    return null;
+  }
 
   const effectiveUnreadCount = customUnreadCount ?? hookUnreadCount;
 

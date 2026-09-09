@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { CommunityPost } from '@/models/discover';
 import { Avatar } from '@/shared/components/Avatar';
 import { Badge } from '@/shared/components/Badge';
+import { cloneDiscoverItinerary } from '@/features/discover/data/mock-discover';
 
 interface DiscoverPostCardProps {
   post: CommunityPost;
@@ -30,17 +31,31 @@ export const DiscoverPostCard: React.FC<DiscoverPostCardProps> = ({
     }
   };
 
-  const handleClonePress = () => {
+  const handleClonePress = (e: any) => {
+    e.stopPropagation?.();
     if (onClone) {
       onClone(post.id);
     } else {
-      router.push(`/(tabs)/trip/setup/new?clone_post_id=${post.id}` as any);
+      const newRoom = cloneDiscoverItinerary(post.id);
+      Alert.alert(
+        'Itinerary Cloned! 🎉',
+        `"${post.title}" has been copied into a new Planning Trip Room.`,
+        [
+          {
+            text: 'View Itinerary 📅',
+            onPress: () => router.push(`/(tabs)/trip/room/${newRoom.id}/itinerary` as any),
+          },
+          { text: 'Keep Browsing', style: 'cancel' },
+        ]
+      );
     }
   };
 
+  const isCloneable = post.type === 'cloneable_itinerary';
+
   return (
     <TouchableOpacity
-      activeOpacity={0.9}
+      activeOpacity={0.92}
       onPress={handleCardPress}
       style={[
         styles.card,
@@ -53,27 +68,31 @@ export const DiscoverPostCard: React.FC<DiscoverPostCardProps> = ({
         },
       ]}
     >
-      {/* Cover Image with Type, Clones & Duration Badges */}
+      {/* Cover Image with Badges */}
       <View style={styles.imageWrapper}>
         <Image
           source={{ uri: post.cover_image }}
-          style={[styles.coverImage, { borderTopLeftRadius: rounded['2xl'], borderTopRightRadius: rounded['2xl'] }]}
+          style={[
+            styles.coverImage,
+            { borderTopLeftRadius: rounded['2xl'], borderTopRightRadius: rounded['2xl'] },
+          ]}
         />
         <View style={styles.badgeOverlay}>
-          {post.type === 'cloneable_itinerary' ? (
+          {isCloneable ? (
             <View style={[styles.clonesBadge, { backgroundColor: '#dcfce7', borderRadius: rounded.full }]}>
               <Text style={[typography.utilityTiny, { color: '#15803d', fontWeight: '800' }]}>
-                {post.stars_count > 0 ? `${post.stars_count * 3} Clones` : '12 Clones'}
+                {post.clones_count ? `${post.clones_count} Clones` : '12 Clones'}
               </Text>
             </View>
           ) : (
             <View style={[styles.locationBadge, { backgroundColor: 'rgba(255,255,255,0.92)', borderRadius: rounded.full }]}>
               <Text style={[typography.utilityTiny, { color: colors.onSurface, fontWeight: '700' }]}>
-                📍 {post.destination}
+                📖 Recap
               </Text>
             </View>
           )}
           <Badge label={`${post.duration_days} Days`} variant="outline" />
+          {post.budget_tier && <Badge label={post.budget_tier} variant="outline" />}
         </View>
       </View>
 
@@ -84,19 +103,31 @@ export const DiscoverPostCard: React.FC<DiscoverPostCardProps> = ({
           <View style={styles.authorInfo}>
             <Avatar uri={post.author_avatar} name={post.author_name} size={28} />
             <View style={{ marginLeft: spacing.xs }}>
-              <Text style={[typography.utilityTiny, { color: colors.onSurface, fontWeight: '700' }]}>
-                {post.author_name}
-              </Text>
-              <Text style={[typography.utilityTiny, { color: colors.outline }]}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <Text style={[typography.utilityTiny, { color: colors.onSurface, fontWeight: '700' }]}>
+                  {post.author_name}
+                </Text>
+                {post.author_level && (
+                  <View style={[styles.lvlBadge, { backgroundColor: '#e2f7e2', borderRadius: rounded.sm }]}>
+                    <Text style={{ fontSize: 9, color: '#1e3a1e', fontWeight: '800' }}>
+                      {post.author_level}
+                    </Text>
+                  </View>
+                )}
+              </View>
+              <Text style={[typography.utilityTiny, { color: colors.outline, fontSize: 10 }]}>
                 {post.travel_style} Explorer
               </Text>
             </View>
           </View>
 
-          {/* Star Toggle Button */}
+          {/* Star Toggle Button (Save) */}
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => onToggleStar(post.id)}
+            onPress={(e) => {
+              e.stopPropagation?.();
+              onToggleStar(post.id);
+            }}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             style={[
               styles.starBtn,
@@ -138,13 +169,31 @@ export const DiscoverPostCard: React.FC<DiscoverPostCardProps> = ({
           {post.content}
         </Text>
 
+        {/* Key Stops Preview (if available) */}
+        {post.key_stops && post.key_stops.length > 0 && (
+          <View style={[styles.keyStopsBox, { backgroundColor: colors.surfaceContainerLow, borderRadius: rounded.lg }]}>
+            <Text style={[typography.utilityTiny, { color: colors.outline, fontWeight: '800', fontSize: 9, marginBottom: 2 }]}>
+              KEY STOPS
+            </Text>
+            {post.key_stops.slice(0, 2).map((stop, idx) => (
+              <Text
+                key={idx}
+                style={[typography.utilityTiny, { color: colors.onSurfaceVariant, fontSize: 11 }]}
+                numberOfLines={1}
+              >
+                📍 {stop}
+              </Text>
+            ))}
+          </View>
+        )}
+
         {/* Card Footer Actions */}
         <View style={styles.footerRow}>
           <Text style={[typography.utilityTiny, { color: colors.outline, fontWeight: '600' }]}>
             📍 {post.destination}
           </Text>
 
-          {post.type === 'cloneable_itinerary' && (
+          {isCloneable && (
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={handleClonePress}
@@ -153,8 +202,8 @@ export const DiscoverPostCard: React.FC<DiscoverPostCardProps> = ({
                 {
                   backgroundColor: colors.primary,
                   borderRadius: rounded.xl,
-                  paddingVertical: 5,
-                  paddingHorizontal: 12,
+                  paddingVertical: 6,
+                  paddingHorizontal: 14,
                 },
               ]}
             >
@@ -178,7 +227,7 @@ const styles = StyleSheet.create({
   imageWrapper: {
     position: 'relative',
     width: '100%',
-    height: 140,
+    height: 150,
   },
   coverImage: {
     width: '100%',
@@ -190,6 +239,7 @@ const styles = StyleSheet.create({
     top: 8,
     left: 8,
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 6,
   },
   clonesBadge: {
@@ -209,6 +259,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  lvlBadge: {
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+  },
   starBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -216,12 +270,17 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderWidth: 1,
   },
+  keyStopsBox: {
+    padding: 8,
+    marginTop: 4,
+    marginBottom: 6,
+  },
   footerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 4,
-    paddingTop: 6,
+    paddingTop: 8,
     borderTopWidth: 1,
     borderTopColor: 'rgba(0,0,0,0.05)',
   },
@@ -230,3 +289,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
+

@@ -53,6 +53,17 @@ export const BottomNavBar: React.FC<StandaloneBottomNavBarProps> = (
   const pathname = usePathname();
   const { hasLiveTrip } = useLiveTrip();
 
+  // Hide BottomNavBar on itinerary detail screens, trip room screens, setup screens, and alerts
+  const isDetailScreen =
+    pathname.includes('/discover/') ||
+    pathname.includes('/room/') ||
+    pathname.includes('/setup/') ||
+    pathname.includes('/safety-alert');
+
+  if (isDetailScreen) {
+    return null;
+  }
+
   // Determine active tab either from React Navigation state, pathname, or prop override
   const getActiveTab = (): TabKey => {
     if (props.state) {

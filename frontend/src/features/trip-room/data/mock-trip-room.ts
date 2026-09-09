@@ -13,7 +13,10 @@ import {
   mockStandardAlbumPhotos,
   mockStandardLandmarks,
   mockStandardSafetyAlerts,
+  currentDemoUser,
 } from '@/shared/data/standard-mock-data';
+import { TripRoom, TripRoomMember } from '@/models/trip-room';
+import { CommunityPost } from '@/models/discover';
 
 export const mockTripRooms = mockStandardTripRooms;
 export const mockTripMembers = mockStandardRoomMembers;
@@ -149,4 +152,137 @@ export const mockSafetyBanner = {
   title: 'AI Safety Check',
   message: 'Heavy rain expected in Kyoto area this afternoon. Consider indoor alternatives.',
   dismissible: true,
+};
+
+/**
+ * Creates a new Planning stage Trip Room cloned from a community discover itinerary post (FR-8-5).
+ */
+export const cloneCommunityItineraryToTripRoom = (post: CommunityPost): TripRoom => {
+  const newRoomId = `room-cloned-${Date.now()}`;
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() + 14);
+  const duration = post.duration_days || 5;
+  const endDate = new Date(startDate);
+  endDate.setDate(startDate.getDate() + duration);
+
+  const newRoom: TripRoom = {
+    id: newRoomId,
+    name: post.title,
+    destination: post.destination,
+    stage: 'planning',
+    created_by: currentDemoUser.id,
+    start_date: startDate.toISOString().split('T')[0],
+    end_date: endDate.toISOString().split('T')[0],
+    theme_color: '#ff8f06',
+    is_public: false,
+    cover_image: post.cover_image,
+    invite_code: `RR-${Math.floor(1000 + Math.random() * 9000)}`,
+  };
+
+  mockTripRooms.unshift(newRoom);
+
+  const ownerMember: TripRoomMember = {
+    room_id: newRoomId,
+    user_id: currentDemoUser.id,
+    role: 'owner',
+    location_sharing_opt_in: true,
+    joined_at: new Date().toISOString(),
+    is_live_for_user: false,
+    user: {
+      name: currentDemoUser.name,
+      avatar: currentDemoUser.avatar,
+    },
+  };
+
+  mockTripMembers.push(ownerMember);
+
+  // Auto-populate itinerary days and items
+  if (post.daily_breakdown && post.daily_breakdown.length > 0) {
+    post.daily_breakdown.forEach((day, index) => {
+      const dayId = `day-${newRoomId}-${day.day_number || index + 1}`;
+      const dayDate = new Date(startDate);
+      dayDate.setDate(startDate.getDate() + index);
+
+      mockItineraryDays.push({
+        id: dayId,
+        room_id: newRoomId,
+        day_number: day.day_number || index + 1,
+        title: day.title || `Day ${index + 1}`,
+        trip_date: dayDate.toISOString().split('T')[0],
+      });
+
+      if (day.stops && day.stops.length > 0) {
+        day.stops.forEach((stop, sIdx) => {
+          const cat = stop.category === 'stay' ? 'stay' : stop.category === 'transit' ? 'transportation' : 'attraction';
+          mockItineraryItems.push({
+            id: `item-${dayId}-${sIdx + 1}`,
+            room_id: newRoomId,
+            day_id: dayId,
+            name: stop.name,
+            lat: 35.0116 + index * 0.01,
+            lng: 135.7681 + sIdx * 0.01,
+            category: cat,
+            scheduled_time: stop.time || (sIdx === 0 ? '09:00 AM' : sIdx === 1 ? '01:30 PM' : '06:00 PM'),
+            sort_order: sIdx + 1,
+            tags: stop.tag ? [stop.tag] : undefined,
+          });
+        });
+      }
+    });
+  } else {
+    // Generate structured fallback days and stops from key_stops or duration
+    const stopsList = post.key_stops || [`Explore ${post.destination}`, `Historic Center Stroll`, `Local Gastronomy Tasting`];
+    for (let i = 0; i < duration; i++) {
+      const dayId = `day-${newRoomId}-${i + 1}`;
+      const dayDate = new Date(startDate);
+      dayDate.setDate(startDate.getDate() + i);
+
+      mockItineraryDays.push({
+        id: dayId,
+        room_id: newRoomId,
+        day_number: i + 1,
+        title: i === 0 ? `Arrival & ${post.destination.split(',')[0]} Sights` : i === duration - 1 ? `Final Highlights & Departure` : `Exploring ${post.destination.split(',')[0]} (Part ${i + 1})`,
+        trip_date: dayDate.toISOString().split('T')[0],
+      });
+
+      const dayStopName = stopsList[i % stopsList.length] || `Spot ${i + 1}`;
+      mockItineraryItems.push({
+        id: `item-${dayId}-1`,
+        room_id: newRoomId,
+        day_id: dayId,
+        name: i === 0 ? `Check-in & Basecamp Arrival` : dayStopName,
+        lat: 35.0116,
+        lng: 135.7681,
+        category: i === 0 ? 'stay' : 'attraction',
+        scheduled_time: '10:00 AM',
+        sort_order: 1,
+      });
+
+      mockItineraryItems.push({
+        id: `item-${dayId}-2`,
+        room_id: newRoomId,
+        day_id: dayId,
+        name: `Local Cuisine & Discovery Walk`,
+        lat: 35.0120,
+        lng: 135.7690,
+        category: 'attraction',
+        scheduled_time: '02:00 PM',
+        sort_order: 2,
+      });
+    }
+  }
+
+  // Add a welcoming Mascot chat message
+  mockMessages.push({
+    id: `msg-cloned-${newRoomId}`,
+    room_id: newRoomId,
+    sender_id: 'system-mascot',
+    sender_type: 'mascot',
+    sender_name: 'Roti 🐶',
+    text: `Welcome to your newly cloned trip: "${post.title}"! 🎉 I've imported ${duration} days of planned stops in ${post.destination}. You can invite friends, customize the itinerary, or ask me for advice anytime!`,
+    type: 'text',
+    created_at: new Date().toISOString(),
+  });
+
+  return newRoom;
 };
