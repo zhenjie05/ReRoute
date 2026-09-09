@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { useTheme } from '@/core/theme';
 import { AppNotification } from '@/models/notification';
 
-const rotiImage = require('../../../../assests/Roti.png');
+const rotiImage = require('../../../../assets/Roti.png');
 
 interface MascotNotificationItemProps {
   notification: AppNotification;

@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/hooks/useAuth';
 import { useNotifications } from '@/lib/hooks/useNotifications';
 import { Avatar } from './Avatar';
 
-const rotiImage = require('../../../assests/Roti.png');
+const rotiImage = require('../../../assets/Roti.png');
 
 interface TopBarProps {
   /** Optional custom title; defaults to 'ReRoute' */

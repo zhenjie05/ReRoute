@@ -22,7 +22,7 @@ import { MascotNotificationItem } from '@/features/mascot/presentation/MascotNot
 import { SOSNotificationItem } from '@/features/sos/presentation/SOSNotificationItem';
 import { CommunityStarNotificationItem } from '@/features/discover/presentation/CommunityStarNotificationItem';
 
-const rotiImage = require('../../../assests/Roti.png');
+const rotiImage = require('../../../assets/Roti.png');
 
 type CategoryFilter = 'all' | 'safety' | 'votes' | 'mascot';
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,11 +8,23 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withTiming,
+  withSequence,
+  withSpring,
+  Easing,
+} from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import Svg, { Path } from 'react-native-svg';
 import { useTheme } from '@/core/theme';
 import { useAuth } from '@/lib/hooks/useAuth';
+
+const rotiImage = require('../../../../assets/Roti.png');
 
 export type AuthMode = 'login' | 'register';
 
@@ -59,6 +71,48 @@ export const AuthCard: React.FC<AuthCardProps> = ({
   const [confirmPassword, setConfirmPassword] = useState('password123');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // React Native Reanimated: Mascot continuous breathing & interactive onClick effects
+  const breath = useSharedValue(0);
+  const tapScale = useSharedValue(1);
+  const tapRotate = useSharedValue(0);
+
+  useEffect(() => {
+    breath.value = withRepeat(
+      withTiming(1, {
+        duration: 1800,
+        easing: Easing.inOut(Easing.ease),
+      }),
+      -1,
+      true
+    );
+  }, [breath]);
+
+  const handleMascotClick = () => {
+    // Playful squish & spring bounce effect on click
+    tapScale.value = withSequence(
+      withTiming(0.85, { duration: 80 }),
+      withSpring(1.18, { damping: 4, stiffness: 220 }),
+      withTiming(1, { duration: 150 })
+    );
+    tapRotate.value = withSequence(
+      withTiming(-9, { duration: 70 }),
+      withTiming(9, { duration: 70 }),
+      withTiming(-4, { duration: 70 }),
+      withTiming(0, { duration: 70 })
+    );
+  };
+
+  const animatedMascotStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        { scaleY: (1 + breath.value * 0.04) * tapScale.value }, // Inhale/exhale vertical expansion + click bounce
+        { scaleX: (1 + breath.value * 0.02) * tapScale.value }, // Subtle lateral expansion + click bounce
+        { translateY: -breath.value * 3 },                      // Gentle rise and fall
+        { rotate: `${tapRotate.value}deg` },                    // Playful click wiggle
+      ],
+    };
+  });
 
   const isLogin = mode === 'login';
 
@@ -147,36 +201,99 @@ export const AuthCard: React.FC<AuthCardProps> = ({
           },
         ]}
       >
-        {/* App Brand Title (§5.2) */}
-        <View style={styles.header}>
-          <Text style={{ fontSize: 32, textAlign: 'center', marginBottom: 4 }}>🧭</Text>
-          <Text
+        {/* Top Middle Mascot with Upper-Right Overlay Speech Bubble */}
+        <View style={styles.mascotHeroArea}>
+          <TouchableOpacity
+            activeOpacity={0.88}
+            onPress={handleMascotClick}
+            accessibilityRole="button"
+            accessibilityLabel="Roti the Corgi Mascot. Click to say hello!"
+          >
+            <Animated.View style={[styles.mascotContainer, animatedMascotStyle]}>
+              <Image
+                source={rotiImage}
+                style={styles.logoImage}
+                resizeMode="contain"
+                accessibilityLabel="Roti the Corgi Mascot"
+              />
+            </Animated.View>
+          </TouchableOpacity>
+
+          {/* Overlay Speech Bubble at upper right of mascot */}
+          <View
             style={[
-              typography.headlineLg,
+              styles.overlaySpeechBubble,
               {
-                color: colors.primary, // #8b4b00
-                fontWeight: '900',
-                textAlign: 'center',
-                letterSpacing: -0.5,
+                backgroundColor: colors.surfaceContainerLow,
+                borderColor: colors.outlineVariant,
+                borderRadius: rounded.lg,
+                paddingHorizontal: spacing.sm + 2,
+                paddingVertical: spacing.xs + 2,
+                ...shadows.soft,
               },
             ]}
           >
-            ReRoute
-          </Text>
-          <Text
-            style={[
-              typography.bodySm,
-              {
-                color: colors.onSurfaceVariant,
-                textAlign: 'center',
-                marginTop: 2,
-                marginBottom: spacing.lg,
-              },
-            ]}
-          >
-            Plan your next escape together
-          </Text>
+            <View
+              style={[
+                styles.speechBubbleArrowBottomLeft,
+                { borderTopColor: colors.surfaceContainerLow },
+              ]}
+            />
+            <Text
+              style={[
+                typography.utilityTiny,
+                {
+                  color: colors.primary,
+                  fontWeight: '800',
+                  marginBottom: 1,
+                },
+              ]}
+            >
+              Hi, I'm Roti! 🐾
+            </Text>
+            <Text
+              style={[
+                typography.utilityTiny,
+                {
+                  color: colors.onSurfaceVariant,
+                  fontSize: 10.5,
+                  lineHeight: 14,
+                },
+              ]}
+            >
+              Plan, navigate & split group trips with me on ReRoute!
+            </Text>
+          </View>
         </View>
+
+        {/* App Brand Title & Subtitle */}
+        <Text
+          style={[
+            typography.headlineLg,
+            {
+              color: colors.primary, // #8b4b00
+              fontWeight: '900',
+              textAlign: 'center',
+              letterSpacing: -0.5,
+              marginTop: 0,
+            },
+          ]}
+        >
+          ReRoute
+        </Text>
+        <Text
+          style={[
+            typography.bodySm,
+            {
+              color: colors.onSurfaceVariant,
+              textAlign: 'center',
+              marginTop: 2,
+              marginBottom: spacing.lg,
+            },
+          ]}
+        >
+          Adventure, rerouted.
+        </Text>
 
         {/* Auth Mode Segmented Pill (§5.2) */}
         <View
@@ -510,8 +627,42 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 390,
   },
-  header: {
+  mascotHeroArea: {
     alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    width: '100%',
+    paddingTop: 32,
+    marginBottom: 0,
+    paddingBottom: 0,
+  },
+  mascotContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoImage: {
+    width: 110,
+    height: 110,
+  },
+  overlaySpeechBubble: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    maxWidth: 175,
+    borderWidth: 1,
+    zIndex: 10,
+  },
+  speechBubbleArrowBottomLeft: {
+    position: 'absolute',
+    left: 20,
+    bottom: -6,
+    width: 0,
+    height: 0,
+    borderLeftWidth: 6,
+    borderRightWidth: 6,
+    borderTopWidth: 6,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
   },
   segmentedContainer: {
     flexDirection: 'row',
