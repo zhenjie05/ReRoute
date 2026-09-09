@@ -4,7 +4,6 @@ import { useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { CommunityPost } from '@/models/discover';
 import { Avatar } from '@/shared/components/Avatar';
-import { Badge } from '@/shared/components/Badge';
 import { cloneDiscoverItinerary } from '@/features/discover/data/mock-discover';
 
 interface DiscoverPostCardProps {
@@ -91,8 +90,18 @@ export const DiscoverPostCard: React.FC<DiscoverPostCardProps> = ({
               </Text>
             </View>
           )}
-          <Badge label={`${post.duration_days} Days`} variant="outline" />
-          {post.budget_tier && <Badge label={post.budget_tier} variant="outline" />}
+          <View style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)', borderRadius: rounded.full, paddingHorizontal: 8, paddingVertical: 4 }}>
+            <Text style={[typography.utilityTiny, { color: '#FFFFFF', fontWeight: '800' }]}>
+              {post.duration_days} Days
+            </Text>
+          </View>
+          {post.budget_tier && (
+            <View style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)', borderRadius: rounded.full, paddingHorizontal: 8, paddingVertical: 4 }}>
+              <Text style={[typography.utilityTiny, { color: '#FFFFFF', fontWeight: '800' }]}>
+                {post.budget_tier}
+              </Text>
+            </View>
+          )}
         </View>
       </View>
 

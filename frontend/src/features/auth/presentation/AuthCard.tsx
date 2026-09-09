@@ -23,6 +23,7 @@ import { useRouter } from 'expo-router';
 import Svg, { Path } from 'react-native-svg';
 import { useTheme } from '@/core/theme';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { Feather } from '@expo/vector-icons';
 
 const rotiImage = require('../../../../assets/Roti.png');
 
@@ -70,6 +71,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({
   const [password, setPassword] = useState('password123');
   const [confirmPassword, setConfirmPassword] = useState('password123');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // React Native Reanimated: Mascot continuous breathing & interactive onClick effects
@@ -433,7 +435,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({
               style={styles.eyeButton}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <Text style={{ fontSize: 16 }}>{showPassword ? '👁️' : '🙈'}</Text>
+              <Feather name={showPassword ? 'eye' : 'eye-off'} size={20} color="#666" />
             </TouchableOpacity>
           </View>
         </View>
@@ -444,30 +446,40 @@ export const AuthCard: React.FC<AuthCardProps> = ({
             <Text style={[typography.labelSm, { color: colors.onSurface, fontWeight: '700', marginBottom: 6 }]}>
               Confirm Password
             </Text>
-            <TextInput
-              value={confirmPassword}
-              onChangeText={(val) => {
-                setConfirmPassword(val);
-                if (errorMsg) setErrorMsg(null);
-              }}
-              secureTextEntry={!showPassword}
-              autoCapitalize="none"
-              autoCorrect={false}
-              placeholder="••••••••"
-              placeholderTextColor={colors.outline}
-              editable={!isLoading}
-              style={[
-                styles.textInput,
-                {
-                  backgroundColor: colors.surfaceContainerLowest,
-                  borderColor: errorMsg?.toLowerCase().includes('match') ? colors.error : colors.outlineVariant,
-                  borderRadius: rounded.xl,
-                  color: colors.onSurface,
-                  paddingHorizontal: spacing.md,
-                  paddingVertical: spacing.md - 2,
-                },
-              ]}
-            />
+            <View style={styles.passwordContainer}>
+              <TextInput
+                value={confirmPassword}
+                onChangeText={(val) => {
+                  setConfirmPassword(val);
+                  if (errorMsg) setErrorMsg(null);
+                }}
+                secureTextEntry={!showConfirmPassword}
+                autoCapitalize="none"
+                autoCorrect={false}
+                placeholder="••••••••"
+                placeholderTextColor={colors.outline}
+                editable={!isLoading}
+                style={[
+                  styles.textInput,
+                  styles.passwordInput,
+                  {
+                    backgroundColor: colors.surfaceContainerLowest,
+                    borderColor: errorMsg?.toLowerCase().includes('match') ? colors.error : colors.outlineVariant,
+                    borderRadius: rounded.xl,
+                    color: colors.onSurface,
+                    paddingHorizontal: spacing.md,
+                    paddingVertical: spacing.md - 2,
+                  },
+                ]}
+              />
+              <TouchableOpacity
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                style={styles.eyeButton}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Feather name={showConfirmPassword ? 'eye' : 'eye-off'} size={20} color="#666" />
+              </TouchableOpacity>
+            </View>
           </View>
         ) : null}
 
