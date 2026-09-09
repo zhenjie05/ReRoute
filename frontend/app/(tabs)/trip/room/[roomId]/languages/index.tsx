@@ -13,7 +13,7 @@ export default function LanguagesHubScreen() {
   const { colors, typography, spacing } = useTheme();
   const router = useRouter();
 
-  const [activeTab, setActiveTab] = useState<LanguageTab>('lessons');
+  const [activeTab, setActiveTab] = useState<LanguageTab>('translator');
   const { progressState, streakData } = useLanguageProgress();
 
   const mockLanguageLessons = getRoomLanguageLessons(roomId);

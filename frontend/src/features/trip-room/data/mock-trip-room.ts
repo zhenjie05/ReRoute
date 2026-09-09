@@ -1,16 +1,15 @@
-import { roomMessages, chinaDays, chinaItems, chinaPhotos } from './room-history';
+import { roomMessages, chinaDays, chinaItems } from './room-history';
+import { createDemoAlbum } from './demo-album';
 import type { ItineraryDay, ItineraryItem } from '@/models/itinerary';
 import type { AlbumPhoto } from '@/models/album';
 import type { DecisionCard } from '@/models/decision';
 import {
-  mockStandardTripRooms,
   mockStandardRoomMembers,
   mockStandardItineraryDays,
   mockStandardItineraryItems,
   mockStandardMessages,
   mockStandardDecisionCards,
   mockStandardVotes,
-  mockStandardAlbumPhotos,
   mockStandardLandmarks,
   mockStandardSafetyAlerts,
   currentDemoUser,
@@ -18,14 +17,54 @@ import {
 import { TripRoom, TripRoomMember } from '@/models/trip-room';
 import { CommunityPost } from '@/models/discover';
 
-export const mockTripRooms = mockStandardTripRooms;
+export const mockTripRooms: TripRoom[] = [
+  {
+    id: 'room-bali-2026', name: 'Bali Coastal Escape', destination: 'Bali, Indonesia', stage: 'active',
+    created_by: currentDemoUser.id, start_date: '2026-09-09', end_date: '2026-09-15', theme_color: '#697E50',
+    is_public: false, invite_code: 'BALI26', cover_image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=900&fit=crop',
+  },
+  {
+    id: 'room-paris-2026', name: 'France City Discovery', destination: 'France', stage: 'planning',
+    created_by: currentDemoUser.id, start_date: '2026-10-18', end_date: '2026-10-27', theme_color: '#697E50',
+    is_public: false, invite_code: 'FRANCE', cover_image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=900&fit=crop',
+  },
+  {
+    id: 'room-tokyo-2026', name: 'Japan Autumn Journey', destination: 'Japan', stage: 'planning',
+    created_by: currentDemoUser.id, start_date: '2026-10-10', end_date: '2026-10-18', theme_color: '#FFC9D6',
+    is_public: false, invite_code: 'JAPAN6', cover_image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=900&fit=crop',
+  },
+  {
+    id: 'room-china-2025', name: 'China Spring Heritage', destination: 'China', stage: 'archived', season: 'spring',
+    season_theme: { background: '#FFECEE', border: '#FFC9D6', badge: '#FFE0E6', text: '#85495C' },
+    created_by: currentDemoUser.id, start_date: '2025-04-01', end_date: '2025-04-08', theme_color: '#FFC9D6',
+    is_public: false, invite_code: 'CN-SPR', cover_image: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=900&fit=crop',
+  },
+  {
+    id: 'room-australia-2025', name: 'Australia Summer Coast', destination: 'Australia', stage: 'archived', season: 'summer',
+    season_theme: { background: '#C3CA92', border: '#697E50', badge: '#A4B17B', text: '#20331B' },
+    created_by: currentDemoUser.id, start_date: '2025-01-12', end_date: '2025-01-21', theme_color: '#697E50',
+    is_public: false, invite_code: 'AU-SUM', cover_image: 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?w=900&fit=crop',
+  },
+  {
+    id: 'room-canada-2024', name: 'Canada Maple Road Trip', destination: 'Canada', stage: 'archived', season: 'autumn',
+    season_theme: { background: '#FBF9F7', border: '#FB8C00', badge: '#FDC591', text: '#BF360C' },
+    created_by: currentDemoUser.id, start_date: '2024-10-03', end_date: '2024-10-12', theme_color: '#FB8C00',
+    is_public: false, invite_code: 'CA-AUT', cover_image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=900&fit=crop',
+  },
+  {
+    id: 'room-swiss-2025', name: 'Swiss Alps Winter Retreat', destination: 'Switzerland', stage: 'archived', season: 'winter',
+    season_theme: { background: '#F7FBFE', border: '#C9DEEF', badge: '#E6F1FA', text: '#2a2f32' },
+    created_by: currentDemoUser.id, start_date: '2025-01-14', end_date: '2025-01-22', theme_color: '#C9DEEF',
+    is_public: false, invite_code: 'CH-WIN', cover_image: 'https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=900&fit=crop',
+  },
+];
 export const mockTripMembers = mockStandardRoomMembers;
-export const mockItineraryDays = mockStandardItineraryDays;
-export const mockItineraryItems = mockStandardItineraryItems;
-export const mockMessages = mockStandardMessages;
-export const mockDecisionCards = mockStandardDecisionCards;
+export const mockItineraryDays: ItineraryDay[] = [...chinaDays, ...mockStandardItineraryDays];
+export const mockItineraryItems: ItineraryItem[] = [...chinaItems, ...mockStandardItineraryItems];
+export const mockMessages = [...roomMessages, ...mockStandardMessages.filter(message => !roomMessages.some(item => item.id === message.id))];
+export const mockDecisionCards: DecisionCard[] = mockStandardDecisionCards;
 export const mockVotes = mockStandardVotes;
-export const mockAlbumPhotos = mockStandardAlbumPhotos;
+export const mockAlbumPhotos: AlbumPhoto[] = mockTripRooms.flatMap(room => createDemoAlbum(room, mockItineraryDays));
 export const mockLandmarks = mockStandardLandmarks;
 export const mockSafetyAlerts = mockStandardSafetyAlerts;
 

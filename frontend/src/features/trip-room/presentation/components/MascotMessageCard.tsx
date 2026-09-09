@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, Text, Image, StyleSheet, Animated } from 'react-native';
 import { useTheme } from '@/core/theme';
 import { Message } from '@/models/chat';
 
@@ -68,7 +68,7 @@ export const MascotMessageCard: React.FC<MascotMessageCardProps> = ({ message })
               },
             ]}
           >
-            <Text style={{ fontSize: 16 }}>🐕</Text>
+            <Image source={require('../../../../../assets/Roti.png')} accessibilityLabel="Roti, your AI travel assistant" resizeMode="contain" style={{ width: 28, height: 28 }} />
           </View>
           <Text
             style={[

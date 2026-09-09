@@ -1,5 +1,6 @@
 import { ArchivedBanner } from '@/features/trip-room/presentation/components';
 import { useRoomSessionState } from '@/features/trip-room/data/useRoomSessionState';
+import { createDemoAlbum, demoAlbumImages } from '@/features/trip-room/data/demo-album';
 import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert, Share, StyleSheet } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
@@ -16,9 +17,10 @@ export default function GroupAlbumScreen() {
   const isArchived = room.stage === 'archived';
 
   // State
-  const [photos, setPhotos] = useRoomSessionState<AlbumPhoto[]>(room.id, 'photos', () =>
-    mockAlbumPhotos.filter(p => p.room_id === (roomId || room.id))
-  );
+  const [photos, setPhotos] = useRoomSessionState<AlbumPhoto[]>(room.id, 'photos', () => {
+    const existing = mockAlbumPhotos.filter(p => p.room_id === room.id);
+    return existing.length ? existing : createDemoAlbum(room, mockItineraryDays);
+  });
   
   // Lightbox state
   const [lightboxVisible, setLightboxVisible] = useState(false);
@@ -41,7 +43,7 @@ export default function GroupAlbumScreen() {
       room_id: (roomId as string) || room.id,
       uploaded_by: 'demo-user-1',
       uploader_name: 'Alex Chen',
-      url: 'https://images.unsplash.com/photo-1538485399081-7191377e8241?w=800&fit=crop',
+      url: demoAlbumImages[photos.length % demoAlbumImages.length].url,
       taken_at: now,
       created_at: now,
       location_name: room.destination,

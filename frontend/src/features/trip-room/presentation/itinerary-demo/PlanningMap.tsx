@@ -4,6 +4,8 @@ import { useRouter } from 'expo-router';
 import { ModalSheet } from '@/shared/components';
 import JapanMap from './JapanMap';
 import GLBViewer from './GLBViewer';
+import LandmarkStory from './LandmarkStory';
+import { landmarkDetails } from './landmark-details';
 import { japanModels } from './japan-models';
 import { DemoPlace, getPlace, getCity, getPlanningCities, demoCities } from './demo-data';
 import { addStop, editStop, finalizePlan, proposeStopVote, useDemoPlan } from './demo-store';
@@ -51,9 +53,14 @@ export default function PlanningMap({ roomId }: { roomId: string }) {
   {selected && <ModalSheet visible onClose={() => setSelected(null)} title={`${cities.find(city => city.id === selected.id)?.name || selected.district} · Explore`} style={s.sheet}>
     <View style={{ position: 'relative' }}>
     {media === 'model' && japanModels[selected.id] ? <GLBViewer key={selected.id} asset={japanModels[selected.id]} name={selected.name} /> : <PlacePhoto key={selected.id} place={selected} />}
-    <View style={[s.mediaTabs, { position: 'absolute', top: 16, right: 16, zIndex: 10, elevation: 10, marginVertical: 0, backgroundColor: '#e2e8ecf2' }]}>{(['model', 'photo'] as const).map(tab => <Pressable key={tab} accessibilityRole="tab" accessibilityState={{ selected: media === tab }} onPress={() => setMedia(tab)} style={[s.mediaTab, { flex: 0, paddingHorizontal: 10, paddingVertical: 9 }, media === tab && { backgroundColor: '#fff' }]}><Text style={s.label}>{tab === 'model' ? '◇ 3D Model' : '▧ Exact Image'}</Text></Pressable>)}</View>
+    <View style={{ position: 'absolute', top: 16, right: 16, zIndex: 10, elevation: 10, width: 208, maxWidth: '90%', flexDirection: 'row', padding: 4, borderRadius: 12, backgroundColor: '#e3e9ed' }}>
+      {(['model', 'photo'] as const).map(tab => <Pressable key={tab} accessibilityRole="tab" accessibilityLabel={tab === 'model' ? '3D Model' : 'Exact Image'} accessibilityState={{ selected: media === tab }} onPress={() => setMedia(tab)} style={{ flexGrow: 1, flexBasis: 0, minWidth: 0, minHeight: 38, justifyContent: 'center', alignItems: 'center', borderRadius: 9, backgroundColor: media === tab ? '#ffffff' : 'transparent' }}>
+        <Text numberOfLines={1} style={{ fontSize: 12, lineHeight: 16, fontWeight: '600', color: media === tab ? '#8b4b00' : '#575c5f' }}>{tab === 'model' ? '3D Model' : 'Exact Image'}</Text>
+      </Pressable>)}
     </View>
-    <Text style={[s.title, { marginTop: 18 }]}>{selected.name}</Text><Text style={[s.caption, { marginTop: 4 }]}>{selected.district}, {country}</Text><View style={s.divider} /><Text style={s.sectionLabel}>About this destination</Text><Text style={[s.body, { marginTop: 8 }]}>{selected.description}</Text>
+    </View>
+    <Text style={[s.title, { marginTop: 18 }]}>{selected.name}</Text><Text style={[s.caption, { marginTop: 4 }]}>{landmarkDetails[selected.id]?.subtitle || `${selected.district}, ${country}`}</Text><View style={s.divider} /><Text style={s.sectionLabel}>About this destination</Text><Text style={[s.body, { marginTop: 8, color: '#2a2f32', fontSize: 13, lineHeight: 21 }]}>{selected.description}</Text>
+    <LandmarkStory placeId={selected.id} />
     <Text style={[s.sectionLabel, { marginTop: 20 }]}>Plan your visit</Text><View style={[s.info, { marginVertical: 12 }]}><Text style={s.label}>◷ {selected.duration}</Text><Text style={s.body}>Leave room for a walk, photographs and a break with your travel crew.</Text></View>
     <Action title={stops.some(stop => stop.placeId === selected.id) ? '✓ Added to Itinerary' : '⌖ Add to Itinerary'} disabled={plan.finalized || stops.some(stop => stop.placeId === selected.id)} onPress={() => add(selected.id)} />
   </ModalSheet>}

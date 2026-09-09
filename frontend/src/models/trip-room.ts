@@ -1,4 +1,12 @@
 export type TripStage = 'planning' | 'active' | 'archived';
+export type TripSeason = 'spring' | 'summer' | 'autumn' | 'winter';
+
+export interface TripSeasonTheme {
+  background: string;
+  border: string;
+  badge: string;
+  text: string;
+}
 export type MemberRole = 'owner' | 'member';
 
 export type TravelCompanions = 'solo' | 'family' | 'couple' | 'friends' | 'elderly';
@@ -17,6 +25,8 @@ export interface TripRoom {
   is_public: boolean;
   cover_image?: string;
   invite_code?: string;
+  season?: TripSeason;
+  season_theme?: TripSeasonTheme;
 }
 
 export interface TripRoomMember {

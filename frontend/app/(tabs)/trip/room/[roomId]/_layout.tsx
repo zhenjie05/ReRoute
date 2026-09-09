@@ -31,8 +31,8 @@ export default function TripRoomLayout() {
         style={[
           styles.header,
           {
-            backgroundColor: '#ffffff',
-            borderBottomColor: colors.cardBorder,
+            backgroundColor: room.stage === 'archived' ? room.season_theme?.background || '#ffffff' : '#ffffff',
+            borderBottomColor: room.stage === 'archived' ? room.season_theme?.border || colors.cardBorder : colors.cardBorder,
             paddingHorizontal: spacing.lg,
             paddingTop: spacing.md,
             paddingBottom: spacing.sm,
@@ -50,8 +50,9 @@ export default function TripRoomLayout() {
             </Text>
             <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center', marginTop: 2 }}>
               <Badge
-                label={stageLabel}
+                label={room.stage === 'archived' && room.season ? `${room.season.toUpperCase()} · ${stageLabel}` : stageLabel}
                 variant={room.stage === 'active' ? 'season' : 'outline'}
+                style={room.stage === 'archived' ? { backgroundColor: room.season_theme?.badge, borderColor: room.season_theme?.border } : undefined}
               />
               <Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant }]}>
                 {room.destination}

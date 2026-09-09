@@ -42,12 +42,6 @@ export default function TripHubScreen({ initialSheet = null }: { initialSheet?: 
 
           <View style={{ flexDirection: 'row', gap: spacing.xs }}>
             <Button
-              title="Join 🔗"
-              onPress={() => setRoomSheet('join')}
-              variant="outline"
-              size="sm"
-            />
-            <Button
               title="+ New Trip"
               onPress={() => setRoomSheet('create')}
               variant="primary"
@@ -132,7 +126,13 @@ export default function TripHubScreen({ initialSheet = null }: { initialSheet?: 
             {filteredRooms.map((room) => (
               <Card
                 key={room.id}
-                style={{ padding: 0, overflow: 'hidden' }}
+                style={{
+                  padding: 0,
+                  overflow: 'hidden',
+                  backgroundColor: room.stage === 'archived' ? room.season_theme?.background : undefined,
+                  borderColor: room.stage === 'archived' ? room.season_theme?.border : undefined,
+                  borderWidth: room.stage === 'archived' ? 2 : undefined,
+                }}
                 onPress={() => router.push(`/(tabs)/trip/room/${room.id}/chat` as any)}
               >
                 {room.cover_image ? (
@@ -141,8 +141,9 @@ export default function TripHubScreen({ initialSheet = null }: { initialSheet?: 
                 <View style={{ padding: spacing.md }}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Badge
-                      label={room.stage.toUpperCase()}
+                      label={room.stage === 'archived' && room.season ? `${room.season.toUpperCase()} · ARCHIVED` : room.stage.toUpperCase()}
                       variant={room.stage === 'active' ? 'season' : 'outline'}
+                      style={room.stage === 'archived' ? { backgroundColor: room.season_theme?.badge, borderColor: room.season_theme?.border } : undefined}
                     />
                     <Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant }]}>
                       Code: {room.invite_code}
@@ -152,7 +153,7 @@ export default function TripHubScreen({ initialSheet = null }: { initialSheet?: 
                   <Text
                     style={[
                       typography.headlineSm,
-                      { color: colors.onSurface, marginTop: spacing.xs },
+                      { color: room.stage === 'archived' ? room.season_theme?.text : colors.onSurface, marginTop: spacing.xs },
                     ]}
                   >
                     {room.name}

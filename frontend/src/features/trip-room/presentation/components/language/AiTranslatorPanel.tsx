@@ -110,7 +110,7 @@ export function AiTranslatorPanel({ destination = 'Japan' }: { destination?: str
         >
           <View style={styles.resultHeader}>
             <Text style={[typography.utilityTiny, { color: colors.primary, fontWeight: 'bold' }]}>
-              ★ AI JAPANESE TRANSLATION
+              ★ {targetLang.toUpperCase()} TRANSLATION
             </Text>
             <View style={{ flexDirection: 'row', gap: spacing.sm }}>
               <TouchableOpacity style={styles.iconBtn}>
@@ -129,7 +129,7 @@ export function AiTranslatorPanel({ destination = 'Japan' }: { destination?: str
           {result.romanization && (
             <View style={[styles.romajiBox, { backgroundColor: colors.card, borderRadius: rounded.xl }]}>
               <Text style={{ fontSize: 11, color: colors.onSurfaceVariant, fontFamily: 'monospace' }}>
-                ROMAJI: {result.romanization}
+                PRONUNCIATION: {result.romanization}
               </Text>
             </View>
           )}

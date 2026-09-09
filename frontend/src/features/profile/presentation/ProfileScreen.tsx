@@ -20,7 +20,7 @@ export const ProfileScreen: React.FC = () => {
   const router = useRouter();
   
   // Use global auth state to keep header in sync
-  const { user: authUser, updateProfile } = useAuth();
+  const { user: authUser, updateProfile, updateLocalProfile } = useAuth();
 
   const {
     user: mockUser,
@@ -68,7 +68,9 @@ export const ProfileScreen: React.FC = () => {
     });
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      setEditAvatar(result.assets[0].uri);
+      const selectedUri = result.assets[0].uri;
+      setEditAvatar(selectedUri);
+      updateLocalProfile({ avatar: selectedUri });
     }
   };
 
@@ -274,11 +276,12 @@ export const ProfileScreen: React.FC = () => {
               <TouchableOpacity
                 onPress={handlePickImage}
                 style={[
-                  styles.avatarOption,
-                  { backgroundColor: colors.surfaceContainerHighest }
+                  styles.uploadButton,
+                  { backgroundColor: colors.surfaceContainerHighest, borderColor: colors.outlineVariant }
                 ]}
               >
                 <Feather name="camera" size={24} color={colors.onSurfaceVariant} />
+                <Text style={[typography.labelSm, { color: colors.onSurface, fontWeight: '700' }]}>Upload from Gallery</Text>
               </TouchableOpacity>
               
               <TouchableOpacity
@@ -292,7 +295,7 @@ export const ProfileScreen: React.FC = () => {
                   <Text style={{ color: colors.onSurfaceVariant, fontWeight: 'bold' }}>{editName?.slice(0, 2).toUpperCase() || 'U'}</Text>
                 </View>
               </TouchableOpacity>
-              {mockStandardUsers.slice(0, 5).map(u => (
+              {mockStandardUsers.filter((u): u is typeof u & { avatar: string } => Boolean(u.avatar)).slice(0, 5).map(u => (
                 <TouchableOpacity
                   key={u.id}
                   onPress={() => setEditAvatar(u.avatar)}
@@ -375,6 +378,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 3,
     borderColor: 'transparent',
+  },
+  uploadButton: {
+    minHeight: 70,
+    paddingHorizontal: 18,
+    borderRadius: 18,
+    borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
   },
   inputField: {
     borderWidth: 1,

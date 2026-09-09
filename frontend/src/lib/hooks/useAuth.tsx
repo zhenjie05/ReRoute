@@ -13,6 +13,7 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<User>) => Promise<{ error?: string }>;
+  updateLocalProfile: (updates: Partial<User>) => void;
   demoSignIn?: () => void;
 }
 
@@ -176,6 +177,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser({ ...currentDemoUser });
   };
 
+  const updateLocalProfile = (updates: Partial<User>) => {
+    setUser((prev) => (prev ? { ...prev, ...updates } : null));
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -187,6 +192,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signInWithGoogle,
         signOut,
         updateProfile,
+        updateLocalProfile,
         demoSignIn,
       }}
     >
