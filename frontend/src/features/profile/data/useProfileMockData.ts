@@ -155,13 +155,13 @@ const mockStarredTrips: StarredTrip[] = [
 
 export const useProfileMockData = () => {
   const [user, setUser] = useState<UserProfile>(mockUser);
-  const [badges, setBadges] = useState<Badge[]>(mockBadges);
-  const [userBadges, setUserBadges] = useState<UserBadge[]>(mockUserBadges);
-  const [starredTrips, setStarredTrips] = useState<StarredTrip[]>(mockStarredTrips);
-  const [languageProgress, setLanguageProgress] = useState<LanguageProgress>(mockLanguageProgress);
+  const badges = mockBadges;
+  const userBadges = mockUserBadges;
+  const starredTrips = mockStarredTrips;
+  const languageProgress = mockLanguageProgress;
   
   // Dynamically filter actual mockTripRooms for archived stage
-  const mappedArchivedTrips: TripRoomSummary[] = mockTripRooms
+  const archivedTrips: TripRoomSummary[] = mockTripRooms
     .filter(room => room.stage === 'archived')
     .map(room => ({
       id: room.id,
@@ -170,8 +170,6 @@ export const useProfileMockData = () => {
       dates: new Date(room.start_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
       stage: 'archived',
     }));
-
-  const [archivedTrips, setArchivedTrips] = useState<TripRoomSummary[]>(mappedArchivedTrips);
 
   // Per NFR-7-1, we return all data in a single payload
   return {

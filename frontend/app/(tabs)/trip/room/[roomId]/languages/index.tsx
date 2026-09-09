@@ -10,7 +10,7 @@ import { mockLanguageLessons, useLanguageProgress } from '@/features/language/da
 
 export default function LanguagesHubScreen() {
   const { roomId } = useLocalSearchParams<{ roomId: string }>();
-  const { colors, typography, spacing, rounded } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState<LanguageTab>('lessons');

@@ -6,7 +6,7 @@ import { Button, Card } from '@/shared/components';
 import { useBudgetMockData } from './useBudgetMockData';
 
 export const SettleUpModal: React.FC<{ roomId: string }> = ({ roomId }) => {
-  const { colors, typography, spacing, rounded } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const router = useRouter();
   const { travelers, addSettlement } = useBudgetMockData();
 

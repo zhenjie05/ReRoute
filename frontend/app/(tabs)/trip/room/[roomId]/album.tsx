@@ -8,7 +8,7 @@ import { AlbumPhotoGrid, AlbumLightbox } from '@/features/trip-room/presentation
 
 export default function GroupAlbumScreen() {
   const { roomId } = useLocalSearchParams<{ roomId: string }>();
-  const { colors, typography, spacing, rounded, shadows } = useTheme();
+  const { colors, typography, spacing, rounded } = useTheme();
 
   const room = mockTripRooms.find((r) => r.id === roomId) || mockTripRooms[0];
   const isArchived = room.stage === 'archived';
@@ -41,7 +41,6 @@ export default function GroupAlbumScreen() {
       uploader_name: 'Alex Chen',
       url: 'https://images.unsplash.com/photo-1538485399081-7191377e8241?w=800&fit=crop',
       taken_at: now,
-      created_at: now,
       location_name: 'Tokyo',
       itinerary_day_id: dayId,
     };

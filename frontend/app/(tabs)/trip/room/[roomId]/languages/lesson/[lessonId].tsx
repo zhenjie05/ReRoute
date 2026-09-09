@@ -23,11 +23,12 @@ export default function LessonDetailScreen() {
   const [correctAnswersCount, setCorrectAnswersCount] = useState(0);
   const [timeSpentMs, setTimeSpentMs] = useState(0);
 
-  // Use a ref to capture the initial mount time safely without triggering impure render warnings
   const startTimeRef = React.useRef<number | null>(null);
-  if (startTimeRef.current === null) {
-    startTimeRef.current = Date.now();
-  }
+  React.useEffect(() => {
+    if (startTimeRef.current === null) {
+      startTimeRef.current = Date.now();
+    }
+  }, []);
 
   if (!lesson) {
     return (

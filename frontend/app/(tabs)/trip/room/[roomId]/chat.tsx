@@ -1,6 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
 import {
-  View,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
@@ -24,7 +23,7 @@ import {
   ProposeVoteSheet,
 } from '@/features/trip-room/presentation/components';
 import { Message } from '@/models/chat';
-import { DecisionCard, DecisionTriggerType } from '@/models/decision';
+import { DecisionCard, DecisionTriggerType, Vote } from '@/models/decision';
 
 /**
  * Discussion (Chat Room) tab — Screen 15 per SCREEN_SPEC.
@@ -129,13 +128,14 @@ export default function TripChatScreen() {
         );
       } else {
         // New vote
-        setVotes((prev) => [
+        setVotes((prev: Vote[]) => [
           ...prev,
           {
             id: `vote-${Date.now()}`,
             decision_card_id: cardId,
             user_id: userId,
             chosen_option: optionId,
+            created_at: new Date().toISOString(),
           },
         ]);
         setDecisionCards((prev) =>

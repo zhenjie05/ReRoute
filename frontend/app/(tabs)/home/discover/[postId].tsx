@@ -6,7 +6,7 @@ import { Button, Badge, Card, Avatar } from '@/shared/components';
 import { mockDiscoverPosts } from '@/features/discover/data/mock-discover';
 
 export default function DiscoverPostDetailScreen() {
-  const { postId, source } = useLocalSearchParams<{ postId: string; source?: string }>();
+  const { postId } = useLocalSearchParams<{ postId: string }>();
   const { colors, typography, spacing, shadows } = useTheme();
   const router = useRouter();
 

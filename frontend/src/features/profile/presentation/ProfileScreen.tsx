@@ -46,9 +46,9 @@ export const ProfileScreen: React.FC = () => {
         <View style={{ backgroundColor: colors.surfaceContainerLow, borderRadius: rounded.xl, padding: spacing.xl, alignItems: 'center', marginBottom: spacing.xl }}>
           <TouchableOpacity onPress={handleEditProfile} style={{ position: 'relative' }}>
             <Avatar 
-              source={user.avatar_url ? { uri: user.avatar_url } : undefined} 
+              uri={user.avatar_url || undefined} 
               size={96} 
-              fallback={user.display_name.charAt(0)} 
+              name={user.display_name} 
             />
             {/* Edit Badge overlay */}
             <View style={{ position: 'absolute', bottom: 0, right: 0, backgroundColor: colors.surface, borderRadius: 12, padding: 4, elevation: 2 }}>

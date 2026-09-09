@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { Button, Card, Badge, LoadingState } from '@/shared/components';
 
 export default function ScanReceiptScreen() {
+  const { roomId } = useLocalSearchParams<{ roomId: string }>();
   const { colors, typography, spacing } = useTheme();
   const router = useRouter();
 
@@ -94,8 +95,8 @@ export default function ScanReceiptScreen() {
             </Card>
 
             <Button
-              title="Confirm & Add to Expenses"
-              onPress={() => router.back()}
+              title="Review & Split Receipt Items →"
+              onPress={() => router.push(`/(tabs)/trip/room/${roomId}/budget/ocr-review` as any)}
               variant="primary"
               size="lg"
             />

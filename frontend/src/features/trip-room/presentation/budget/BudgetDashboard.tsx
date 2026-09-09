@@ -8,7 +8,7 @@ import { useRouter } from 'expo-router';
 export const BudgetDashboard: React.FC<{ roomId: string }> = ({ roomId }) => {
   const { colors, typography, spacing, rounded } = useTheme();
   const router = useRouter();
-  const { expenses, categories, settlements } = useBudgetMockData();
+  const { expenses } = useBudgetMockData();
 
   // Mocked totals from screenshot
   const totalSpent = 2450;

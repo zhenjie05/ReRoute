@@ -1,6 +1,6 @@
 export type Season = 'spring' | 'summer' | 'autumn' | 'winter';
 
-export const seasonalPalettes = {
+const seasonalPalettes = {
   spring: {
     50: '#FFECEE',
     100: '#FFE0E6',
@@ -51,7 +51,7 @@ export const seasonalPalettes = {
   },
 };
 
-export const baseColors = {
+const baseColors = {
   surface: '#f3f7fa',
   surfaceDim: '#ced6da',
   surfaceBright: '#f3f7fa',

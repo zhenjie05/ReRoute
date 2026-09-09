@@ -99,7 +99,7 @@ export const AlbumLightbox: React.FC<AlbumLightboxProps> = ({
                  {currentPhoto?.uploader_name || 'Member'}
                </Text>
                <Text style={[typography.utilityTiny, { color: 'rgba(255,255,255,0.7)', marginTop: 2 }]}>
-                 {getRelativeTime(currentPhoto?.created_at || currentPhoto?.taken_at || new Date().toISOString())}
+                 {getRelativeTime(currentPhoto?.taken_at || new Date().toISOString())}
                </Text>
             </View>
 

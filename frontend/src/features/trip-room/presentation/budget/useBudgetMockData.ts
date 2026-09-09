@@ -57,7 +57,7 @@ export const mockTravelers: User[] = [
 ];
 
 export const useBudgetMockData = () => {
-  const [categories, setCategories] = useState<BudgetCategory[]>([
+  const [categories] = useState<BudgetCategory[]>([
     { id: 'c1', room_id: 'r1', category_name: 'Accommodation', planned_amount: 1200 },
     { id: 'c2', room_id: 'r1', category_name: 'Food & Drink', planned_amount: 800 },
     { id: 'c3', room_id: 'r1', category_name: 'Transport', planned_amount: 500 },

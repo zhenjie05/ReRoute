@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useTheme } from '@/core/theme';
-import { Card, Badge } from '@/shared/components';
+import { Badge } from '@/shared/components';
 import { mockLandmarks } from '@/features/trip-room/data/mock-trip-room';
 
 /**

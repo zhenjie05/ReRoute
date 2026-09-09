@@ -10,9 +10,9 @@ export const AddExpenseSheet: React.FC<{ roomId: string }> = ({ roomId }) => {
   const { travelers, addExpense } = useBudgetMockData();
 
   const [amount, setAmount] = useState('');
-  const [currency, setCurrency] = useState('USD');
+  const [currency] = useState('USD');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('Food & Drink');
+  const [category] = useState('Food & Drink');
   const [splitMethod, setSplitMethod] = useState<'Equal' | 'Percentage' | 'Shares' | 'Exact'>('Equal');
 
   const handleScanReceipt = () => {
