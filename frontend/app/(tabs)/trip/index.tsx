@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter, useLocalSearchParams, Redirect, useSegments } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { Card, Badge, Button, EmptyState } from '@/shared/components';
+import { Avatar } from '@/shared/components/Avatar';
 import { mockTripRooms } from '@/features/trip-room/data/mock-trip-room';
+import { mockStandardRoomMembers } from '@/shared/data/standard-mock-data';
+import { Feather } from '@expo/vector-icons';
 import { useLiveTrip } from '@/lib/hooks/useLiveTrip';
 import { CreateRoomSheet, RoomSheetMode } from '@/features/trip-room/presentation/CreateRoomSheet';
 
@@ -126,47 +129,111 @@ export default function TripHubScreen({ initialSheet = null }: { initialSheet?: 
           />
         ) : (
           <View style={{ gap: spacing.md }}>
-            {filteredRooms.map((room) => (
-              <Card
-                key={room.id}
-                style={{
-                  padding: 0,
-                  overflow: 'hidden',
-                  backgroundColor: room.stage === 'archived' ? room.season_theme?.background : undefined,
-                  borderColor: room.stage === 'archived' ? room.season_theme?.border : undefined,
-                  borderWidth: room.stage === 'archived' ? 2 : undefined,
-                }}
-                onPress={() => router.push(`/(tabs)/trip/room/${room.id}/chat` as any)}
-              >
-                {room.cover_image ? (
-                  <Image source={{ uri: room.cover_image }} style={{ width: '100%', height: 130 }} />
-                ) : null}
-                <View style={{ padding: spacing.md }}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            {filteredRooms.map((room) => {
+              const roomMembers = mockStandardRoomMembers.filter(m => m.room_id === room.id);
+              const displayMembers = roomMembers.slice(0, 3);
+              const remainingCount = roomMembers.length > 3 ? roomMembers.length - 3 : 0;
+              const hexThemeColor = room.theme_color || colors.primary;
+              
+              // Helper to make transparent background from hex
+              const getBgColor = () => {
+                if (room.stage === 'archived' && room.season_theme) return room.season_theme.background;
+                if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hexThemeColor)){
+                  let c: any = hexThemeColor.substring(1).split('');
+                  if(c.length === 3){ c= [c[0], c[0], c[1], c[1], c[2], c[2]]; }
+                  c= '0x'+c.join('');
+                  return 'rgba('+[(c>>16)&255, (c>>8)&255, c&255].join(',')+',0.05)';
+                }
+                return 'rgba(0,0,0,0.02)';
+              };
+
+              return (
+                <Card
+                  key={room.id}
+                  style={{
+                    padding: spacing.md,
+                    overflow: 'hidden',
+                    backgroundColor: getBgColor(),
+                    borderColor: room.stage === 'archived' ? room.season_theme?.border : hexThemeColor,
+                    borderWidth: 1,
+                    borderLeftWidth: 6,
+                  }}
+                  onPress={() => router.push(`/(tabs)/trip/room/${room.id}/chat` as any)}
+                >
+                  {/* Top Row: Title & Badge */}
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                    <Text
+                      style={[
+                        typography.headlineSm,
+                        { color: room.stage === 'archived' ? room.season_theme?.text : colors.onSurface, flex: 1 },
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {room.name}
+                    </Text>
                     <Badge
                       label={room.stage === 'archived' && room.season ? `${room.season.toUpperCase()} · ARCHIVED` : room.stage.toUpperCase()}
-                      variant={room.stage === 'active' ? 'season' : 'outline'}
-                      style={room.stage === 'archived' ? { backgroundColor: room.season_theme?.badge, borderColor: room.season_theme?.border } : undefined}
+                      style={{ 
+                        backgroundColor: room.stage === 'archived' ? room.season_theme?.badge : hexThemeColor, 
+                        borderWidth: 0,
+                        paddingHorizontal: 8,
+                        paddingVertical: 4
+                      }}
+                      textStyle={{ 
+                        color: room.stage === 'archived' ? room.season_theme?.text : '#FFFFFF',
+                        fontWeight: '800' 
+                      }}
                     />
-                    <Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant }]}>
-                      Code: {room.invite_code}
+                  </View>
+
+                  {/* Middle Row: Date */}
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: spacing.xs }}>
+                    <Feather name="calendar" size={14} color={colors.onSurfaceVariant} style={{ marginRight: 6 }} />
+                    <Text style={[typography.bodySm, { color: colors.onSurfaceVariant }]}>
+                      {room.start_date} - {room.end_date}
                     </Text>
                   </View>
 
-                  <Text
-                    style={[
-                      typography.headlineSm,
-                      { color: room.stage === 'archived' ? room.season_theme?.text : colors.onSurface, marginTop: spacing.xs },
-                    ]}
-                  >
-                    {room.name}
-                  </Text>
-                  <Text style={[typography.bodySm, { color: colors.onSurfaceVariant, marginTop: 2 }]}>
-                    📍 {room.destination} • {room.start_date}
-                  </Text>
-                </View>
-              </Card>
-            ))}
+                  {/* Bottom Row: Avatars & Count */}
+                  <View style={{ 
+                    flexDirection: 'row', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    marginTop: spacing.md, 
+                    paddingTop: spacing.sm,
+                    borderTopWidth: 1,
+                    borderTopColor: 'rgba(0,0,0,0.06)'
+                  }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      {displayMembers.map((m, idx) => (
+                        <View key={m.user_id} style={{ marginLeft: idx > 0 ? -10 : 0, borderWidth: 2, borderColor: '#fff', borderRadius: 20 }}>
+                          <Avatar uri={m.user?.avatar} name={m.user?.name || 'Member'} size={26} />
+                        </View>
+                      ))}
+                      {remainingCount > 0 && (
+                        <View style={{ 
+                          marginLeft: -10, 
+                          borderWidth: 2, 
+                          borderColor: '#fff', 
+                          borderRadius: 20, 
+                          backgroundColor: colors.surfaceContainerHigh, 
+                          width: 26, 
+                          height: 26, 
+                          alignItems: 'center', 
+                          justifyContent: 'center' 
+                        }}>
+                          <Text style={{ fontSize: 10, fontWeight: '700', color: colors.onSurface }}>+{remainingCount}</Text>
+                        </View>
+                      )}
+                    </View>
+                    
+                    <Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant, fontWeight: '700' }]}>
+                      {roomMembers.length} Traveler{roomMembers.length !== 1 ? 's' : ''}
+                    </Text>
+                  </View>
+                </Card>
+              );
+            })}
           </View>
         )}
       </ScrollView>
