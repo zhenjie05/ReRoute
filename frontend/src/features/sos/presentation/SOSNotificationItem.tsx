@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTheme } from '@/core/theme';
 import { AppNotification } from '@/models/notification';
+import { Feather } from '@expo/vector-icons';
 
 interface SOSNotificationItemProps {
   notification: AppNotification;
@@ -31,7 +32,7 @@ export const SOSNotificationItem: React.FC<SOSNotificationItemProps> = ({
       <View style={styles.topRow}>
         <View style={styles.badgeRow}>
           <View style={[styles.iconBox, { backgroundColor: colors.error, borderRadius: rounded.md }]}>
-            <Text style={{ fontSize: 13, color: '#ffffff' }}>🚨</Text>
+            <Feather name="alert-triangle" size={13} color="#ffffff" />
           </View>
           <Text style={[typography.utilityTiny, { color: colors.error, fontWeight: '800', marginLeft: 6 }]}>
             EMERGENCY SOS ALERT
@@ -52,9 +53,12 @@ export const SOSNotificationItem: React.FC<SOSNotificationItemProps> = ({
 
       {notification.metadata?.sos_coordinates && (
         <View style={[styles.coordBox, { backgroundColor: '#ffffff', borderRadius: rounded.md }]}>
-          <Text style={[typography.utilityTiny, { color: colors.error, fontWeight: '700' }]}>
-            📍 Lat: {notification.metadata.sos_coordinates.lat.toFixed(4)}, Lng: {notification.metadata.sos_coordinates.lng.toFixed(4)}
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <Feather name="map-pin" size={10} color={colors.error} />
+            <Text style={[typography.utilityTiny, { color: colors.error, fontWeight: '700' }]}>
+              Lat: {notification.metadata.sos_coordinates.lat.toFixed(4)}, Lng: {notification.metadata.sos_coordinates.lng.toFixed(4)}
+            </Text>
+          </View>
         </View>
       )}
 

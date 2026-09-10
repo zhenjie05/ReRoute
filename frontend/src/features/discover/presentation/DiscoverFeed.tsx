@@ -10,6 +10,7 @@ import { useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { useDiscoverStore } from '@/features/discover/data/mock-discover';
 import { DiscoverPostCard } from './DiscoverPostCard';
+import { Feather } from '@expo/vector-icons';
 
 type FilterOption = 'All' | 'Cloneable' | 'Cultural' | 'Nature';
 
@@ -24,10 +25,10 @@ export const DiscoverFeed: React.FC = () => {
   });
 
   const filterOptions: { key: FilterOption; label: string; icon: string }[] = [
-    { key: 'All', label: 'All', icon: '🌐' },
-    { key: 'Cloneable', label: 'Cloneable', icon: '📋' },
-    { key: 'Cultural', label: 'Cultural', icon: '🏛️' },
-    { key: 'Nature', label: 'Nature', icon: '🌲' },
+    { key: 'All', label: 'All', icon: '' },
+    { key: 'Cloneable', label: 'Cloneable', icon: '' },
+    { key: 'Cultural', label: 'Cultural', icon: '' },
+    { key: 'Nature', label: 'Nature', icon: '' },
   ];
 
   const handleMorePress = () => {
@@ -39,7 +40,7 @@ export const DiscoverFeed: React.FC = () => {
       {/* Header Row */}
       <View style={styles.headerRow}>
         <View style={styles.titleGroup}>
-          <Text style={{ fontSize: 18 }}>🌍</Text>
+          <Text style={{ fontSize: 18 }}></Text>
           <Text style={[typography.headlineSm, { color: colors.onSurface, fontWeight: '800', marginLeft: 6 }]}>
             Discover
           </Text>
@@ -122,9 +123,10 @@ export const DiscoverFeed: React.FC = () => {
       </View>
 
       {/* Recommendation Transparency Notice (FR-NAV-4 / Section 4.4) */}
-      <View style={styles.transparencyNotice}>
+      <View style={[styles.transparencyNotice, { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }]}>
+        <Feather name="star" size={12} color={colors.outline} style={{ marginRight: 6 }} />
         <Text style={[typography.utilityTiny, { color: colors.outline, textAlign: 'center', fontStyle: 'italic', lineHeight: 14 }]}>
-          💡 Starred trips and preferences help tailor your personalized AI recommendations.
+          Starred trips and preferences help tailor your personalized AI recommendations.
         </Text>
       </View>
     </View>

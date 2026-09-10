@@ -46,7 +46,7 @@ export default function TripHubScreen({ initialSheet = null }: { initialSheet?: 
         {/* Header Title & Actions */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md }}>
           <View>
-            <Text style={[typography.headlineLg, { color: colors.onSurface }]}>Trip Rooms 🧭</Text>
+            <Text style={[typography.headlineLg, { color: colors.onSurface }]}>Trip Rooms</Text>
             <Text style={[typography.bodySm, { color: colors.onSurfaceVariant }]}>
               Collaborate and manage itineraries
             </Text>
@@ -85,9 +85,12 @@ export default function TripHubScreen({ initialSheet = null }: { initialSheet?: 
               <Text style={[typography.headlineSm, { color: colors.onSurface, marginTop: spacing.xs }]}>
                 {liveTrip.name}
               </Text>
-              <Text style={[typography.bodySm, { color: colors.onSurfaceVariant, marginTop: 2 }]}>
-                📍 {liveTrip.destination} • {liveTrip.start_date} to {liveTrip.end_date}
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
+                <Feather name="map-pin" size={12} color={colors.onSurfaceVariant} style={{ marginRight: 4 }} />
+                <Text style={[typography.bodySm, { color: colors.onSurfaceVariant }]}>
+                  {liveTrip.destination} • {liveTrip.start_date} to {liveTrip.end_date}
+                </Text>
+              </View>
             </Card>
           </TouchableOpacity>
         ) : null}
@@ -195,9 +198,27 @@ export default function TripHubScreen({ initialSheet = null }: { initialSheet?: 
                       {/* Middle Row: Date */}
                       <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: spacing.xs }}>
                         <Feather name="calendar" size={14} color={colors.onSurfaceVariant} style={{ marginRight: 6 }} />
-                        <Text style={[typography.bodySm, { color: colors.onSurfaceVariant }]}>
+                        <Text style={[typography.bodySm, { color: colors.onSurfaceVariant, flexShrink: 1 }]} numberOfLines={1}>
                           {room.start_date} - {room.end_date}
                         </Text>
+                        {room.season && room.theme_color && (
+                          <View style={{
+                            marginLeft: 8,
+                            backgroundColor: `${room.theme_color}26`,
+                            paddingHorizontal: 8,
+                            paddingVertical: 4,
+                            borderRadius: 12,
+                          }}>
+                            <Text style={{
+                              fontSize: 12,
+                              fontWeight: '600',
+                              color: room.theme_color,
+                              textTransform: 'capitalize'
+                            }}>
+                              {room.season}
+                            </Text>
+                          </View>
+                        )}
                       </View>
 
                       {/* Bottom Row: Avatars & Count */}

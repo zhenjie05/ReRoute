@@ -35,7 +35,7 @@ export const AISuggestedItineraries: React.FC = () => {
       <View style={[styles.headerRow, { paddingHorizontal: spacing.lg }]}>
         <View>
           <View style={styles.titleRow}>
-            <Text style={{ fontSize: 16 }}>✨</Text>
+            <Text style={{ fontSize: 16 }}></Text>
             <Text style={[typography.headlineSm, { color: colors.onSurface, fontWeight: '800', marginLeft: 6 }]}>
               Trending AI Itineraries
             </Text>
@@ -111,10 +111,9 @@ export const AISuggestedItineraries: React.FC = () => {
                 {trip.match_tags.join(' • ')} ({trip.duration_days} Days)
               </Text>
 
-              {/* Card Footer: Clone Counter + Clone CTA */}
               <View style={styles.cardFooter}>
                 <Text style={[typography.utilityTiny, { color: colors.outline }]}>
-                  📋 243 cloned
+                  243 cloned
                 </Text>
 
                 <TouchableOpacity

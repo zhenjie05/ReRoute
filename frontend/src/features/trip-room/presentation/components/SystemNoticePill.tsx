@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '@/core/theme';
+import { Feather } from '@expo/vector-icons';
 
 interface SystemNoticePillProps {
   text: string;
@@ -26,7 +27,7 @@ export const SystemNoticePill: React.FC<SystemNoticePillProps> = ({ text }) => {
           },
         ]}
       >
-        <Text style={{ fontSize: 10, marginRight: 4 }}>ℹ️</Text>
+        <Feather name="info" size={14} color="#4A90E2" style={{ marginRight: 6 }} />
         <Text
           style={[
             typography.labelSm,

@@ -124,9 +124,12 @@ export default function GroupAlbumScreen() {
                 }
               ]}
             >
-              <Text style={[typography.labelSm, { color: '#ffffff', fontWeight: '800' }]}>
-                📷 Upload
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <Feather name="upload" size={14} color="#ffffff" />
+                <Text style={[typography.labelSm, { color: '#ffffff', fontWeight: '800' }]}>
+                  Upload
+                </Text>
+              </View>
             </TouchableOpacity>
           )}
         </View>

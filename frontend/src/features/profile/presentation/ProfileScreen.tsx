@@ -11,6 +11,7 @@ import { useProfileMockData } from '../data/useProfileMockData';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useLiveTrip } from '@/lib/hooks/useLiveTrip';
 import { EditProfileModal } from './components/EditProfileModal';
+import { Feather, Ionicons } from '@expo/vector-icons';
 
 export const ProfileScreen: React.FC = () => {
   const { colors, typography, spacing, rounded } = useTheme();
@@ -75,11 +76,13 @@ export const ProfileScreen: React.FC = () => {
           </Text>
           
           <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md }}>
-            <View style={styles.statPill}>
-              <Text style={styles.statPillText}>🔥 {languageProgress.streak_days}d Streak</Text>
+            <View style={[styles.statPill, { flexDirection: 'row', alignItems: 'center', gap: 4 }]}>
+              <Ionicons name="flame" size={16} color="#d97706" />
+              <Text style={styles.statPillText}>{languageProgress.streak_days}d Streak</Text>
             </View>
-            <View style={styles.statPill}>
-              <Text style={styles.statPillText}>📷 420 Photos</Text>
+            <View style={[styles.statPill, { flexDirection: 'row', alignItems: 'center', gap: 4 }]}>
+              <Feather name="image" size={14} color="#d97706" />
+              <Text style={styles.statPillText}>420 Photos</Text>
             </View>
           </View>
         </View>
@@ -186,9 +189,12 @@ export const ProfileScreen: React.FC = () => {
               <Text style={[typography.labelLg, { color: '#8b4b00', fontWeight: 'bold' }]}>
                 {languageProgress.language} Progress
               </Text>
-              <Text style={[typography.bodySm, { color: '#8b4b00', marginTop: 2 }]}>
-                {languageProgress.streak_days}-day streak 🔥
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2, gap: 4 }}>
+                <Text style={[typography.bodySm, { color: '#8b4b00' }]}>
+                  {languageProgress.streak_days}-day streak
+                </Text>
+                <Ionicons name="flame" size={14} color="#8b4b00" />
+              </View>
             </View>
             <Text style={{ fontSize: 28, color: '#8b4b00' }}>A文</Text>
           </View>
@@ -220,11 +226,11 @@ export const ProfileScreen: React.FC = () => {
         {/* Settings & Logout */}
         <View style={{ gap: spacing.md, marginTop: spacing.lg }}>
           <TouchableOpacity onPress={handleSettings} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: spacing.sm }}>
-            <Text style={{ fontSize: 20, marginRight: spacing.md }}>⚙️</Text>
+            <Feather name="settings" size={20} color={colors.onSurface} style={{ marginRight: spacing.md }} />
             <Text style={[typography.labelLg, { color: colors.onSurface, fontWeight: 'bold' }]}>Settings</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={handleLogout} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: spacing.sm }}>
-            <Text style={{ fontSize: 20, marginRight: spacing.md }}>🚪</Text>
+            <Feather name="log-out" size={20} color={colors.error} style={{ marginRight: spacing.md }} />
             <Text style={[typography.labelLg, { color: colors.error, fontWeight: 'bold' }]}>Logout</Text>
           </TouchableOpacity>
         </View>

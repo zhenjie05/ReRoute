@@ -13,7 +13,7 @@ import { useTheme } from '@/core/theme';
 interface ModalSheetProps {
   visible: boolean;
   onClose: () => void;
-  title?: string;
+  title?: string | React.ReactNode;
   children: React.ReactNode;
   style?: ViewStyle;
 }
@@ -60,9 +60,13 @@ export const ModalSheet: React.FC<ModalSheetProps> = ({
           {/* Header */}
           {title ? (
             <View style={[styles.header, { marginBottom: spacing.lg }]}>
-              <Text style={[typography.headlineSm, { color: colors.onSurface }]}>
-                {title}
-              </Text>
+              {typeof title === 'string' ? (
+                <Text style={[typography.headlineSm, { color: colors.onSurface }]}>
+                  {title}
+                </Text>
+              ) : (
+                title
+              )}
               <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                 <Text style={{ fontSize: 18, color: colors.onSurfaceVariant }}>✕</Text>
               </TouchableOpacity>

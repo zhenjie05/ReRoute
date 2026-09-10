@@ -9,6 +9,7 @@ import {
   Modal,
   FlatList,
 } from 'react-native';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/core/theme';
 import { AITripPlanReviewModal } from './AITripPlanReviewModal';
 import { mockAiHistory, TripHistoryItem } from '../data/mock-history';
@@ -37,9 +38,9 @@ export const AIChatbox: React.FC = () => {
   const paceOptions = ['Ambitious', 'Moderate', 'Relaxed'];
 
   const quickPrompts = [
-    '🍜 5 days Tokyo food & ramen tour',
-    '⛩️ Kyoto shrines & bamboo grove trip',
-    '⛷️ Hokkaido winter ski & hot spring escape',
+    '5 days Tokyo food & ramen tour',
+    'Kyoto shrines & bamboo grove trip',
+    'Hokkaido winter ski & hot spring escape',
   ];
 
   const handleGenerate = () => {
@@ -68,10 +69,7 @@ export const AIChatbox: React.FC = () => {
         {/* Header Row */}
         <View style={styles.headerRow}>
           <View style={styles.titleWithIcon}>
-            <View style={[styles.iconSparkle, { backgroundColor: colors.primaryContainer, borderRadius: rounded.md }]}>
-              <Text style={{ fontSize: 16 }}>✨</Text>
-            </View>
-            <View style={{ marginLeft: spacing.sm }}>
+            <View>
               <Text style={[typography.headlineSm, { color: colors.onSurface, fontWeight: '800' }]}>
                 AI Trip Planner
               </Text>
@@ -101,7 +99,7 @@ export const AIChatbox: React.FC = () => {
             },
           ]}
         >
-          <Text style={{ fontSize: 16 }}>🎯</Text>
+          <Ionicons name="car-outline" size={16} color={colors.outline} />
           <View style={{ marginLeft: spacing.sm, flex: 1 }}>
             <Text style={[typography.utilityTiny, { color: colors.outline, fontWeight: '700' }]}>
               STARTING FROM
@@ -139,7 +137,7 @@ export const AIChatbox: React.FC = () => {
               HEADING TO
             </Text>
             <View style={styles.gridValRow}>
-              <Text style={{ fontSize: 14 }}>📍</Text>
+              <Feather name="map-pin" size={14} color={colors.outline} />
               <TextInput
                 value={destination}
                 onChangeText={setDestination}
@@ -166,7 +164,7 @@ export const AIChatbox: React.FC = () => {
               DATE / DURATION
             </Text>
             <View style={styles.gridValRow}>
-              <Text style={{ fontSize: 14 }}>📅</Text>
+              <Feather name="calendar" size={14} color={colors.outline} />
               <TextInput
                 value={dates}
                 onChangeText={setDates}
@@ -192,7 +190,7 @@ export const AIChatbox: React.FC = () => {
           ]}
         >
           <View style={styles.prefHeaderLeft}>
-            <Text style={{ fontSize: 14 }}>⚙️</Text>
+            <Feather name="heart" size={14} color={colors.outline} />
             <Text style={[typography.labelSm, { color: colors.onSurface, fontWeight: '800', marginLeft: 6 }]}>
               PREFERENCES & STYLES
             </Text>
@@ -388,7 +386,7 @@ export const AIChatbox: React.FC = () => {
             </View>
           ) : (
             <Text style={[typography.labelMd, { color: '#ffffff', fontWeight: '800', textAlign: 'center' }]}>
-              ✨ Plan a Trip with AI
+              Plan a Trip with AI
             </Text>
           )}
         </TouchableOpacity>
@@ -436,7 +434,7 @@ export const AIChatbox: React.FC = () => {
                     setReviewModalVisible(true);
                   }}
                 >
-                  <Text style={{ fontSize: 24, marginRight: 12 }}>📍</Text>
+                  <Feather name="map-pin" size={24} color={colors.outline} style={{ marginRight: 12 }} />
                   <View>
                     <Text style={[typography.labelMd, { color: colors.onSurface, fontWeight: '700' }]}>{item.destination}</Text>
                     <Text style={[typography.utilityTiny, { color: colors.outline }]}>{item.dates} • {item.duration}</Text>

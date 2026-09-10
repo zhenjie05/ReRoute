@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTheme } from '@/core/theme';
+import { Feather } from '@expo/vector-icons';
 
 interface MessageComposerProps {
   isArchived: boolean;
@@ -99,7 +100,7 @@ export const MessageComposer: React.FC<MessageComposerProps> = ({
           },
         ]}
       >
-        <Text style={{ fontSize: 16 }}>🗳️</Text>
+        <Feather name="check-square" size={18} color={colors.onSurfaceVariant} />
       </TouchableOpacity>
 
       {/* Text Input */}

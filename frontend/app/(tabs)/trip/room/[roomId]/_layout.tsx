@@ -8,11 +8,11 @@ import ArchivedItinerary from '@/features/trip-room/presentation/itinerary-demo/
 import { Feather } from '@expo/vector-icons';
 
 const roomTabs = [
-  { slug: 'chat', label: '💬 Discussion' },
-  { slug: 'itinerary', label: '🗺️ Itinerary' },
-  { slug: 'budget', label: '💰 Budget' },
-  { slug: 'album', label: '📸 Album' },
-  { slug: 'languages', label: '🎤 Language' },
+  { slug: 'chat', label: 'Discussion' },
+  { slug: 'itinerary', label: 'Itinerary' },
+  { slug: 'budget', label: 'Budget' },
+  { slug: 'album', label: 'Album' },
+  { slug: 'languages', label: 'Language' },
 ];
 
 export default function TripRoomLayout() {
