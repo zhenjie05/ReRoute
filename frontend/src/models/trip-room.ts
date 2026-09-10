@@ -16,6 +16,15 @@ export type TravelPace = 'ambitious' | 'moderate' | 'relaxed';
 export interface TripRoom {
   id: string;
   name: string;
+export type MemberRole = 'owner' | 'member';
+
+export type TravelCompanions = 'solo' | 'family' | 'couple' | 'friends' | 'elderly';
+export type TravelStyle = 'cultural' | 'classic' | 'nature' | 'cityscape' | 'historical';
+export type TravelPace = 'ambitious' | 'moderate' | 'relaxed';
+
+export interface TripRoom {
+  id: string;
+  name: string;
   destination: string;
   stage: TripStage;
   created_by: string;
@@ -24,12 +33,11 @@ export interface TripRoom {
   theme_color?: string;
   is_public: boolean;
   cover_image?: string;
+  groupProfileImage?: string;
   invite_code?: string;
   season?: TripSeason;
   season_theme?: TripSeasonTheme;
 }
-
-export interface TripRoomMember {
   room_id: string;
   user_id: string;
   role: MemberRole;

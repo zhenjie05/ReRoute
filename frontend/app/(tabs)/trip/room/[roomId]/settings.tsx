@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Switch } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Switch, Image, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { Card, Badge, Button } from '@/shared/components';
 import { mockTripRooms } from '@/features/trip-room/data/mock-trip-room';
 import { useLiveTrip } from '@/lib/hooks/useLiveTrip';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function RoomSettingsScreen() {
   const { roomId } = useLocalSearchParams<{ roomId: string }>();
@@ -15,6 +16,27 @@ export default function RoomSettingsScreen() {
   const room = mockTripRooms.find((r) => r.id === roomId) || mockTripRooms[0];
   const [isPublic, setIsPublic] = useState(room.is_public);
   const [stage, setStage] = useState(room.stage);
+  const [groupImage, setGroupImage] = useState(room.groupProfileImage);
+
+  const handlePickImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const newUri = result.assets[0].uri;
+        setGroupImage(newUri);
+        room.groupProfileImage = newUri;
+        router.setParams({ imgUpdated: Date.now().toString() });
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to pick image');
+    }
+  };
 
   const handleStartTrip = () => {
     setStage('active');
@@ -39,6 +61,34 @@ export default function RoomSettingsScreen() {
       </View>
 
       <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: 100 }}>
+        {/* Group Profile Picture Section */}
+        <Card style={{ marginBottom: spacing.lg }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flex: 1, paddingRight: spacing.md }}>
+              <Text style={[typography.labelLg, { color: colors.onSurface, fontWeight: '700' }]}>
+                Group Profile Picture
+              </Text>
+              <Text style={[typography.bodySm, { color: colors.onSurfaceVariant, marginTop: 2, marginBottom: spacing.md }]}>
+                Give your trip a recognizable avatar.
+              </Text>
+              <Button
+                title="Change Picture"
+                onPress={handlePickImage}
+                variant="outline"
+                size="sm"
+              />
+            </View>
+            <View style={{ width: 80, height: 80, borderRadius: 12, overflow: 'hidden', backgroundColor: colors.surfaceContainerHigh }}>
+              {groupImage ? (
+                <Image source={{ uri: groupImage }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+              ) : (
+                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                  <Text style={{ fontSize: 24 }}>📸</Text>
+                </View>
+              )}
+            </View>
+          </View>
+        </Card>
         {/* Trip Stage Management & Owner Start Trip Action (FR-2-2a, FR-2-10a) */}
         <Card variant="season" style={{ marginBottom: spacing.lg }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>

@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { Slot, useRouter, usePathname } from 'expo-router';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { Slot, useRouter, usePathname, useLocalSearchParams } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { Badge } from '@/shared/components';
 import { mockTripRooms } from '@/features/trip-room/data/mock-trip-room';
@@ -19,6 +19,7 @@ export default function TripRoomLayout() {
   const { colors, typography, spacing, rounded } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
+  const params = useLocalSearchParams();
   // Slot layouts can retain local params when switching between rooms.
   const roomId = decodeURIComponent(pathname.split('/room/')[1]?.split('/')[0] || '');
 
@@ -45,19 +46,28 @@ export default function TripRoomLayout() {
             <Text style={{ fontSize: 18 }}>←</Text>
           </TouchableOpacity>
 
-          <View style={{ alignItems: 'center' }}>
-            <Text style={[typography.headlineSm, { color: colors.onSurface }]}>
-              {room.name}
-            </Text>
-            <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center', marginTop: 2 }}>
-              <Badge
-                label={room.stage === 'archived' && room.season ? `${room.season.toUpperCase()} · ${stageLabel}` : stageLabel}
-                variant={room.stage === 'active' ? 'season' : 'outline'}
-                style={room.stage === 'archived' ? { backgroundColor: room.season_theme?.badge, borderColor: room.season_theme?.border } : undefined}
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {room.groupProfileImage && (
+              <Image
+                source={{ uri: room.groupProfileImage }}
+                style={{ width: 44, height: 44, borderRadius: 22, marginRight: 12, backgroundColor: '#eee' }}
+                resizeMode="cover"
               />
-              <Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant }]}>
-                {room.destination}
+            )}
+            <View style={{ alignItems: 'flex-start' }}>
+              <Text style={[typography.headlineSm, { color: colors.onSurface }]}>
+                {room.name}
               </Text>
+              <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center', marginTop: 2 }}>
+                <Badge
+                  label={room.stage === 'archived' && room.season ? `${room.season.toUpperCase()} · ${stageLabel}` : stageLabel}
+                  variant={room.stage === 'active' ? 'season' : 'outline'}
+                  style={room.stage === 'archived' ? { backgroundColor: room.season_theme?.badge, borderColor: room.season_theme?.border } : undefined}
+                />
+                <Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant }]}>
+                  {room.destination}
+                </Text>
+              </View>
             </View>
           </View>
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
-import { useRouter, useLocalSearchParams, Redirect, useSegments } from 'expo-router';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { useRouter, useLocalSearchParams, Redirect, useSegments, useFocusEffect } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { Card, Badge, Button, EmptyState } from '@/shared/components';
 import { Avatar } from '@/shared/components/Avatar';
@@ -18,8 +18,14 @@ export default function TripHubScreen({ initialSheet = null }: { initialSheet?: 
   const segments = useSegments();
 
   const [selectedStage, setSelectedStage] = useState<'all' | 'planning' | 'active' | 'archived'>('all');
-  const [rooms] = useState(mockTripRooms);
+  const [rooms, setRooms] = useState(mockTripRooms);
   const [roomSheet, setRoomSheet] = useState<RoomSheetMode | null>(initialSheet);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setRooms([...mockTripRooms]);
+    }, [])
+  );
 
   // FR-2-4: Live-trip bypass - if current user has a live trip, route directly into that room
   // Only bypass if navigating directly to the trip hub (not deep-linking into a room)
@@ -148,76 +154,90 @@ export default function TripHubScreen({ initialSheet = null }: { initialSheet?: 
                   }}
                   onPress={() => router.push(`/(tabs)/trip/room/${room.id}/chat` as any)}
                 >
-                  {/* Top Row: Title & Badge */}
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-                    <Text
-                      style={[
-                        typography.headlineSm,
-                        { color: room.stage === 'archived' ? room.season_theme?.text : colors.onSurface, flex: 1 },
-                      ]}
-                      numberOfLines={1}
-                    >
-                      {room.name}
-                    </Text>
-                    <Badge
-                      label={room.stage.toUpperCase()}
-                      style={{ 
-                        backgroundColor: seasonalTheme.badge,
-                        borderWidth: 0,
-                        paddingHorizontal: 8,
-                        paddingVertical: 4
-                      }}
-                      textStyle={{ 
-                        color: seasonalTheme.text,
-                        fontWeight: '800' 
-                      }}
-                    />
-                  </View>
-
-                  {/* Middle Row: Date */}
-                  <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: spacing.xs }}>
-                    <Feather name="calendar" size={14} color={colors.onSurfaceVariant} style={{ marginRight: 6 }} />
-                    <Text style={[typography.bodySm, { color: colors.onSurfaceVariant }]}>
-                      {room.start_date} - {room.end_date}
-                    </Text>
-                  </View>
-
-                  {/* Bottom Row: Avatars & Count */}
-                  <View style={{ 
-                    flexDirection: 'row', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center', 
-                    marginTop: spacing.md, 
-                    paddingTop: spacing.sm,
-                    borderTopWidth: 1,
-                    borderTopColor: 'rgba(0,0,0,0.06)'
-                  }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      {displayMembers.map((m, idx) => (
-                        <View key={m.user_id} style={{ marginLeft: idx > 0 ? -10 : 0, borderWidth: 2, borderColor: '#fff', borderRadius: 20 }}>
-                          <Avatar uri={m.user?.avatar} name={m.user?.name || 'Member'} size={26} />
-                        </View>
-                      ))}
-                      {remainingCount > 0 && (
-                        <View style={{ 
-                          marginLeft: -10, 
-                          borderWidth: 2, 
-                          borderColor: '#fff', 
-                          borderRadius: 20, 
-                          backgroundColor: colors.surfaceContainerHigh, 
-                          width: 26, 
-                          height: 26, 
-                          alignItems: 'center', 
-                          justifyContent: 'center' 
-                        }}>
-                          <Text style={{ fontSize: 10, fontWeight: '700', color: colors.onSurface }}>+{remainingCount}</Text>
-                        </View>
-                      )}
-                    </View>
+                  <View style={{ flexDirection: 'row' }}>
+                    {/* Left Side: Group Profile Image */}
+                    {room.groupProfileImage && (
+                      <Image 
+                        source={{ uri: room.groupProfileImage }} 
+                        style={{ width: 80, height: 80, borderRadius: 12, marginRight: 16, alignSelf: 'center' }} 
+                        resizeMode="cover" 
+                      />
+                    )}
                     
-                    <Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant, fontWeight: '700' }]}>
-                      {roomMembers.length} Traveler{roomMembers.length !== 1 ? 's' : ''}
-                    </Text>
+                    {/* Right Side: Existing Content */}
+                    <View style={{ flex: 1, justifyContent: 'center' }}>
+                      {/* Top Row: Title & Badge */}
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                        <Text
+                          style={[
+                            typography.headlineSm,
+                            { color: room.stage === 'archived' ? room.season_theme?.text : colors.onSurface, flex: 1 },
+                          ]}
+                          numberOfLines={1}
+                        >
+                          {room.name}
+                        </Text>
+                        <Badge
+                          label={room.stage.toUpperCase()}
+                          style={{ 
+                            backgroundColor: seasonalTheme.badge,
+                            borderWidth: 0,
+                            paddingHorizontal: 8,
+                            paddingVertical: 4
+                          }}
+                          textStyle={{ 
+                            color: seasonalTheme.text,
+                            fontWeight: '800' 
+                          }}
+                        />
+                      </View>
+
+                      {/* Middle Row: Date */}
+                      <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: spacing.xs }}>
+                        <Feather name="calendar" size={14} color={colors.onSurfaceVariant} style={{ marginRight: 6 }} />
+                        <Text style={[typography.bodySm, { color: colors.onSurfaceVariant }]}>
+                          {room.start_date} - {room.end_date}
+                        </Text>
+                      </View>
+
+                      {/* Bottom Row: Avatars & Count */}
+                      <View style={{ 
+                        flexDirection: 'row', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center', 
+                        marginTop: spacing.md, 
+                        paddingTop: spacing.sm,
+                        borderTopWidth: 1,
+                        borderTopColor: 'rgba(0,0,0,0.06)'
+                      }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                          {displayMembers.map((m, idx) => (
+                            <View key={m.user_id} style={{ marginLeft: idx > 0 ? -10 : 0, borderWidth: 2, borderColor: '#fff', borderRadius: 20 }}>
+                              <Avatar uri={m.user?.avatar} name={m.user?.name || 'Member'} size={26} />
+                            </View>
+                          ))}
+                          {remainingCount > 0 && (
+                            <View style={{ 
+                              marginLeft: -10, 
+                              borderWidth: 2, 
+                              borderColor: '#fff', 
+                              borderRadius: 20, 
+                              backgroundColor: colors.surfaceContainerHigh, 
+                              width: 26, 
+                              height: 26, 
+                              alignItems: 'center', 
+                              justifyContent: 'center' 
+                            }}>
+                              <Text style={{ fontSize: 10, fontWeight: '700', color: colors.onSurface }}>+{remainingCount}</Text>
+                            </View>
+                          )}
+                        </View>
+                        
+                        <Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant, fontWeight: '700' }]}>
+                          {roomMembers.length} Traveler{roomMembers.length !== 1 ? 's' : ''}
+                        </Text>
+                      </View>
+                    </View>
                   </View>
                 </Card>
               );
