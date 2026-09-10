@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Modal, Image, TouchableOpacity, StyleSheet, Dimensions, SafeAreaView, Linking } from 'react-native';
+import { View, Text, Modal, Image, TouchableOpacity, StyleSheet, SafeAreaView, Linking } from 'react-native';
 import { useTheme } from '@/core/theme';
 import { AlbumPhoto } from '@/models/album';
 import { Feather } from '@expo/vector-icons';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface AlbumLightboxProps {
   visible: boolean;
@@ -82,7 +81,7 @@ export const AlbumLightbox: React.FC<AlbumLightboxProps> = ({
           
           {/* Top Row: Close */}
           <View style={styles.topRow}>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+            <TouchableOpacity accessibilityRole="button" accessibilityLabel="Close photo" onPress={onClose} style={styles.closeBtn}>
               <Text style={{ color: '#ffffff', fontSize: 18, fontWeight: '700' }}>✕</Text>
             </TouchableOpacity>
           </View>
@@ -91,24 +90,25 @@ export const AlbumLightbox: React.FC<AlbumLightboxProps> = ({
           <View style={styles.centerArea}>
              {/* Left Arrow */}
              {currentIndex > 0 ? (
-               <TouchableOpacity onPress={handlePrev} style={[styles.arrowBtn, { left: 16 }]}>
+               <TouchableOpacity accessibilityRole="button" accessibilityLabel="Previous photo" onPress={handlePrev} style={[styles.arrowBtn, { left: 16 }]}>
                  <Text style={styles.arrowText}>‹</Text>
                </TouchableOpacity>
-             ) : <View style={[styles.arrowBtn, { left: 16 }]} />}
+             ) : null}
 
              {/* Main Image */}
              <Image
                source={{ uri: currentPhoto?.url }}
+               accessibilityLabel={currentPhoto?.location_name || currentPhoto?.caption || undefined}
                style={styles.image}
                resizeMode="contain"
              />
 
              {/* Right Arrow */}
              {currentIndex < photos.length - 1 ? (
-               <TouchableOpacity onPress={handleNext} style={[styles.arrowBtn, { right: 16 }]}>
+               <TouchableOpacity accessibilityRole="button" accessibilityLabel="Next photo" onPress={handleNext} style={[styles.arrowBtn, { right: 16 }]}>
                  <Text style={styles.arrowText}>›</Text>
                </TouchableOpacity>
-             ) : <View style={[styles.arrowBtn, { right: 16 }]} />}
+             ) : null}
           </View>
 
           {/* Bottom Info Bar */}
@@ -122,7 +122,7 @@ export const AlbumLightbox: React.FC<AlbumLightboxProps> = ({
                </Text>
             </View>
 
-            {currentPhoto?.caption && <Text style={{ color: '#fff', fontSize: 11, flex: 1 }}>{currentPhoto.caption}</Text>}
+            {currentPhoto?.caption && <Text style={{ color: '#fff', fontSize: 11, lineHeight: 17 }}>{currentPhoto.caption}</Text>}
             {currentPhoto?.source_url && <TouchableOpacity accessibilityRole="link" onPress={() => Linking.openURL(currentPhoto.source_url!)}><Text style={{ color: '#fff', padding: 8 }}>Photo source ↗</Text></TouchableOpacity>}
             {/* Actions: Share and Delete, hidden if archived */}
             {!isArchived && (
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   image: {
-    width: SCREEN_WIDTH,
+    width: '100%',
     height: '100%',
   },
   arrowBtn: {
@@ -225,15 +225,17 @@ const styles = StyleSheet.create({
     fontWeight: '300',
   },
   bottomBar: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     justifyContent: 'space-between',
-    alignItems: 'flex-end',
+    alignItems: 'stretch',
+    gap: 8,
     paddingHorizontal: 16,
     paddingBottom: 24,
     paddingTop: 16,
   },
   bottomInfo: {
-    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   bottomActions: {
     flexDirection: 'row',

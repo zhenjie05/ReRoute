@@ -81,6 +81,9 @@ export default function TripRoomLayout() {
             return (
               <TouchableOpacity
                 key={tab.slug}
+                accessibilityRole="tab"
+                accessibilityLabel={tab.label.slice(tab.label.indexOf(' ') + 1)}
+                accessibilityState={{ selected: isActive }}
                 onPress={() => router.push(`/(tabs)/trip/room/${room.id}/${tab.slug}` as any)}
                 style={[
                   styles.tabPill,

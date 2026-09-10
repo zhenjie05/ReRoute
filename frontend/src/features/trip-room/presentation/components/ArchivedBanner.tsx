@@ -29,8 +29,7 @@ export const ArchivedBanner: React.FC = () => {
           { color: colors.onSurfaceVariant, flex: 1, lineHeight: 18 },
         ]}
       >
-        This trip room is archived. You can view past discussions and polls, but
-        new interactions are disabled.
+        This trip is archived. Discussions, itinerary, budget and photos are view-only.
       </Text>
     </View>
   );

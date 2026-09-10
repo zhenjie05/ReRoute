@@ -1,25 +1,8 @@
 // Small dependency-free checks for the demo's shared state and map coordinates.
 // Run: node scripts/check-itinerary-demo.cjs
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-const Module = require('node:module');
-const ts = require('typescript');
-const folder = path.join(__dirname, '../src/features/trip-room/presentation/itinerary-demo');
-const cache = new Map();
-function load(name) {
-  if (cache.has(name)) return cache.get(name);
-  const filename = path.join(folder, `${name}.ts`);
-  const compiled = ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
-    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },
-  }).outputText;
-  const unit = new Module(filename, module);
-  unit.paths = module.paths;
-  unit.require = (id) => id === './demo-data' ? load('demo-data') : require(id);
-  unit._compile(compiled, filename);
-  cache.set(name, unit.exports);
-  return unit.exports;
-}
+const { load: loadFile } = require('./load-frontend-mock.cjs');
+const load = name => loadFile(`src/features/trip-room/presentation/itinerary-demo/${name}.ts`);
 const data = load('demo-data');
 const store = load('demo-store');
 let checks = 0;

@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ModalSheet } from '@/shared/components';
 import JapanMap from './JapanMap';
-import GLBViewer from './GLBViewer';
+import GLBViewer, { prepareModel } from './GLBViewer';
 import LandmarkStory from './LandmarkStory';
-import { landmarkDetails } from './landmark-details';
+import { landmarkDetails, landmarkCopy } from './landmark-details';
 import { japanModels } from './japan-models';
 import { DemoPlace, getPlace, getCity, getPlanningCities, demoCities } from './demo-data';
 import { addStop, editStop, finalizePlan, proposeStopVote, useDemoPlan } from './demo-store';
@@ -16,6 +16,8 @@ export default function PlanningMap({ roomId }: { roomId: string }) {
   const plan = useDemoPlan(roomId);
   const cityId = getCity(roomId), country = demoCities[cityId].country;
   const cities = getPlanningCities(roomId);
+  const firstModel = japanModels[cities[0]?.id];
+  useEffect(() => firstModel ? prepareModel(firstModel) : undefined, [firstModel]);
   const [query, setQuery] = useState('');
   const [day, setDay] = useState(0);
   const [selected, setSelected] = useState<DemoPlace | null>(null);
@@ -24,7 +26,7 @@ export default function PlanningMap({ roomId }: { roomId: string }) {
   const stops = plan.days[day], allStops = plan.days.flat();
   const confirmed = allStops.filter(stop => stop.confirmed).length;
   const results = cities.filter(city => `${city.name} ${getPlace(city.id).name}`.toLowerCase().includes(query.trim().toLowerCase()));
-  const open = (id: string) => { setSelected(getPlace(id)); setMedia('model'); setQuery(''); };
+  const open = (id: string) => { setSelected(getPlace(id)); setMedia(japanModels[id] ? 'model' : 'photo'); setQuery(''); };
   const discussion = () => router.push(`/(tabs)/trip/room/${roomId}/chat` as any);
   const add = (id: string) => { addStop(roomId, day, id); setNotice(`${getPlace(id).name} added to Day ${day + 1}.`); setSelected(null); };
   return <View style={s.screen}><ScrollView contentContainerStyle={s.page} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
@@ -50,19 +52,20 @@ export default function PlanningMap({ roomId }: { roomId: string }) {
     {!plan.finalized && confirmed !== allStops.length && <Text style={s.caption}>Confirm each stop to complete your plan.</Text>}
     <Pressable accessibilityRole="button" onPress={discussion}><Text style={s.discussion}>Open Discussion Room ↗</Text></Pressable>
   </ScrollView>
-  {selected && <ModalSheet visible onClose={() => setSelected(null)} title={`${cities.find(city => city.id === selected.id)?.name || selected.district} · Explore`} style={s.sheet}>
+  {selected && <ModalSheet visible onClose={() => setSelected(null)} title={`${cities.find(city => city.id === selected.id)?.name || selected.district} · ${landmarkCopy.explore}`} style={s.sheet}>
     <View style={{ position: 'relative' }}>
-    {media === 'model' && japanModels[selected.id] ? <GLBViewer key={selected.id} asset={japanModels[selected.id]} name={selected.name} /> : <PlacePhoto key={selected.id} place={selected} />}
+    {japanModels[selected.id] && <View style={{ display: media === 'model' ? 'flex' : 'none' }}><GLBViewer key={selected.id} asset={japanModels[selected.id]} name={selected.name} /></View>}
+    {media === 'photo' && <PlacePhoto key={selected.id} place={selected} />}
     <View style={{ position: 'absolute', top: 16, right: 16, zIndex: 10, elevation: 10, width: 208, maxWidth: '90%', flexDirection: 'row', padding: 4, borderRadius: 12, backgroundColor: '#e3e9ed' }}>
-      {(['model', 'photo'] as const).map(tab => <Pressable key={tab} accessibilityRole="tab" accessibilityLabel={tab === 'model' ? '3D Model' : 'Exact Image'} accessibilityState={{ selected: media === tab }} onPress={() => setMedia(tab)} style={{ flexGrow: 1, flexBasis: 0, minWidth: 0, minHeight: 38, justifyContent: 'center', alignItems: 'center', borderRadius: 9, backgroundColor: media === tab ? '#ffffff' : 'transparent' }}>
-        <Text numberOfLines={1} style={{ fontSize: 12, lineHeight: 16, fontWeight: '600', color: media === tab ? '#8b4b00' : '#575c5f' }}>{tab === 'model' ? '3D Model' : 'Exact Image'}</Text>
+      {(japanModels[selected.id] ? ['model', 'photo'] as const : ['photo'] as const).map(tab => <Pressable key={tab} accessibilityRole="tab" accessibilityLabel={tab === 'model' ? landmarkCopy.model : landmarkCopy.photo} accessibilityState={{ selected: media === tab }} onPress={() => setMedia(tab)} style={{ flexGrow: 1, flexBasis: 0, minWidth: 0, minHeight: 38, justifyContent: 'center', alignItems: 'center', borderRadius: 9, backgroundColor: media === tab ? '#ffffff' : 'transparent' }}>
+        <Text numberOfLines={1} style={{ fontSize: 12, lineHeight: 16, fontWeight: '600', color: media === tab ? '#8b4b00' : '#575c5f' }}>{tab === 'model' ? landmarkCopy.model : landmarkCopy.photo}</Text>
       </Pressable>)}
     </View>
     </View>
-    <Text style={[s.title, { marginTop: 18 }]}>{selected.name}</Text><Text style={[s.caption, { marginTop: 4 }]}>{landmarkDetails[selected.id]?.subtitle || `${selected.district}, ${country}`}</Text><View style={s.divider} /><Text style={s.sectionLabel}>About this destination</Text><Text style={[s.body, { marginTop: 8, color: '#2a2f32', fontSize: 13, lineHeight: 21 }]}>{selected.description}</Text>
+    <Text style={[s.title, { marginTop: 18 }]}>{selected.name}</Text><Text style={[s.caption, { marginTop: 4 }]}>{landmarkDetails[selected.id]?.subtitle || `${selected.district}, ${country}`}</Text><View style={s.divider} /><Text style={s.sectionLabel}>{landmarkCopy.about}</Text><Text style={[s.body, { marginTop: 8, color: '#2a2f32', fontSize: 13, lineHeight: 21 }]}>{selected.description}</Text>
     <LandmarkStory placeId={selected.id} />
-    <Text style={[s.sectionLabel, { marginTop: 20 }]}>Plan your visit</Text><View style={[s.info, { marginVertical: 12 }]}><Text style={s.label}>◷ {selected.duration}</Text><Text style={s.body}>Leave room for a walk, photographs and a break with your travel crew.</Text></View>
-    <Action title={stops.some(stop => stop.placeId === selected.id) ? '✓ Added to Itinerary' : '⌖ Add to Itinerary'} disabled={plan.finalized || stops.some(stop => stop.placeId === selected.id)} onPress={() => add(selected.id)} />
+    <Text style={[s.sectionLabel, { marginTop: 20 }]}>{landmarkCopy.plan}</Text><View style={[s.info, { marginVertical: 12 }]}><Text style={s.label}>◷ {selected.duration}</Text><Text style={s.body}>{landmarkCopy.planningTip}</Text></View>
+    <Action title={stops.some(stop => stop.placeId === selected.id) ? landmarkCopy.added : landmarkCopy.add} disabled={plan.finalized || stops.some(stop => stop.placeId === selected.id)} onPress={() => add(selected.id)} />
   </ModalSheet>}
   </View>;
 }

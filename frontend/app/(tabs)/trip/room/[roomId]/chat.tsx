@@ -4,6 +4,8 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  View,
+  Text,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
@@ -300,6 +302,9 @@ export default function TripChatScreen() {
       </ScrollView>
 
       {/* Composer / Archived disabled state */}
+      {isArchived && <View style={{ paddingHorizontal: spacing.lg, paddingVertical: 12, paddingBottom: 96, backgroundColor: colors.surfaceContainerLow }}>
+        <Text style={{ color: colors.onSurfaceVariant, fontSize: 12, lineHeight: 18, textAlign: 'center' }}>This trip room has been archived. Chat is read-only.</Text>
+      </View>}
       {!isArchived && <MessageComposer
         isArchived={isArchived}
         inputText={inputText}

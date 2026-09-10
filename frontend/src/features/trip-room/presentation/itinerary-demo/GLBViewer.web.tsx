@@ -16,6 +16,27 @@ function loadEngine() {
   });
   return engine;
 }
+const prefetched = new Set<string>();
+// Warm only the first likely model; parsing every 20 MB asset would hurt responsiveness.
+export function prepareModel(asset: number) {
+  let cancelled = false;
+  const timer = setTimeout(() => {
+    if (cancelled) return;
+    loadEngine().then(() => {
+      const constructor = customElements.get('model-viewer') as (CustomElementConstructor & { modelCacheSize: number }) | undefined;
+      // model-viewer retains parsed geometry/materials and clones them on a repeat visit.
+      if (constructor) constructor.modelCacheSize = 3;
+    }).catch(() => {});
+    const uri = Asset.fromModule(asset).uri;
+    if (!prefetched.has(uri)) {
+      prefetched.add(uri);
+      const link = document.createElement('link');
+      link.rel = 'prefetch'; link.href = uri; link.as = 'fetch';
+      document.head.appendChild(link);
+    }
+  }, 500);
+  return () => { cancelled = true; clearTimeout(timer); };
+}
 export default function GLBViewer({ asset, name }: { asset: number; name: string }) {
   const element = useRef<ModelElement | null>(null);
   const initialOrbit = useRef('');
@@ -48,7 +69,7 @@ export default function GLBViewer({ asset, name }: { asset: number; name: string
   return <View style={{ borderRadius: 18, overflow: 'hidden', backgroundColor: '#e3e9ed' }}>
     <View style={{ width: '100%', aspectRatio: 1, backgroundColor: '#303436' }}>
       {React.createElement('model-viewer', {
-        key: attempt, ref: element, src: Asset.fromModule(asset).uri, alt: `${name} 3D model`,
+        key: attempt, ref: element, src: Asset.fromModule(asset).uri, alt: `${name} 3D model`, loading: 'eager',
         'camera-controls': '', 'touch-action': 'none', 'interaction-prompt': 'none',
         'shadow-intensity': '1', exposure: '1.1', 'camera-orbit': '25deg 65deg auto',
         style: { width: '100%', height: '100%', touchAction: 'none' },

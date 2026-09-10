@@ -4,14 +4,30 @@ import { WebView } from 'react-native-webview';
 import { Asset } from 'expo-asset';
 import * as FileSystem from 'expo-file-system';
 
+const encodedModels = new Map<number, Promise<string>>();
+function modelData(asset: number) {
+  if (!encodedModels.has(asset)) {
+    // Bound base64 memory while retaining the most recently opened native models.
+    if (encodedModels.size >= 2) encodedModels.delete(encodedModels.keys().next().value!);
+    const load = Asset.fromModule(asset).downloadAsync().then(file =>
+      FileSystem.readAsStringAsync(file.localUri!, { encoding: FileSystem.EncodingType.Base64 }));
+    encodedModels.set(asset, load);
+    load.catch(() => encodedModels.delete(asset));
+  }
+  return encodedModels.get(asset)!;
+}
+export function prepareModel(asset: number) {
+  const timer = setTimeout(() => { Asset.fromModule(asset).downloadAsync().catch(() => {}); }, 500);
+  return () => clearTimeout(timer);
+}
+
 export default function GLBViewer({ asset, name }: { asset: number; name: string }) {
   const [base64, setBase64] = useState('');
   const [error, setError] = useState('');
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     let current = true;
-    Asset.fromModule(asset).downloadAsync().then(async (file) => {
-      const data = await FileSystem.readAsStringAsync(file.localUri!, { encoding: FileSystem.EncodingType.Base64 });
+    modelData(asset).then(data => {
       if (current) setBase64(data);
     }).catch(() => { if (current) setError('Unable to load model.'); });
     return () => { current = false; };

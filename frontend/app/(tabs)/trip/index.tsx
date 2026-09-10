@@ -4,8 +4,8 @@ import { useRouter, useLocalSearchParams, Redirect, useSegments } from 'expo-rou
 import { useTheme } from '@/core/theme';
 import { Card, Badge, Button, EmptyState } from '@/shared/components';
 import { Avatar } from '@/shared/components/Avatar';
-import { mockTripRooms } from '@/features/trip-room/data/mock-trip-room';
-import { mockStandardRoomMembers } from '@/shared/data/standard-mock-data';
+import { mockTripRooms, mockTripMembers } from '@/features/trip-room/data/mock-trip-room';
+import { getRoomSeasonTheme } from '@/features/trip-room/data/season-presentation';
 import { Feather } from '@expo/vector-icons';
 import { useLiveTrip } from '@/lib/hooks/useLiveTrip';
 import { CreateRoomSheet, RoomSheetMode } from '@/features/trip-room/presentation/CreateRoomSheet';
@@ -130,22 +130,11 @@ export default function TripHubScreen({ initialSheet = null }: { initialSheet?: 
         ) : (
           <View style={{ gap: spacing.md }}>
             {filteredRooms.map((room) => {
-              const roomMembers = mockStandardRoomMembers.filter(m => m.room_id === room.id);
+              const roomMembers = mockTripMembers.filter(m => m.room_id === room.id);
               const displayMembers = roomMembers.slice(0, 3);
               const remainingCount = roomMembers.length > 3 ? roomMembers.length - 3 : 0;
-              const hexThemeColor = room.theme_color || colors.primary;
+              const seasonalTheme = getRoomSeasonTheme(room);
               
-              // Helper to make transparent background from hex
-              const getBgColor = () => {
-                if (room.stage === 'archived' && room.season_theme) return room.season_theme.background;
-                if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hexThemeColor)){
-                  let c: any = hexThemeColor.substring(1).split('');
-                  if(c.length === 3){ c= [c[0], c[0], c[1], c[1], c[2], c[2]]; }
-                  c= '0x'+c.join('');
-                  return 'rgba('+[(c>>16)&255, (c>>8)&255, c&255].join(',')+',0.05)';
-                }
-                return 'rgba(0,0,0,0.02)';
-              };
 
               return (
                 <Card
@@ -153,10 +142,9 @@ export default function TripHubScreen({ initialSheet = null }: { initialSheet?: 
                   style={{
                     padding: spacing.md,
                     overflow: 'hidden',
-                    backgroundColor: getBgColor(),
-                    borderColor: room.stage === 'archived' ? room.season_theme?.border : hexThemeColor,
+                    backgroundColor: seasonalTheme.background,
+                    borderColor: seasonalTheme.border,
                     borderWidth: 1,
-                    borderLeftWidth: 6,
                   }}
                   onPress={() => router.push(`/(tabs)/trip/room/${room.id}/chat` as any)}
                 >
@@ -172,15 +160,15 @@ export default function TripHubScreen({ initialSheet = null }: { initialSheet?: 
                       {room.name}
                     </Text>
                     <Badge
-                      label={room.stage === 'archived' && room.season ? `${room.season.toUpperCase()} · ARCHIVED` : room.stage.toUpperCase()}
+                      label={room.stage.toUpperCase()}
                       style={{ 
-                        backgroundColor: room.stage === 'archived' ? room.season_theme?.badge : hexThemeColor, 
+                        backgroundColor: seasonalTheme.badge,
                         borderWidth: 0,
                         paddingHorizontal: 8,
                         paddingVertical: 4
                       }}
                       textStyle={{ 
-                        color: room.stage === 'archived' ? room.season_theme?.text : '#FFFFFF',
+                        color: seasonalTheme.text,
                         fontWeight: '800' 
                       }}
                     />

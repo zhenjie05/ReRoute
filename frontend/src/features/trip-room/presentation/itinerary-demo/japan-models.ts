@@ -1,7 +1,6 @@
 // Static requires let Metro bundle GLBs without renaming the user's files.
 export const japanModels: Record<string, number> = {
   eiffel: require('../../../../../assets/models/Paris_France.glb'),
-  louvre: require('../../../../../assets/models/Paris_France.glb'),
   lyon: require('../../../../../assets/models/Lyon_France .glb'),
   bordeaux: require('../../../../../assets/models/Bordeaux_Franch.glb'),
   marseille: require('../../../../../assets/models/Marseille_France.glb'),

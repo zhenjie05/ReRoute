@@ -1,3 +1,4 @@
+import { locationPhotos } from '../../data/location-photos';
 export type CityId = 'tokyo' | 'paris' | 'bali';
 export type Coordinate = { lat: number; lng: number };
 export type TransportMode = 'train' | 'bus' | 'taxi';
@@ -11,7 +12,7 @@ export interface DemoPlace extends Coordinate {
   duration: string; description: string; model: ModelKind; photo: string;
   source: string; credit: string; transport: TransportOption[];
 }
-const commons = (file: string) => `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(file)}?width=960`;
+const commons = (file: string) => locationPhotos[file]?.imageUrl || `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(file)}?width=960`;
 const source = (file: string) => `https://commons.wikimedia.org/wiki/File:${encodeURIComponent(file)}`;
 
 // All route timings, fares, entrances and moving member coordinates are demo fixtures.
@@ -65,11 +66,11 @@ export const demoPlaces: DemoPlace[] = [
 ];
 
 export const japanCities = [
-  { id: 'tokyo-tower', name: 'Tokyo', x: 69, y: 65 },
-  { id: 'kyoto', name: 'Kyoto', x: 48, y: 73 },
-  { id: 'osaka', name: 'Osaka', x: 43, y: 79 },
-  { id: 'sapporo', name: 'Sapporo', x: 81, y: 21 },
-  { id: 'shizuoka', name: 'Shizuoka', x: 60, y: 70 },
+  { id: 'tokyo-tower', name: 'Tokyo', x: 80, y: 44 },
+  { id: 'kyoto', name: 'Kyoto', x: 29, y: 42 },
+  { id: 'osaka', name: 'Osaka', x: 29, y: 68 },
+  { id: 'sapporo', name: 'Sapporo', x: 78, y: 20 },
+  { id: 'shizuoka', name: 'Shizuoka', x: 78, y: 69 },
 ];
 [
   { id: 'kyoto', name: 'Kinkaku-ji', district: 'Kyoto', lat: 35.0394, lng: 135.7292, file: 'Kinkaku-ji, Kyoto.jpg', credit: '27curlyta · CC0 · Wikimedia Commons', description: 'Kyoto’s Golden Pavilion overlooks a mirror pond and landscaped gardens. The gold-covered upper floors and carefully framed views make this a memorable cultural stop.' },

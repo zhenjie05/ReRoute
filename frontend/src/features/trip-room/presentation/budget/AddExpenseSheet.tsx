@@ -7,7 +7,7 @@ import { useRouter } from 'expo-router';
 export const AddExpenseSheet: React.FC<{ roomId: string }> = ({ roomId }) => {
   const { colors, typography, spacing, rounded } = useTheme();
   const router = useRouter();
-  const { travelers, addExpense } = useBudgetMockData();
+  const { travelers, addExpense } = useBudgetMockData(roomId);
 
   const [amount, setAmount] = useState('');
   const [currency] = useState('USD');
@@ -21,18 +21,26 @@ export const AddExpenseSheet: React.FC<{ roomId: string }> = ({ roomId }) => {
   };
 
   const handleAddExpense = () => {
-    if (!amount || !description) return;
+    const total = Number(amount);
+    if (!Number.isFinite(total) || total <= 0 || !description.trim() || !travelers.length) return;
+    const expenseId = `expense-${Date.now()}`;
     addExpense({
-      id: Math.random().toString(),
+      id: expenseId,
       room_id: roomId,
-      category_id: 'c1',
+      category_id: 'c2',
+      category_name: category,
       description,
-      total_amount: parseFloat(amount),
+      total_amount: total,
       currency,
       paid_by: [travelers[0].id],
       created_by: travelers[0].id,
       created_at: new Date().toISOString()
-    }, []);
+    }, travelers.map((person, index) => ({
+      id: `${expenseId}-split-${index}`, expense_id: expenseId, user_id: person.id,
+      split_type: splitMethod.toLowerCase() as 'equal' | 'percentage' | 'shares' | 'exact',
+      share_value: splitMethod === 'Percentage' ? 100 / travelers.length : splitMethod === 'Exact' ? total / travelers.length : 1,
+      amount_owed: total / travelers.length,
+    })));
     router.back();
   };
 
