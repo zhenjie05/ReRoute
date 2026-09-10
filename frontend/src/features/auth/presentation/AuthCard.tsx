@@ -159,6 +159,8 @@ export const AuthCard: React.FC<AuthCardProps> = ({
         setErrorMsg(res.error);
       } else if (onSuccess) {
         onSuccess();
+      } else {
+        router.replace('/welcome' as any);
       }
     } else {
       const res = await signUp(email, password);
@@ -166,6 +168,8 @@ export const AuthCard: React.FC<AuthCardProps> = ({
         setErrorMsg(res.error);
       } else if (onSuccess) {
         onSuccess();
+      } else {
+        router.replace('/welcome?firstTime=true' as any);
       }
     }
   };
@@ -177,13 +181,19 @@ export const AuthCard: React.FC<AuthCardProps> = ({
       setErrorMsg(res.error);
     } else if (onSuccess) {
       onSuccess();
+    } else {
+      router.replace(isLogin ? ('/welcome' as any) : ('/welcome?firstTime=true' as any));
     }
   };
 
   const handleDemoSignIn = () => {
     if (demoSignIn) {
       demoSignIn();
-      if (onSuccess) onSuccess();
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.replace('/welcome' as any);
+      }
     }
   };
 
