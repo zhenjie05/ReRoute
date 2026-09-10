@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native
 import { useRouter, usePathname } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { useLiveTrip } from '@/lib/hooks/useLiveTrip';
+import { mockTripRooms } from '@/features/trip-room/data/mock-trip-room';
 import { Feather } from '@expo/vector-icons';
 
 export type TabKey = 'home' | 'trip' | 'profile';
@@ -48,7 +49,7 @@ export const BottomNavBar: React.FC<StandaloneBottomNavBarProps> = (
   const { typography, rounded, shadows } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
-  const { hasLiveTrip } = useLiveTrip();
+  const { hasLiveTrip, liveTrip } = useLiveTrip();
 
   // Hide BottomNavBar on itinerary detail screens, trip room screens, setup screens, and alerts
   const isDetailScreen =
@@ -92,13 +93,35 @@ export const BottomNavBar: React.FC<StandaloneBottomNavBarProps> = (
         canPreventDefault: true,
       });
 
-      if (!isFocused && !event.defaultPrevented) {
-        props.navigation.navigate(targetRoute ? targetRoute.name : tab.key);
+      if (!event.defaultPrevented) {
+        if (isFocused) {
+          // When clicking the active Trip tab while already in the Trip Hub, route directly into the Trip Room
+          if (tab.key === 'trip') {
+            const targetRoomId = (hasLiveTrip && liveTrip) ? liveTrip.id : mockTripRooms[0]?.id;
+            if (targetRoomId) {
+              router.push(`/(tabs)/trip/room/${targetRoomId}/chat` as any);
+            }
+          }
+        } else {
+          props.navigation.navigate({
+            name: targetRoute ? targetRoute.name : tab.key,
+            params: tab.key === 'trip' ? { mode: undefined } : undefined,
+          });
+        }
       }
     } else if (props.onTabPress) {
       props.onTabPress(tab.key);
     } else {
-      router.navigate(tab.route as any);
+      if (tab.key === 'trip') {
+        const targetRoomId = (hasLiveTrip && liveTrip) ? liveTrip.id : mockTripRooms[0]?.id;
+        if (targetRoomId) {
+          router.push(`/(tabs)/trip/room/${targetRoomId}/chat` as any);
+        } else {
+          router.navigate(tab.route as any);
+        }
+      } else {
+        router.navigate(tab.route as any);
+      }
     }
   };
 
