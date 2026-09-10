@@ -35,13 +35,43 @@ export function createRoomBudget(room: TripRoom, members: TripRoomMember[]): Roo
     amount_owed: expense.total_amount / members.length,
   })));
   const share = expenses.reduce((sum, expense) => sum + expense.total_amount, 0) / (members.length || 1);
-  const settlements: Settlement[] = room.stage === 'archived' ? members.slice(1).map(member => ({
-    id: `${room.id}-settlement-${member.user_id}`, room_id: room.id,
-    from_user_id: member.user_id, from_user_name: member.user?.name,
-    to_user_id: payer, to_user_name: members[0]?.user?.name,
-    amount: share, currency: 'USD', method: 'Recorded transfer',
-    settled_at: `${room.end_date}T18:00:00Z`,
-  })) : [];
+  let settlements: Settlement[] = [];
+  if (room.stage === 'archived') {
+    settlements = members.slice(1).map(member => ({
+      id: `${room.id}-settlement-${member.user_id}`, room_id: room.id,
+      from_user_id: member.user_id, from_user_name: member.user?.name,
+      to_user_id: payer, to_user_name: members[0]?.user?.name,
+      amount: share, currency: 'USD', method: 'Recorded transfer',
+      settled_at: `${room.end_date}T18:00:00Z`,
+    }));
+  } else if (room.stage === 'active' && members.length >= 4) {
+    // 1. User owes M1 (User pays M1 an amount greater than what M1 owes User)
+    settlements.push({
+      id: `${room.id}-settlement-user-owes`, room_id: room.id,
+      from_user_id: payer, from_user_name: members[0]?.user?.name,
+      to_user_id: members[1].user_id, to_user_name: members[1].user?.name,
+      amount: share + 45, currency: 'USD', method: 'Recorded transfer',
+      settled_at: `${room.start_date}T12:00:00Z`,
+    });
+
+    // 2. M2 owes User (M2 pays a partial amount, still owes)
+    settlements.push({
+      id: `${room.id}-settlement-user-is-owed`, room_id: room.id,
+      from_user_id: members[2].user_id, from_user_name: members[2].user?.name,
+      to_user_id: payer, to_user_name: members[0]?.user?.name,
+      amount: share - 20, currency: 'USD', method: 'Recorded transfer',
+      settled_at: `${room.start_date}T13:00:00Z`,
+    });
+
+    // 3. M3 is Already Settled (M3 pays exact amount owed)
+    settlements.push({
+      id: `${room.id}-settlement-settled`, room_id: room.id,
+      from_user_id: members[3].user_id, from_user_name: members[3].user?.name,
+      to_user_id: payer, to_user_name: members[0]?.user?.name,
+      amount: share, currency: 'USD', method: 'Recorded transfer',
+      settled_at: `${room.start_date}T14:00:00Z`,
+    });
+  }
   return { categories, expenses, splits, settlements };
 }
 
