@@ -11,6 +11,7 @@ import {
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { Button } from '@/shared/components/Button';
+import { TimelineItem } from '../data/mock-history';
 
 interface AITripPlanReviewModalProps {
   visible: boolean;
@@ -23,6 +24,8 @@ interface AITripPlanReviewModalProps {
     pace: string;
   };
   prompt?: string;
+  matchPercentage?: number;
+  itineraryPreview?: TimelineItem[];
 }
 
 export const AITripPlanReviewModal: React.FC<AITripPlanReviewModalProps> = ({
@@ -36,6 +39,8 @@ export const AITripPlanReviewModal: React.FC<AITripPlanReviewModalProps> = ({
     pace: 'Moderate',
   },
   prompt,
+  matchPercentage = 98,
+  itineraryPreview = [],
 }) => {
   const { colors, typography, spacing, rounded, shadows } = useTheme();
   const router = useRouter();
@@ -145,7 +150,7 @@ export const AITripPlanReviewModal: React.FC<AITripPlanReviewModalProps> = ({
                   ]}
                 >
                   <Text style={[typography.utilityTiny, { color: '#15803d', fontWeight: '800' }]}>
-                    ★ Matched 98%
+                    ★ Matched {matchPercentage}%
                   </Text>
                 </View>
               </View>
@@ -248,145 +253,166 @@ export const AITripPlanReviewModal: React.FC<AITripPlanReviewModalProps> = ({
 
             {/* Timeline Stops Stepper */}
             <View style={styles.timelineContainer}>
-              {/* Stop 1: Transportation */}
-              <View style={styles.timelineItem}>
-                <View style={styles.stepperCol}>
-                  <View style={[styles.stepDot, { backgroundColor: colors.primary }]} />
-                  <View style={[styles.stepLine, { backgroundColor: colors.outlineVariant }]} />
-                </View>
-                <View
-                  style={[
-                    styles.stepCard,
-                    {
-                      backgroundColor: colors.card,
-                      borderColor: colors.surfaceContainerHigh,
-                      borderRadius: rounded.xl,
-                      padding: spacing.md,
-                      ...shadows.soft,
-                    },
-                  ]}
-                >
-                  <View style={styles.cardHeaderRow}>
-                    <Text style={[typography.utilityTiny, { color: colors.primary, fontWeight: '800' }]}>
-                      ✈️ HOW TO GET THERE
-                    </Text>
-                    <View style={[styles.optBadge, { backgroundColor: colors.primaryContainer, borderRadius: rounded.md }]}>
-                      <Text style={[typography.utilityTiny, { color: colors.onPrimaryContainer, fontWeight: '700' }]}>
-                        ✨ Optimized for Time
-                      </Text>
-                    </View>
-                  </View>
-                  <Text style={[typography.labelMd, { color: colors.onSurface, fontWeight: '800', marginTop: 4 }]}>
-                    Kuala Lumpur (KUL) ✈️ Haneda (HND)
-                  </Text>
-                  <View style={styles.flightMetaRow}>
-                    <Text style={[typography.utilityTiny, { color: colors.outline }]}>
-                      09:10 - 17:10 • Direct (7h 00m)
-                    </Text>
-                    <Text style={[typography.utilityTiny, { color: colors.primary, fontWeight: '800' }]}>
-                      ✓ Japan Airlines JL724 • $340 / person
-                    </Text>
-                  </View>
-                </View>
-              </View>
-
-              {/* Stop 2: Attractions & Sights */}
-              <View style={styles.timelineItem}>
-                <View style={styles.stepperCol}>
-                  <View style={[styles.stepDot, { backgroundColor: colors.primary }]} />
-                  <View style={[styles.stepLine, { backgroundColor: colors.outlineVariant }]} />
-                </View>
-                <View
-                  style={[
-                    styles.stepCard,
-                    {
-                      backgroundColor: colors.card,
-                      borderColor: colors.surfaceContainerHigh,
-                      borderRadius: rounded.xl,
-                      padding: spacing.md,
-                      ...shadows.soft,
-                    },
-                  ]}
-                >
-                  <View style={styles.cardHeaderRow}>
-                    <Text style={[typography.utilityTiny, { color: colors.primary, fontWeight: '800' }]}>
-                      ✨ WHAT TO SEE & DO
-                    </Text>
-                    <View style={[styles.optBadge, { backgroundColor: '#dcfce7', borderRadius: rounded.md }]}>
-                      <Text style={[typography.utilityTiny, { color: '#15803d', fontWeight: '700' }]}>
-                        Free Entry
-                      </Text>
-                    </View>
-                  </View>
-                  <View style={styles.attractionHeroRow}>
-                    <View style={styles.thumbnailWrapper}>
-                      <Image
-                        source={{ uri: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=400&q=80' }}
-                        style={[styles.attractionThumb, { borderRadius: rounded.md }]}
-                        resizeMode="cover"
-                      />
-                      <View style={[styles.ratingOverlay, { backgroundColor: 'rgba(0,0,0,0.7)', borderRadius: rounded.sm }]}>
-                        <Text style={[typography.utilityTiny, { color: '#fde047', fontWeight: '800' }]}>
-                          4.8 ★
-                        </Text>
+              {itineraryPreview.length === 0 ? (
+                <Text style={[typography.bodySm, { color: colors.outline, textAlign: 'center', marginVertical: spacing.lg }]}>
+                  No itinerary data available for this trip.
+                </Text>
+              ) : (
+                itineraryPreview.map((item, index) => {
+                  const isLast = index === itineraryPreview.length - 1;
+                  
+                  if (item.type === 'transport') {
+                    return (
+                      <View key={item.id} style={styles.timelineItem}>
+                        <View style={styles.stepperCol}>
+                          <View style={[styles.stepDot, { backgroundColor: colors.primary }]} />
+                          {!isLast && <View style={[styles.stepLine, { backgroundColor: colors.outlineVariant }]} />}
+                        </View>
+                        <View
+                          style={[
+                            styles.stepCard,
+                            {
+                              backgroundColor: colors.card,
+                              borderColor: colors.surfaceContainerHigh,
+                              borderRadius: rounded.xl,
+                              padding: spacing.md,
+                              ...shadows.soft,
+                            },
+                          ]}
+                        >
+                          <View style={styles.cardHeaderRow}>
+                            <Text style={[typography.utilityTiny, { color: colors.primary, fontWeight: '800' }]}>
+                              ✈️ HOW TO GET THERE
+                            </Text>
+                            <View style={[styles.optBadge, { backgroundColor: colors.primaryContainer, borderRadius: rounded.md }]}>
+                              <Text style={[typography.utilityTiny, { color: colors.onPrimaryContainer, fontWeight: '700' }]}>
+                                ✨ Optimized for Time
+                              </Text>
+                            </View>
+                          </View>
+                          <Text style={[typography.labelMd, { color: colors.onSurface, fontWeight: '800', marginTop: 4 }]}>
+                            {item.title}
+                          </Text>
+                          <View style={styles.flightMetaRow}>
+                            <Text style={[typography.utilityTiny, { color: colors.outline }]}>
+                              {item.meta1}
+                            </Text>
+                            <Text style={[typography.utilityTiny, { color: colors.primary, fontWeight: '800' }]}>
+                              {item.meta2}
+                            </Text>
+                          </View>
+                        </View>
                       </View>
-                    </View>
-                    <View style={{ flex: 1, marginLeft: spacing.sm }}>
-                      <Text style={[typography.labelMd, { color: colors.onSurface, fontWeight: '800' }]}>
-                        Senso-ji Temple & Nakamise Street
-                      </Text>
-                      <Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant, marginTop: 2, lineHeight: 15 }]} numberOfLines={2}>
-                        Historic Buddhist temple & Nakamise shopping street in Asakusa.
-                      </Text>
-                    </View>
-                  </View>
-                  <View style={styles.metaChipsRow}>
-                    <View style={[styles.miniChip, { backgroundColor: colors.surfaceContainerLow, borderRadius: rounded.md }]}>
-                      <Text style={[typography.utilityTiny, { color: colors.onSurface }]}>🕒 2 - 3 hours</Text>
-                    </View>
-                    <View style={[styles.miniChip, { backgroundColor: colors.surfaceContainerLow, borderRadius: rounded.md }]}>
-                      <Text style={[typography.utilityTiny, { color: colors.onSurface }]}>☀️ Best at 14:00</Text>
-                    </View>
-                  </View>
-                </View>
-              </View>
+                    );
+                  }
 
-              {/* Stop 3: Stay / Accommodation */}
-              <View style={styles.timelineItem}>
-                <View style={styles.stepperCol}>
-                  <View style={[styles.stepDot, { backgroundColor: colors.outlineVariant }]} />
-                </View>
-                <View
-                  style={[
-                    styles.stepCard,
-                    {
-                      backgroundColor: colors.surfaceContainerLow,
-                      borderColor: colors.outlineVariant,
-                      borderStyle: 'dashed',
-                      borderRadius: rounded.xl,
-                      padding: spacing.md,
-                    },
-                  ]}
-                >
-                  <Text style={[typography.utilityTiny, { color: colors.outline, fontWeight: '800' }]}>
-                    🏨 WHERE TO STAY
-                  </Text>
-                  <Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant, marginVertical: 4 }]}>
-                    No hotel locked in for Day 1 yet. Choose nearby Asakusa or Shinjuku Ryokan.
-                  </Text>
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    style={[
-                      styles.addStayBtn,
-                      { borderColor: colors.primary, borderRadius: rounded.lg },
-                    ]}
-                  >
-                    <Text style={[typography.utilityTiny, { color: colors.primary, fontWeight: '800' }]}>
-                      + Add Suggested Stay
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
+                  if (item.type === 'attraction') {
+                    return (
+                      <View key={item.id} style={styles.timelineItem}>
+                        <View style={styles.stepperCol}>
+                          <View style={[styles.stepDot, { backgroundColor: colors.primary }]} />
+                          {!isLast && <View style={[styles.stepLine, { backgroundColor: colors.outlineVariant }]} />}
+                        </View>
+                        <View
+                          style={[
+                            styles.stepCard,
+                            {
+                              backgroundColor: colors.card,
+                              borderColor: colors.surfaceContainerHigh,
+                              borderRadius: rounded.xl,
+                              padding: spacing.md,
+                              ...shadows.soft,
+                            },
+                          ]}
+                        >
+                          <View style={styles.cardHeaderRow}>
+                            <Text style={[typography.utilityTiny, { color: colors.primary, fontWeight: '800' }]}>
+                              ✨ WHAT TO SEE & DO
+                            </Text>
+                            <View style={[styles.optBadge, { backgroundColor: '#dcfce7', borderRadius: rounded.md }]}>
+                              <Text style={[typography.utilityTiny, { color: '#15803d', fontWeight: '700' }]}>
+                                Free Entry
+                              </Text>
+                            </View>
+                          </View>
+                          <View style={styles.attractionHeroRow}>
+                            <View style={styles.thumbnailWrapper}>
+                              <Image
+                                source={{ uri: item.imageUrl }}
+                                style={[styles.attractionThumb, { borderRadius: rounded.md }]}
+                                resizeMode="cover"
+                              />
+                              <View style={[styles.ratingOverlay, { backgroundColor: 'rgba(0,0,0,0.7)', borderRadius: rounded.sm }]}>
+                                <Text style={[typography.utilityTiny, { color: '#fde047', fontWeight: '800' }]}>
+                                  {item.rating} ★
+                                </Text>
+                              </View>
+                            </View>
+                            <View style={{ flex: 1, marginLeft: spacing.sm }}>
+                              <Text style={[typography.labelMd, { color: colors.onSurface, fontWeight: '800' }]}>
+                                {item.title}
+                              </Text>
+                              <Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant, marginTop: 2, lineHeight: 15 }]} numberOfLines={2}>
+                                {item.description}
+                              </Text>
+                            </View>
+                          </View>
+                          <View style={styles.metaChipsRow}>
+                            {item.tags?.map((tag, idx) => (
+                              <View key={idx} style={[styles.miniChip, { backgroundColor: colors.surfaceContainerLow, borderRadius: rounded.md }]}>
+                                <Text style={[typography.utilityTiny, { color: colors.onSurface }]}>{tag}</Text>
+                              </View>
+                            ))}
+                          </View>
+                        </View>
+                      </View>
+                    );
+                  }
+
+                  if (item.type === 'accommodation') {
+                    return (
+                      <View key={item.id} style={styles.timelineItem}>
+                        <View style={styles.stepperCol}>
+                          <View style={[styles.stepDot, { backgroundColor: colors.outlineVariant }]} />
+                          {!isLast && <View style={[styles.stepLine, { backgroundColor: colors.outlineVariant }]} />}
+                        </View>
+                        <View
+                          style={[
+                            styles.stepCard,
+                            {
+                              backgroundColor: colors.surfaceContainerLow,
+                              borderColor: colors.outlineVariant,
+                              borderStyle: 'dashed',
+                              borderRadius: rounded.xl,
+                              padding: spacing.md,
+                            },
+                          ]}
+                        >
+                          <Text style={[typography.utilityTiny, { color: colors.outline, fontWeight: '800' }]}>
+                            🏨 WHERE TO STAY
+                          </Text>
+                          <Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant, marginVertical: 4 }]}>
+                            {item.description}
+                          </Text>
+                          <TouchableOpacity
+                            activeOpacity={0.8}
+                            style={[
+                              styles.addStayBtn,
+                              { borderColor: colors.primary, borderRadius: rounded.lg },
+                            ]}
+                          >
+                            <Text style={[typography.utilityTiny, { color: colors.primary, fontWeight: '800' }]}>
+                              + Add Suggested Stay
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    );
+                  }
+
+                  return null;
+                })
+              )}
             </View>
 
             {/* Primary Action Button */}

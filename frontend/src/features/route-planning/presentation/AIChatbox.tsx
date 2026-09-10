@@ -6,9 +6,12 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
+  Modal,
+  FlatList,
 } from 'react-native';
 import { useTheme } from '@/core/theme';
 import { AITripPlanReviewModal } from './AITripPlanReviewModal';
+import { mockAiHistory, TripHistoryItem } from '../data/mock-history';
 
 export const AIChatbox: React.FC = () => {
   const { colors, typography, spacing, rounded, shadows } = useTheme();
@@ -26,6 +29,8 @@ export const AIChatbox: React.FC = () => {
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [reviewModalVisible, setReviewModalVisible] = useState(false);
+  const [historyModalVisible, setHistoryModalVisible] = useState(false);
+  const [selectedHistoryTrip, setSelectedHistoryTrip] = useState<TripHistoryItem | null>(null);
 
   const companionOptions = ['Solo', 'Family', 'Couple', 'Friends'];
   const styleOptions = ['Cultural', 'Classic', 'Nature', 'Cityscape'];
@@ -75,7 +80,7 @@ export const AIChatbox: React.FC = () => {
               </Text>
             </View>
           </View>
-          <TouchableOpacity activeOpacity={0.8} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          <TouchableOpacity onPress={() => setHistoryModalVisible(true)} activeOpacity={0.8} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
             <Text style={[typography.utilityTiny, { color: colors.primary, fontWeight: '700' }]}>
               See History ↗
             </Text>
@@ -392,16 +397,56 @@ export const AIChatbox: React.FC = () => {
       {/* Review Modal Dialog */}
       <AITripPlanReviewModal
         visible={reviewModalVisible}
-        onClose={() => setReviewModalVisible(false)}
-        destination={destination}
-        duration={dates}
+        onClose={() => {
+          setReviewModalVisible(false);
+          setSelectedHistoryTrip(null);
+        }}
+        destination={selectedHistoryTrip ? selectedHistoryTrip.destination : destination}
+        duration={selectedHistoryTrip ? selectedHistoryTrip.dates : dates}
         preferences={{
-          companions,
-          style: travelStyle,
-          pace: travelPace,
+          companions: selectedHistoryTrip ? selectedHistoryTrip.tags[0] : companions,
+          style: selectedHistoryTrip ? selectedHistoryTrip.tags[1] : travelStyle,
+          pace: selectedHistoryTrip ? selectedHistoryTrip.tags[2] : travelPace,
         }}
         prompt={promptText}
+        matchPercentage={selectedHistoryTrip ? selectedHistoryTrip.matchPercentage : 98}
+        itineraryPreview={selectedHistoryTrip ? selectedHistoryTrip.itineraryPreview : []}
       />
+
+      {/* History Modal */}
+      <Modal visible={historyModalVisible} transparent animationType="slide" onRequestClose={() => setHistoryModalVisible(false)}>
+        <TouchableOpacity style={styles.historyBackdrop} activeOpacity={1} onPress={() => setHistoryModalVisible(false)}>
+          <TouchableOpacity activeOpacity={1} style={styles.historyModalContent}>
+            <View style={styles.historyModalHeader}>
+              <Text style={[typography.labelLg, { color: colors.onSurface, fontWeight: '800' }]}>AI Generation History</Text>
+              <TouchableOpacity onPress={() => setHistoryModalVisible(false)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Text style={{ fontSize: 16, color: colors.outline }}>✕</Text>
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              data={mockAiHistory}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={{ paddingBottom: spacing.lg }}
+              renderItem={({ item }) => (
+                <TouchableOpacity 
+                  style={[styles.historyListItem, { borderBottomColor: colors.surfaceContainerHigh }]} 
+                  onPress={() => {
+                    setSelectedHistoryTrip(item);
+                    setHistoryModalVisible(false);
+                    setReviewModalVisible(true);
+                  }}
+                >
+                  <Text style={{ fontSize: 24, marginRight: 12 }}>📍</Text>
+                  <View>
+                    <Text style={[typography.labelMd, { color: colors.onSurface, fontWeight: '700' }]}>{item.destination}</Text>
+                    <Text style={[typography.utilityTiny, { color: colors.outline }]}>{item.dates} • {item.duration}</Text>
+                  </View>
+                </TouchableOpacity>
+              )}
+            />
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 };
@@ -509,5 +554,31 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  historyBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  historyModalContent: {
+    width: '100%',
+    maxHeight: '80%',
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    paddingBottom: 40,
+  },
+  historyModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  historyListItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
   },
 });
