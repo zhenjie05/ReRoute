@@ -74,12 +74,19 @@ export const AlbumPhotoGrid: React.FC<AlbumPhotoGridProps> = ({
             </Text>
 
             <View style={[styles.grid, { paddingHorizontal: spacing.lg }]}>
-              {visiblePhotos.map(photo => (
+              {visiblePhotos.map((photo, index) => (
                 <TouchableOpacity
                   key={photo.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={`View photo: ${photo.location_name || 'Trip memory'}`}
                   activeOpacity={0.8}
                   onPress={() => onPhotoPress(photo.id)}
-                  style={{ width: cellWidth, aspectRatio: 1, marginBottom: '2%' }}
+                  style={{ 
+                    width: cellWidth, 
+                    aspectRatio: 1, 
+                    marginBottom: '2%',
+                    marginRight: (index + 1) % 3 === 0 ? 0 : '2%'
+                  }}
                 >
                   <Image
                     source={{ uri: photo.url }}
@@ -99,6 +106,7 @@ export const AlbumPhotoGrid: React.FC<AlbumPhotoGridProps> = ({
                       width: cellWidth,
                       aspectRatio: 1,
                       marginBottom: '2%',
+                      marginRight: (visiblePhotos.length + 1) % 3 === 0 ? 0 : '2%',
                       backgroundColor: colors.surfaceContainer,
                       borderRadius: rounded.md,
                     }
@@ -137,7 +145,7 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
   },
   overflowTile: {
     alignItems: 'center',

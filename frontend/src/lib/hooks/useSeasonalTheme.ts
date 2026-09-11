@@ -1,3 +1,4 @@
+// fallow-ignore-file unused-file
 import { useTheme, Season } from '@/core/theme';
 import { useEffect } from 'react';
 

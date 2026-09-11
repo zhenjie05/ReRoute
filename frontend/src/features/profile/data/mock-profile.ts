@@ -1,3 +1,4 @@
+// fallow-ignore-file unused-file
 import { Badge } from '@/models/badge';
 import { TripRoom } from '@/models/trip-room';
 import { CommunityPost } from '@/models/discover';

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
@@ -6,14 +6,23 @@ import { Card } from '@/shared/components/Card';
 import { Avatar } from '@/shared/components/Avatar';
 import { Badge } from '@/shared/components/Badge';
 import { DiscoverPostCard } from '@/features/discover/presentation/DiscoverPostCard';
+import { toggleStarPost, cloneDiscoverItinerary } from '@/features/discover/data/mock-discover';
 import { useProfileMockData } from '../data/useProfileMockData';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { useLiveTrip } from '@/lib/hooks/useLiveTrip';
+import { EditProfileModal } from './components/EditProfileModal';
+import { Feather, Ionicons } from '@expo/vector-icons';
 
 export const ProfileScreen: React.FC = () => {
   const { colors, typography, spacing, rounded } = useTheme();
   const router = useRouter();
   
+  // Use global auth state to keep header in sync
+  const { user: authUser, signOut } = useAuth();
+  const { liveTrip } = useLiveTrip();
+
   const {
-    user,
+    user: mockUser,
     badges,
     userBadges,
     starredTrips,
@@ -21,12 +30,19 @@ export const ProfileScreen: React.FC = () => {
     archivedTrips,
   } = useProfileMockData();
 
+  // Combine auth user with mock user for standard fields
+  const displayName = authUser?.name || mockUser.display_name;
+  const avatarUrl = authUser?.avatar || mockUser.avatar_url || undefined;
+
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+
   const handleEditProfile = () => {
-    Alert.alert('Edit Profile', 'Edit profile modal would open here.');
+    setIsEditModalVisible(true);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     Alert.alert('Logout', 'Logging out...');
+    await signOut();
     router.replace('/');
   };
 
@@ -46,9 +62,9 @@ export const ProfileScreen: React.FC = () => {
         <View style={{ backgroundColor: colors.surfaceContainerLow, borderRadius: rounded.xl, padding: spacing.xl, alignItems: 'center', marginBottom: spacing.xl }}>
           <TouchableOpacity onPress={handleEditProfile} style={{ position: 'relative' }}>
             <Avatar 
-              source={user.avatar_url ? { uri: user.avatar_url } : undefined} 
+              uri={avatarUrl} 
               size={96} 
-              fallback={user.display_name.charAt(0)} 
+              name={displayName} 
             />
             {/* Edit Badge overlay */}
             <View style={{ position: 'absolute', bottom: 0, right: 0, backgroundColor: colors.surface, borderRadius: 12, padding: 4, elevation: 2 }}>
@@ -57,19 +73,17 @@ export const ProfileScreen: React.FC = () => {
           </TouchableOpacity>
           
           <Text style={[typography.headlineMd, { color: colors.onSurface, fontWeight: 'bold', marginTop: spacing.md }]}>
-            {user.display_name}
-          </Text>
-          
-          <Text style={[typography.bodySm, { color: colors.onSurfaceVariant, marginTop: spacing.xs }]}>
-            Level 12 Traveller · {user.trip_count} trips · {user.country_count} countries
+            {displayName}
           </Text>
           
           <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md }}>
-            <View style={styles.statPill}>
-              <Text style={styles.statPillText}>🔥 {languageProgress.streak_days}d Streak</Text>
+            <View style={[styles.statPill, { flexDirection: 'row', alignItems: 'center', gap: 4 }]}>
+              <Ionicons name="flame" size={16} color="#d97706" />
+              <Text style={styles.statPillText}>{languageProgress.streak_days}d Streak</Text>
             </View>
-            <View style={styles.statPill}>
-              <Text style={styles.statPillText}>📷 420 Photos</Text>
+            <View style={[styles.statPill, { flexDirection: 'row', alignItems: 'center', gap: 4 }]}>
+              <Feather name="image" size={14} color="#d97706" />
+              <Text style={styles.statPillText}>420 Photos</Text>
             </View>
           </View>
         </View>
@@ -118,16 +132,27 @@ export const ProfileScreen: React.FC = () => {
             </Text>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.md }}>
-            {starredTrips.map(st => (
-              <View key={st.id} style={{ width: 280 }}>
-                <DiscoverPostCard 
-                  post={st.post} 
-                  onToggleStar={() => {}} 
-                  onClone={() => Alert.alert('Clone Trip', `Cloning ${st.post.title}...`)}
-                  sourceTab="profile"
-                />
-              </View>
-            ))}
+            {starredTrips
+              .filter((st): st is typeof st & { post: NonNullable<typeof st.post> } => Boolean(st.post))
+              .map(st => (
+                <View key={st.id} style={{ width: 280 }}>
+                  <DiscoverPostCard 
+                    post={st.post} 
+                    onToggleStar={(id) => toggleStarPost(id)} 
+                    onClone={(id) => {
+                      const newRoom = cloneDiscoverItinerary(id);
+                      Alert.alert('Itinerary Cloned! 🎉', `"${st.post.title}" has been cloned into your planning trips.`, [
+                        {
+                          text: 'View Itinerary 📅',
+                          onPress: () => router.push(`/(tabs)/trip/room/${newRoom.id}/itinerary` as any),
+                        },
+                        { text: 'Stay Here', style: 'cancel' },
+                      ]);
+                    }}
+                    sourceTab="profile"
+                  />
+                </View>
+              ))}
           </ScrollView>
         </View>
 
@@ -152,7 +177,7 @@ export const ProfileScreen: React.FC = () => {
                     {trip.dates}
                   </Text>
                 </View>
-                <Badge label="Archived" variant="season" style={{ backgroundColor: '#D4E8D4' }} />
+                <Badge label="Archived" variant="archived" />
               </Card>
             ))}
           </View>
@@ -165,9 +190,12 @@ export const ProfileScreen: React.FC = () => {
               <Text style={[typography.labelLg, { color: '#8b4b00', fontWeight: 'bold' }]}>
                 {languageProgress.language} Progress
               </Text>
-              <Text style={[typography.bodySm, { color: '#8b4b00', marginTop: 2 }]}>
-                {languageProgress.streak_days}-day streak 🔥
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2, gap: 4 }}>
+                <Text style={[typography.bodySm, { color: '#8b4b00' }]}>
+                  {languageProgress.streak_days}-day streak
+                </Text>
+                <Ionicons name="flame" size={14} color="#8b4b00" />
+              </View>
             </View>
             <Text style={{ fontSize: 28, color: '#8b4b00' }}>A文</Text>
           </View>
@@ -180,7 +208,15 @@ export const ProfileScreen: React.FC = () => {
             <Text style={[typography.utilityTiny, { color: '#8b4b00' }]}>
               {languageProgress.mastery_percent}% Mastered
             </Text>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                if (liveTrip) {
+                  router.push(`/(tabs)/trip/room/${liveTrip.id}/languages?tab=lessons` as any);
+                } else {
+                  router.push('/(tabs)/trip?mode=list' as any);
+                }
+              }}
+            >
               <Text style={[typography.labelSm, { color: '#8b4b00', fontWeight: 'bold' }]}>
                 Continue learning →
               </Text>
@@ -191,16 +227,23 @@ export const ProfileScreen: React.FC = () => {
         {/* Settings & Logout */}
         <View style={{ gap: spacing.md, marginTop: spacing.lg }}>
           <TouchableOpacity onPress={handleSettings} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: spacing.sm }}>
-            <Text style={{ fontSize: 20, marginRight: spacing.md }}>⚙️</Text>
+            <Feather name="settings" size={20} color={colors.onSurface} style={{ marginRight: spacing.md }} />
             <Text style={[typography.labelLg, { color: colors.onSurface, fontWeight: 'bold' }]}>Settings</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={handleLogout} style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: spacing.sm }}>
-            <Text style={{ fontSize: 20, marginRight: spacing.md }}>🚪</Text>
+            <Feather name="log-out" size={20} color={colors.error} style={{ marginRight: spacing.md }} />
             <Text style={[typography.labelLg, { color: colors.error, fontWeight: 'bold' }]}>Logout</Text>
           </TouchableOpacity>
         </View>
 
       </ScrollView>
+
+      <EditProfileModal
+        visible={isEditModalVisible}
+        onClose={() => setIsEditModalVisible(false)}
+        initialName={displayName}
+        initialAvatar={avatarUrl}
+      />
     </View>
   );
 };
@@ -222,5 +265,5 @@ const styles = StyleSheet.create({
     height: 70,
     justifyContent: 'center',
     alignItems: 'center',
-  }
+  },
 });

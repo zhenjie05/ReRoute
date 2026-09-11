@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import { useTheme } from '@/core/theme';
-import { Card, Button } from '@/shared/components';
+import { Card } from '@/shared/components';
 import { useRouter } from 'expo-router';
 
 export const OcrReviewScreen: React.FC<{ roomId: string }> = ({ roomId }) => {

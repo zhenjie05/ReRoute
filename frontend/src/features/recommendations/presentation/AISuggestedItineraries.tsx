@@ -10,6 +10,7 @@ import {
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { mockRecommendations, RecommendedTrip } from '@/features/recommendations/data/mock-recommendations';
+import { cloneDiscoverItinerary } from '@/features/discover/data/mock-discover';
 
 export const AISuggestedItineraries: React.FC = () => {
   const { colors, typography, spacing, rounded, shadows } = useTheme();
@@ -20,7 +21,12 @@ export const AISuggestedItineraries: React.FC = () => {
   };
 
   const handleClonePress = (trip: RecommendedTrip) => {
-    router.push(`/(tabs)/trip/setup/new?clone_post_id=${trip.clone_post_id}` as any);
+    try {
+      const newRoom = cloneDiscoverItinerary(trip.clone_post_id);
+      router.push(`/(tabs)/trip/room/${newRoom.id}/itinerary` as any);
+    } catch {
+      router.navigate('/(tabs)/trip' as any);
+    }
   };
 
   return (
@@ -29,7 +35,7 @@ export const AISuggestedItineraries: React.FC = () => {
       <View style={[styles.headerRow, { paddingHorizontal: spacing.lg }]}>
         <View>
           <View style={styles.titleRow}>
-            <Text style={{ fontSize: 16 }}>✨</Text>
+            <Text style={{ fontSize: 16 }}></Text>
             <Text style={[typography.headlineSm, { color: colors.onSurface, fontWeight: '800', marginLeft: 6 }]}>
               Trending AI Itineraries
             </Text>
@@ -41,7 +47,7 @@ export const AISuggestedItineraries: React.FC = () => {
 
         <TouchableOpacity
           activeOpacity={0.8}
-          onPress={() => router.push('/(tabs)/home/discover/post-kyoto-1' as any)}
+          onPress={() => router.push('/(tabs)/home/discover' as any)}
         >
           <Text style={[typography.utilityTiny, { color: colors.primary, fontWeight: '700' }]}>
             View All →
@@ -105,10 +111,9 @@ export const AISuggestedItineraries: React.FC = () => {
                 {trip.match_tags.join(' • ')} ({trip.duration_days} Days)
               </Text>
 
-              {/* Card Footer: Clone Counter + Clone CTA */}
               <View style={styles.cardFooter}>
                 <Text style={[typography.utilityTiny, { color: colors.outline }]}>
-                  📋 243 cloned
+                  243 cloned
                 </Text>
 
                 <TouchableOpacity

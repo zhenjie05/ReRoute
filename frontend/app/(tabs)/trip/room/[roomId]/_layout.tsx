@@ -1,35 +1,41 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { Slot, useLocalSearchParams, useRouter, usePathname } from 'expo-router';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { Slot, useRouter, usePathname } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { Badge } from '@/shared/components';
 import { mockTripRooms } from '@/features/trip-room/data/mock-trip-room';
+import { getRoomSeasonTheme } from '@/features/trip-room/data/season-presentation';
+import ArchivedItinerary from '@/features/trip-room/presentation/itinerary-demo/ArchivedItinerary';
+import { Feather } from '@expo/vector-icons';
 
 const roomTabs = [
-  { slug: 'chat', label: '💬 Chat' },
-  { slug: 'itinerary', label: '📅 Itinerary' },
-  { slug: 'budget', label: '💰 Budget' },
-  { slug: 'album', label: '📷 Album' },
-  { slug: 'languages', label: '🗣️ Languages' },
+  { slug: 'chat', label: 'Discussion' },
+  { slug: 'itinerary', label: 'Itinerary' },
+  { slug: 'budget', label: 'Budget' },
+  { slug: 'album', label: 'Album' },
+  { slug: 'languages', label: 'Language' },
 ];
 
 export default function TripRoomLayout() {
-  const { roomId } = useLocalSearchParams<{ roomId: string }>();
   const { colors, typography, spacing, rounded } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
+  // Slot layouts can retain local params when switching between rooms.
+  const roomId = decodeURIComponent(pathname.split('/room/')[1]?.split('/')[0] || '');
 
   const room = mockTripRooms.find((r) => r.id === roomId) || mockTripRooms[0];
+  const stageLabel = room.stage.toUpperCase();
+  const seasonalTheme = getRoomSeasonTheme(room);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      {/* Dynamic Seasonal Top Header */}
+      {/* Dynamic Top Header */}
       <View
         style={[
           styles.header,
           {
-            backgroundColor: '#ffffff',
-            borderBottomColor: colors.cardBorder,
+            backgroundColor: seasonalTheme.background,
+            borderBottomColor: seasonalTheme.border,
             paddingHorizontal: spacing.lg,
             paddingTop: spacing.md,
             paddingBottom: spacing.sm,
@@ -37,22 +43,31 @@ export default function TripRoomLayout() {
         ]}
       >
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <TouchableOpacity onPress={() => router.push('/(tabs)/trip' as any)} style={{ padding: 4 }}>
+          <TouchableOpacity onPress={() => router.push('/(tabs)/trip?mode=list' as any)} style={{ padding: 4 }}>
             <Text style={{ fontSize: 18 }}>←</Text>
           </TouchableOpacity>
 
-          <View style={{ alignItems: 'center' }}>
-            <Text style={[typography.headlineSm, { color: colors.onSurface }]}>
-              {room.name}
-            </Text>
-            <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center', marginTop: 2 }}>
-              <Badge
-                label={room.stage.toUpperCase()}
-                variant={room.stage === 'active' ? 'season' : 'outline'}
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {room.groupProfileImage && (
+              <Image
+                source={{ uri: room.groupProfileImage }}
+                style={{ width: 44, height: 44, borderRadius: 22, marginRight: 12, backgroundColor: '#eee' }}
+                resizeMode="cover"
               />
-              <Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant }]}>
-                {room.destination}
+            )}
+            <View style={{ alignItems: 'flex-start' }}>
+              <Text style={[typography.headlineSm, { color: colors.onSurface }]}>
+                {room.name}
               </Text>
+              <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center', marginTop: 2 }}>
+                <Badge
+                  label={room.stage === 'archived' && room.season ? `${room.season.toUpperCase()} · ${stageLabel}` : stageLabel}
+                  variant={room.stage}
+                />
+                <Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant }]}>
+                  {room.destination}
+                </Text>
+              </View>
             </View>
           </View>
 
@@ -61,7 +76,7 @@ export default function TripRoomLayout() {
             onPress={() => router.push(`/(tabs)/trip/room/${room.id}/settings` as any)}
             style={{ padding: 6 }}
           >
-            <Text style={{ fontSize: 20 }}>⚙️</Text>
+            <Feather name="settings" size={24} color="#333" />
           </TouchableOpacity>
         </View>
 
@@ -76,6 +91,9 @@ export default function TripRoomLayout() {
             return (
               <TouchableOpacity
                 key={tab.slug}
+                accessibilityRole="tab"
+                accessibilityLabel={tab.label.slice(tab.label.indexOf(' ') + 1)}
+                accessibilityState={{ selected: isActive }}
                 onPress={() => router.push(`/(tabs)/trip/room/${room.id}/${tab.slug}` as any)}
                 style={[
                   styles.tabPill,
@@ -106,7 +124,7 @@ export default function TripRoomLayout() {
 
       {/* Screen Slot */}
       <View style={{ flex: 1 }}>
-        <Slot />
+        {room.stage === 'archived' && /\/budget\/(add-expense|settle-up)/.test(pathname) ? <View style={{ padding: 24 }}><Text>Archived trip — expenses and settlements are read-only.</Text></View> : room.stage === 'archived' && /\/itinerary\/.+/.test(pathname) ? <ArchivedItinerary roomId={room.id} /> : <Slot key={roomId} />}
       </View>
     </View>
   );

@@ -10,6 +10,7 @@ import {
 import { useTheme } from '@/core/theme';
 import { ModalSheet } from '@/shared/components';
 import { DecisionTriggerType } from '@/models/decision';
+import { Feather } from '@expo/vector-icons';
 
 interface ProposeVoteSheetProps {
   visible: boolean;
@@ -73,7 +74,16 @@ export const ProposeVoteSheet: React.FC<ProposeVoteSheetProps> = ({
   };
 
   return (
-    <ModalSheet visible={visible} onClose={onClose} title="Propose Group Vote 🗳️">
+    <ModalSheet 
+      visible={visible} 
+      onClose={onClose} 
+      title={
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <Feather name="check-square" size={22} color={colors.onSurface} />
+          <Text style={[typography.headlineSm, { color: colors.onSurface }]}>Propose Group Vote</Text>
+        </View>
+      }
+    >
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={{ gap: spacing.md }}>
           {/* Decision Question */}
@@ -115,18 +125,20 @@ export const ProposeVoteSheet: React.FC<ProposeVoteSheetProps> = ({
                   },
                 ]}
               >
-                <Text
-                  style={[
-                    typography.labelSm,
-                    {
-                      color: triggerType === 'conflict' ? '#ffffff' : colors.onSurface,
-                      fontWeight: '700',
-                      textAlign: 'center',
-                    },
-                  ]}
-                >
-                  🤝 Conflict
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                  <Feather name="alert-circle" size={16} color={triggerType === 'conflict' ? '#ffffff' : colors.onSurface} />
+                  <Text
+                    style={[
+                      typography.labelSm,
+                      {
+                        color: triggerType === 'conflict' ? '#ffffff' : colors.onSurface,
+                        fontWeight: '700',
+                      },
+                    ]}
+                  >
+                    Conflict
+                  </Text>
+                </View>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setTriggerType('disruption')}
@@ -139,18 +151,20 @@ export const ProposeVoteSheet: React.FC<ProposeVoteSheetProps> = ({
                   },
                 ]}
               >
-                <Text
-                  style={[
-                    typography.labelSm,
-                    {
-                      color: triggerType === 'disruption' ? '#ffffff' : colors.onSurface,
-                      fontWeight: '700',
-                      textAlign: 'center',
-                    },
-                  ]}
-                >
-                  ⚡ Disruption
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                  <Feather name="zap" size={16} color={triggerType === 'disruption' ? '#ffffff' : colors.onSurface} />
+                  <Text
+                    style={[
+                      typography.labelSm,
+                      {
+                        color: triggerType === 'disruption' ? '#ffffff' : colors.onSurface,
+                        fontWeight: '700',
+                      },
+                    ]}
+                  >
+                    Disruption
+                  </Text>
+                </View>
               </TouchableOpacity>
             </View>
           </View>

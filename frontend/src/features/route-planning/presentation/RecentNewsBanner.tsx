@@ -60,8 +60,7 @@ export const RecentNewsBanner: React.FC = () => {
         {/* Header Row */}
         <View style={styles.headerRow}>
           <View style={styles.headerTitleGroup}>
-            <Text style={{ fontSize: 16 }}>📰</Text>
-            <Text style={[typography.labelMd, { color: colors.onSurface, fontWeight: '800', marginLeft: 6 }]}>
+            <Text style={[typography.labelMd, { color: colors.onSurface, fontWeight: '800' }]}>
               Recent News & Safety Alerts
             </Text>
           </View>

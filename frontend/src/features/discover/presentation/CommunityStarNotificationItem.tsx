@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTheme } from '@/core/theme';
 import { AppNotification } from '@/models/notification';
+import { Feather } from '@expo/vector-icons';
 
 interface CommunityStarNotificationItemProps {
   notification: AppNotification;
@@ -31,7 +32,7 @@ export const CommunityStarNotificationItem: React.FC<CommunityStarNotificationIt
       <View style={styles.topRow}>
         <View style={styles.badgeRow}>
           <View style={[styles.iconBox, { backgroundColor: '#fef3c7', borderRadius: rounded.md }]}>
-            <Text style={{ fontSize: 13 }}>⭐</Text>
+            <Feather name="star" size={13} color="#b45309" />
           </View>
           <Text style={[typography.utilityTiny, { color: '#b45309', fontWeight: '800', marginLeft: 6 }]}>
             COMMUNITY & DISCOVER

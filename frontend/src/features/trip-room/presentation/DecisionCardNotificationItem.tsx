@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTheme } from '@/core/theme';
 import { AppNotification } from '@/models/notification';
+import { Feather } from '@expo/vector-icons';
 
 interface DecisionCardNotificationItemProps {
   notification: AppNotification;
@@ -31,7 +32,7 @@ export const DecisionCardNotificationItem: React.FC<DecisionCardNotificationItem
       <View style={styles.topRow}>
         <View style={styles.badgeRow}>
           <View style={[styles.iconBox, { backgroundColor: '#e0e7ff', borderRadius: rounded.md }]}>
-            <Text style={{ fontSize: 13 }}>🗳️</Text>
+            <Feather name="check-square" size={13} color="#4338ca" />
           </View>
           <Text style={[typography.utilityTiny, { color: '#4338ca', fontWeight: '800', marginLeft: 6 }]}>
             TRIP ROOM DECISION POLL

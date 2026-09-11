@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Image, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { mockTripRooms } from '@/features/trip-room/data/mock-trip-room';
+import * as ImagePicker from 'expo-image-picker';
+import { Feather } from '@expo/vector-icons';
 
 export type RoomSheetMode = 'create' | 'join';
 type IconName = 'compass' | 'plus' | 'key' | 'sparkles' | 'pin' | 'spring' | 'sun' | 'calendar' | 'stage' | 'bulb' | 'arrow' | 'close';
@@ -49,6 +51,7 @@ export function CreateRoomSheet({ mode: initialMode, onClose }: { mode: RoomShee
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [inviteCode, setInviteCode] = useState('');
+  const [avatar, setAvatar] = useState<string | null>(null);
   const [error, setError] = useState('');
   const today = new Date();
   // Offer the next available season instead of stale screenshot dates.
@@ -57,6 +60,26 @@ export function CreateRoomSheet({ mode: initialMode, onClose }: { mode: RoomShee
   const label = [typography.labelMd, { color: colors.onSurface }];
   const field = [styles.field, { backgroundColor: colors.surfaceContainerLow }];
   const input = [typography.bodyMd, styles.input, { color: colors.onSurface }];
+
+  const handlePickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      setError('Camera roll permissions are required to upload an avatar.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setAvatar(result.assets[0].uri);
+      setError('');
+    }
+  };
 
   const submit = () => {
     if (mode === 'join') {
@@ -76,6 +99,7 @@ export function CreateRoomSheet({ mode: initialMode, onClose }: { mode: RoomShee
       roomId: 'room-new-123', name: name.trim(), destination: destination.trim(), timing,
       seasonYear: String(timing === 'spring' ? springYear : summerYear),
       startDate: timing === 'custom' ? startDate : '', endDate: timing === 'custom' ? endDate : '',
+      avatar: avatar || '',
     } } as any);
   };
 
@@ -97,6 +121,16 @@ export function CreateRoomSheet({ mode: initialMode, onClose }: { mode: RoomShee
             </Pressable>)}
           </View>
           {mode === 'create' ? <>
+            <View style={[styles.group, { alignItems: 'center', marginTop: 8 }]}>
+              <Pressable onPress={handlePickImage} style={{ alignItems: 'center', justifyContent: 'center', width: 72, height: 72, borderRadius: 36, backgroundColor: colors.surfaceContainerHigh, overflow: 'hidden' }}>
+                {avatar ? (
+                  <Image source={{ uri: avatar }} style={{ width: '100%', height: '100%' }} />
+                ) : (
+                  <Feather name="camera" size={24} color={colors.onSurfaceVariant} />
+                )}
+              </Pressable>
+              <Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant, marginTop: 8 }]}>Add Room Photo (Optional)</Text>
+            </View>
             <View style={styles.group}>
               <Text style={label}>Trip Room Name <Text style={{ color: colors.primary }}>*</Text></Text>
               <View style={field}><Icon name="sparkles" color={colors.primary} size={21} /><TextInput accessibilityLabel="Trip Room Name" value={name} onChangeText={setName} placeholder="e.g., Kyoto Spring Blossoms" placeholderTextColor={colors.outlineVariant} maxLength={80} style={input} /></View>
@@ -124,9 +158,9 @@ export function CreateRoomSheet({ mode: initialMode, onClose }: { mode: RoomShee
               </View>}
             </View>
             <View style={[styles.stage, { backgroundColor: colors.surfaceContainerLow }]}>
-              <View style={[styles.stageIcon, { backgroundColor: colors.tertiaryContainer }]}><Icon name="stage" color={colors.onTertiaryContainer} /></View>
+              <View style={[styles.stageIcon, { backgroundColor: '#fff0e6' }]}><Icon name="stage" color="#8b4b00" /></View>
               <View style={{ flex: 1, gap: 4 }}><Text style={label}>Initial Stage</Text><Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant }]}>Starts automatically in Planning</Text></View>
-              <Text style={[typography.utilityTiny, styles.badge, { backgroundColor: colors.surfaceContainerHighest, color: colors.onSurface }]}>PLANNING</Text>
+              <Text style={[typography.utilityTiny, styles.badge, { backgroundColor: '#fff0e6', color: '#8b4b00', borderColor: '#fed7aa', borderWidth: 1 }]}>PLANNING</Text>
             </View>
           </> : <View style={[styles.group, { paddingVertical: 8 }]}>
             <Text style={label}>Room Invite Code <Text style={{ color: colors.primary }}>*</Text></Text>

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTheme } from '@/core/theme';
 import { AppNotification } from '@/models/notification';
+import { Feather } from '@expo/vector-icons';
 
 interface BudgetNotificationItemProps {
   notification: AppNotification;
@@ -31,7 +32,7 @@ export const BudgetNotificationItem: React.FC<BudgetNotificationItemProps> = ({
       <View style={styles.topRow}>
         <View style={styles.badgeRow}>
           <View style={[styles.iconBox, { backgroundColor: '#dcfce7', borderRadius: rounded.md }]}>
-            <Text style={{ fontSize: 13 }}>💰</Text>
+            <Feather name="dollar-sign" size={13} color="#15803d" />
           </View>
           <Text style={[typography.utilityTiny, { color: '#15803d', fontWeight: '800', marginLeft: 6 }]}>
             BUDGET & EXPENSE SPLIT

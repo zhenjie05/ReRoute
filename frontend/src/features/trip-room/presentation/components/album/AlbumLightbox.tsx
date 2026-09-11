@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Modal, Image, TouchableOpacity, StyleSheet, Dimensions, SafeAreaView } from 'react-native';
+import { View, Text, Modal, Image, TouchableOpacity, StyleSheet, SafeAreaView, Linking } from 'react-native';
 import { useTheme } from '@/core/theme';
 import { AlbumPhoto } from '@/models/album';
+import { Feather } from '@expo/vector-icons';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface AlbumLightboxProps {
   visible: boolean;
@@ -12,6 +12,8 @@ interface AlbumLightboxProps {
   isArchived?: boolean;
   onClose: () => void;
   onShare: (photo: AlbumPhoto) => void;
+  onDelete?: (photoId: string) => void;
+  themeColor?: string;
 }
 
 export const AlbumLightbox: React.FC<AlbumLightboxProps> = ({
@@ -21,12 +23,15 @@ export const AlbumLightbox: React.FC<AlbumLightboxProps> = ({
   isArchived = false,
   onClose,
   onShare,
+  onDelete,
+  themeColor = '#ff8f06',
 }) => {
   const { typography } = useTheme();
   
   // Find initial index based on passed photoId
   const initialIndex = Math.max(0, photos.findIndex(p => p.id === initialPhotoId));
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
 
   // Update index when visible or initialPhotoId changes
   useEffect(() => {
@@ -56,6 +61,19 @@ export const AlbumLightbox: React.FC<AlbumLightboxProps> = ({
     return `${Math.round(diffHours / 24)} days ago`;
   };
 
+  const handleDeletePress = () => {
+    if (!currentPhoto || !onDelete) return;
+    setIsConfirmDeleteVisible(true);
+  };
+
+  const confirmDelete = () => {
+    if (currentPhoto && onDelete) {
+      onDelete(currentPhoto.id);
+    }
+    setIsConfirmDeleteVisible(false);
+    onClose();
+  };
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.container}>
@@ -63,7 +81,7 @@ export const AlbumLightbox: React.FC<AlbumLightboxProps> = ({
           
           {/* Top Row: Close */}
           <View style={styles.topRow}>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+            <TouchableOpacity accessibilityRole="button" accessibilityLabel="Close photo" onPress={onClose} style={styles.closeBtn}>
               <Text style={{ color: '#ffffff', fontSize: 18, fontWeight: '700' }}>✕</Text>
             </TouchableOpacity>
           </View>
@@ -72,24 +90,25 @@ export const AlbumLightbox: React.FC<AlbumLightboxProps> = ({
           <View style={styles.centerArea}>
              {/* Left Arrow */}
              {currentIndex > 0 ? (
-               <TouchableOpacity onPress={handlePrev} style={[styles.arrowBtn, { left: 16 }]}>
+               <TouchableOpacity accessibilityRole="button" accessibilityLabel="Previous photo" onPress={handlePrev} style={[styles.arrowBtn, { left: 16 }]}>
                  <Text style={styles.arrowText}>‹</Text>
                </TouchableOpacity>
-             ) : <View style={[styles.arrowBtn, { left: 16 }]} />}
+             ) : null}
 
              {/* Main Image */}
              <Image
                source={{ uri: currentPhoto?.url }}
+               accessibilityLabel={currentPhoto?.location_name || currentPhoto?.caption || undefined}
                style={styles.image}
                resizeMode="contain"
              />
 
              {/* Right Arrow */}
              {currentIndex < photos.length - 1 ? (
-               <TouchableOpacity onPress={handleNext} style={[styles.arrowBtn, { right: 16 }]}>
+               <TouchableOpacity accessibilityRole="button" accessibilityLabel="Next photo" onPress={handleNext} style={[styles.arrowBtn, { right: 16 }]}>
                  <Text style={styles.arrowText}>›</Text>
                </TouchableOpacity>
-             ) : <View style={[styles.arrowBtn, { right: 16 }]} />}
+             ) : null}
           </View>
 
           {/* Bottom Info Bar */}
@@ -99,13 +118,20 @@ export const AlbumLightbox: React.FC<AlbumLightboxProps> = ({
                  {currentPhoto?.uploader_name || 'Member'}
                </Text>
                <Text style={[typography.utilityTiny, { color: 'rgba(255,255,255,0.7)', marginTop: 2 }]}>
-                 {getRelativeTime(currentPhoto?.created_at || currentPhoto?.taken_at || new Date().toISOString())}
+                 {getRelativeTime(currentPhoto?.taken_at || new Date().toISOString())}
                </Text>
             </View>
 
-            {/* Actions: Share only, hidden if archived */}
+            {currentPhoto?.caption && <Text style={{ color: '#fff', fontSize: 11, lineHeight: 17 }}>{currentPhoto.caption}</Text>}
+            {currentPhoto?.source_url && <TouchableOpacity accessibilityRole="link" onPress={() => Linking.openURL(currentPhoto.source_url!)}><Text style={{ color: '#fff', padding: 8 }}>Photo source ↗</Text></TouchableOpacity>}
+            {/* Actions: Share and Delete, hidden if archived */}
             {!isArchived && (
               <View style={styles.bottomActions}>
+                {onDelete && (
+                  <TouchableOpacity onPress={handleDeletePress} style={styles.actionBtn}>
+                    <Feather name="trash-2" size={24} color="white" />
+                  </TouchableOpacity>
+                )}
                 <TouchableOpacity onPress={() => onShare(currentPhoto)} style={styles.actionBtn}>
                   {/* Mocking share icon with emoji */}
                   <Text style={{ fontSize: 24, color: '#ffffff' }}>↗️</Text>
@@ -116,6 +142,34 @@ export const AlbumLightbox: React.FC<AlbumLightboxProps> = ({
 
         </SafeAreaView>
       </View>
+
+      {/* Custom Delete Confirmation Modal */}
+      <Modal visible={isConfirmDeleteVisible} transparent animationType="fade">
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' }}>
+          <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 24, width: '80%', maxWidth: 320, alignItems: 'center' }}>
+            <Text style={[typography.titleMd, { color: '#333', marginBottom: 8, fontWeight: '700' }]}>Delete Photo?</Text>
+            <Text style={[typography.bodyMd, { color: '#666', textAlign: 'center', marginBottom: 24 }]}>
+              Are you sure you want to remove this photo from the album?
+            </Text>
+            
+            <View style={{ flexDirection: 'row', gap: 12, width: '100%' }}>
+              <TouchableOpacity 
+                style={{ flex: 1, paddingVertical: 12, borderRadius: 8, backgroundColor: '#f5f5f5', alignItems: 'center' }}
+                onPress={() => setIsConfirmDeleteVisible(false)}
+              >
+                <Text style={{ color: '#666', fontWeight: '600' }}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={{ flex: 1, paddingVertical: 12, borderRadius: 8, backgroundColor: themeColor, alignItems: 'center' }}
+                onPress={confirmDelete}
+              >
+                <Text style={{ color: '#fff', fontWeight: '600' }}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </Modal>
   );
 };
@@ -149,7 +203,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   image: {
-    width: SCREEN_WIDTH,
+    width: '100%',
     height: '100%',
   },
   arrowBtn: {
@@ -171,15 +225,17 @@ const styles = StyleSheet.create({
     fontWeight: '300',
   },
   bottomBar: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     justifyContent: 'space-between',
-    alignItems: 'flex-end',
+    alignItems: 'stretch',
+    gap: 8,
     paddingHorizontal: 16,
     paddingBottom: 24,
     paddingTop: 16,
   },
   bottomInfo: {
-    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   bottomActions: {
     flexDirection: 'row',

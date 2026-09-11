@@ -1,8 +1,10 @@
 import { useState, useCallback } from 'react';
 import { LanguageLesson, LessonProgressState } from '@/models/language';
-import { mockStandardLanguageLessons } from '@/shared/data/standard-mock-data';
+import { lessonsForDestination } from './destination-lessons';
+import { mockTripRooms } from '@/features/trip-room/data/mock-trip-room';
 
-export const mockLanguageLessons: LanguageLesson[] = mockStandardLanguageLessons;
+export const mockLanguageLessons: LanguageLesson[] = ['Japan', 'France', 'Bali', 'China'].flatMap(lessonsForDestination);
+export const getRoomLanguageLessons = (roomId: string) => lessonsForDestination(mockTripRooms.find(room => room.id === roomId)?.destination || '');
 
 // Simulate backend progress persistence using React state for the session
 const initialProgress: Record<string, LessonProgressState> = {};

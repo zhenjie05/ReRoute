@@ -464,7 +464,7 @@ export const mockStandardMessages: Message[] = [
     room_id: 'room-tokyo-2026',
     sender_id: null,
     sender_type: 'mascot',
-    sender_name: 'Roti Corgi 🐕',
+    sender_name: 'Roti 🐕',
     text: '💡 Roti Tip: Evening rain forecast for Oct 12. I recommend moving the outdoor rooftop visit to Oct 11 afternoon for optimal visibility!',
     type: 'text',
     created_at: '2026-09-05T10:18:00Z',
@@ -1302,7 +1302,7 @@ export const mockStandardNotifications: AppNotification[] = [
   {
     id: 'notif-3',
     type: 'mascot_advisory',
-    title: 'Roti Corgi Tip: Suica / Pasmo IC Cards',
+    title: 'Roti Tip: Suica / Pasmo IC Cards',
     message: 'Tap your digital Suica card at ticket gates without opening Apple/Google Wallet! Keep your phone unlocked for faster tap.',
     timestamp: '1h ago',
     isRead: false,

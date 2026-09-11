@@ -1,10 +1,25 @@
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { useTheme } from '@/core/theme';
+import type { TripStage } from '@/models/trip-room';
+import { tripStageThemes } from '@/features/trip-room/data/season-presentation';
+
+export type BadgeVariant =
+  | 'primary'
+  | 'secondary'
+  | 'season'
+  | 'warning'
+  | 'error'
+  | 'success'
+  | 'outline'
+  | 'planning'
+  | 'active'
+  | 'archived';
 
 interface BadgeProps {
   label: string;
-  variant?: 'primary' | 'secondary' | 'season' | 'warning' | 'error' | 'success' | 'outline';
+  variant?: BadgeVariant;
+  stage?: TripStage;
   style?: ViewStyle;
   textStyle?: TextStyle;
   icon?: React.ReactNode;
@@ -13,6 +28,7 @@ interface BadgeProps {
 export const Badge: React.FC<BadgeProps> = ({
   label,
   variant = 'season',
+  stage,
   style,
   textStyle,
   icon,
@@ -20,6 +36,11 @@ export const Badge: React.FC<BadgeProps> = ({
   const { colors, typography, rounded, spacing } = useTheme();
 
   const getColors = () => {
+    const effectiveStage = stage || (variant === 'active' || variant === 'planning' || variant === 'archived' ? variant : undefined);
+    if (effectiveStage && tripStageThemes[effectiveStage]) {
+      return tripStageThemes[effectiveStage];
+    }
+
     switch (variant) {
       case 'primary':
         return { bg: colors.primaryContainer, text: colors.onPrimaryContainer };
@@ -57,7 +78,7 @@ export const Badge: React.FC<BadgeProps> = ({
       ]}
     >
       {icon ? <View style={{ marginRight: spacing.xs }}>{icon}</View> : null}
-      <Text style={[typography.labelSm, { color: c.text, fontWeight: '600' }, textStyle]}>
+      <Text style={[typography.labelSm, { color: c.text, fontWeight: '700' }, textStyle]}>
         {label}
       </Text>
     </View>

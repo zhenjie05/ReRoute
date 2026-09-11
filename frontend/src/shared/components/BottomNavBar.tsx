@@ -3,14 +3,15 @@ import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native
 import { useRouter, usePathname } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { useLiveTrip } from '@/lib/hooks/useLiveTrip';
+import { mockTripRooms } from '@/features/trip-room/data/mock-trip-room';
+import { Feather } from '@expo/vector-icons';
 
 export type TabKey = 'home' | 'trip' | 'profile';
 
 interface TabItemConfig {
   key: TabKey;
   label: string;
-  icon: string;
-  activeIcon: string;
+  iconName: React.ComponentProps<typeof Feather>['name'];
   route: string;
 }
 
@@ -18,22 +19,19 @@ const TABS: TabItemConfig[] = [
   {
     key: 'home',
     label: 'Home',
-    icon: '🏠',
-    activeIcon: '🏡',
+    iconName: 'home',
     route: '/(tabs)/home',
   },
   {
     key: 'trip',
     label: 'Trip',
-    icon: '🗺️',
-    activeIcon: '🧭',
+    iconName: 'map',
     route: '/(tabs)/trip',
   },
   {
     key: 'profile',
     label: 'Profile',
-    icon: '👤',
-    activeIcon: '✨',
+    iconName: 'user',
     route: '/(tabs)/profile',
   },
 ];
@@ -48,10 +46,21 @@ interface StandaloneBottomNavBarProps {
 export const BottomNavBar: React.FC<StandaloneBottomNavBarProps> = (
   props
 ) => {
-  const { colors, typography, spacing, rounded, shadows } = useTheme();
+  const { typography, rounded, shadows } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
-  const { hasLiveTrip } = useLiveTrip();
+  const { hasLiveTrip, liveTrip } = useLiveTrip();
+
+  // Hide BottomNavBar on itinerary detail screens, trip room screens, setup screens, and alerts
+  const isDetailScreen =
+    pathname.includes('/discover/') ||
+    pathname.includes('/room/') ||
+    pathname.includes('/setup/') ||
+    pathname.includes('/safety-alert');
+
+  if (isDetailScreen) {
+    return null;
+  }
 
   // Determine active tab either from React Navigation state, pathname, or prop override
   const getActiveTab = (): TabKey => {
@@ -74,19 +83,45 @@ export const BottomNavBar: React.FC<StandaloneBottomNavBarProps> = (
   const handlePress = (tab: TabItemConfig, index: number) => {
     if (props.navigation && props.state) {
       const isFocused = props.state.index === index;
+      const targetRoute =
+        props.state.routes.find((r: any) => r.name === tab.key) ||
+        props.state.routes[index];
+
       const event = props.navigation.emit({
         type: 'tabPress',
-        target: props.state.routes[index]?.key,
+        target: targetRoute?.key,
         canPreventDefault: true,
       });
 
-      if (!isFocused && !event.defaultPrevented) {
-        router.push(tab.route as any);
+      if (!event.defaultPrevented) {
+        if (isFocused) {
+          // When clicking the active Trip tab while already in the Trip Hub, route directly into the Trip Room
+          if (tab.key === 'trip') {
+            const targetRoomId = (hasLiveTrip && liveTrip) ? liveTrip.id : mockTripRooms[0]?.id;
+            if (targetRoomId) {
+              router.push(`/(tabs)/trip/room/${targetRoomId}/chat` as any);
+            }
+          }
+        } else {
+          props.navigation.navigate({
+            name: targetRoute ? targetRoute.name : tab.key,
+            params: tab.key === 'trip' ? { mode: undefined } : undefined,
+          });
+        }
       }
     } else if (props.onTabPress) {
       props.onTabPress(tab.key);
     } else {
-      router.push(tab.route as any);
+      if (tab.key === 'trip') {
+        const targetRoomId = (hasLiveTrip && liveTrip) ? liveTrip.id : mockTripRooms[0]?.id;
+        if (targetRoomId) {
+          router.push(`/(tabs)/trip/room/${targetRoomId}/chat` as any);
+        } else {
+          router.navigate(tab.route as any);
+        }
+      } else {
+        router.navigate(tab.route as any);
+      }
     }
   };
 
@@ -96,11 +131,10 @@ export const BottomNavBar: React.FC<StandaloneBottomNavBarProps> = (
         style={[
           styles.barContainer,
           {
-            backgroundColor: colors.surface,
-            borderColor: colors.surfaceContainerHigh,
-            borderRadius: rounded.cardLarge,
-            paddingHorizontal: spacing.sm,
-            paddingVertical: spacing.xs,
+            backgroundColor: '#ffffff',
+            borderColor: '#f4f5f7',
+            borderRadius: 36,
+            paddingHorizontal: 24,
             ...shadows.medium,
           },
         ]}
@@ -117,19 +151,19 @@ export const BottomNavBar: React.FC<StandaloneBottomNavBarProps> = (
               accessibilityRole="tab"
               accessibilityState={{ selected: isActive }}
               accessibilityLabel={`${tab.label} tab`}
-              style={[
-                styles.tabButton,
-                isActive && [
-                  styles.activeTabCapsule,
-                  {
-                    backgroundColor: colors.primaryContainer,
-                    borderRadius: rounded.xl,
-                  },
-                ],
-              ]}
+              style={styles.tabButton}
             >
-              <View style={styles.iconWrapper}>
-                <Text style={styles.tabIcon}>{isActive ? tab.activeIcon : tab.icon}</Text>
+              <View
+                style={[
+                  styles.iconWrapper,
+                  isActive && styles.activeIconBg,
+                ]}
+              >
+                <Feather
+                  name={tab.iconName}
+                  size={20}
+                  color={isActive ? '#3E2723' : '#6B7280'}
+                />
                 {isTrip && hasLiveTrip && (
                   <View
                     style={[
@@ -147,9 +181,9 @@ export const BottomNavBar: React.FC<StandaloneBottomNavBarProps> = (
                 style={[
                   typography.utilityTiny,
                   {
-                    color: isActive ? colors.onPrimaryContainer : colors.outline,
-                    fontWeight: isActive ? '800' : '600',
-                    marginTop: 2,
+                    color: isActive ? '#3E2723' : '#6B7280',
+                    fontWeight: isActive ? '700' : '500',
+                    marginTop: 4,
                   },
                 ]}
               >
@@ -177,34 +211,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
-    maxWidth: 420,
+    maxWidth: 380,
     borderWidth: 1,
-    height: 64,
+    height: 68,
   },
   tabButton: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 6,
-    marginHorizontal: 4,
-  },
-  activeTabCapsule: {
-    paddingVertical: 6,
   },
   iconWrapper: {
-    position: 'relative',
+    width: 52,
+    height: 32,
     alignItems: 'center',
     justifyContent: 'center',
+    borderRadius: 16,
   },
-  tabIcon: {
-    fontSize: 20,
+  activeIconBg: {
+    backgroundColor: '#FF8C00',
   },
   liveDot: {
     position: 'absolute',
     top: -2,
-    right: -6,
-    width: 7,
-    height: 7,
+    right: 8,
+    width: 8,
+    height: 8,
     borderWidth: 1.5,
     borderColor: '#ffffff',
   },

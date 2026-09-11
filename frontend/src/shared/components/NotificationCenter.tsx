@@ -13,6 +13,7 @@ import { useRouter } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { useNotifications } from '@/lib/hooks/useNotifications';
 import { AppNotification } from '@/models/notification';
+import { Feather, Ionicons } from '@expo/vector-icons';
 
 // Import feature-owned notification rendering components (ownership breakdown preserved)
 import { SafetyAlertNotificationItem } from '@/features/route-planning/presentation/SafetyAlertNotificationItem';
@@ -22,7 +23,7 @@ import { MascotNotificationItem } from '@/features/mascot/presentation/MascotNot
 import { SOSNotificationItem } from '@/features/sos/presentation/SOSNotificationItem';
 import { CommunityStarNotificationItem } from '@/features/discover/presentation/CommunityStarNotificationItem';
 
-const rotiImage = require('../../../assests/Roti.png');
+const rotiImage = require('../../../assets/Roti.png');
 
 type CategoryFilter = 'all' | 'safety' | 'votes' | 'mascot';
 
@@ -41,11 +42,11 @@ export const NotificationCenter: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>('all');
   const [inquireQuery, setInquireQuery] = useState('');
 
-  const filterTabs: { key: CategoryFilter; label: string; icon: string }[] = [
-    { key: 'all', label: 'All', icon: '🔔' },
-    { key: 'safety', label: 'Safety & Weather', icon: '🌧️' },
-    { key: 'votes', label: 'Trip Room Votes', icon: '🗳️' },
-    { key: 'mascot', label: 'Mascot Tips', icon: '🐕' },
+  const filterTabs: { key: CategoryFilter; label: string; icon: (c: string) => React.ReactNode }[] = [
+    { key: 'all', label: 'All', icon: (c) => <Feather name="bell" size={12} color={c} /> },
+    { key: 'safety', label: 'Safety & Weather', icon: (c) => <Feather name="cloud-rain" size={12} color={c} /> },
+    { key: 'votes', label: 'Trip Room Votes', icon: (c) => <Feather name="check-square" size={12} color={c} /> },
+    { key: 'mascot', label: 'Mascot Tips', icon: (c) => <Feather name="info" size={12} color={c} /> },
   ];
 
   const items = filterNotifications(activeCategory);
@@ -208,7 +209,7 @@ export const NotificationCenter: React.FC = () => {
               <TextInput
                 value={inquireQuery}
                 onChangeText={setInquireQuery}
-                placeholder="Ask Corgi AI about your trip alerts..."
+                placeholder="Ask Roti about your trip alerts..."
                 placeholderTextColor={colors.outline}
                 style={[
                   typography.bodySm,
@@ -231,22 +232,30 @@ export const NotificationCenter: React.FC = () => {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={{ gap: 6, paddingVertical: 2 }}
             >
-              {['📍 Plan indoor route', '✈️ Flight status', '🍽️ Nearby dining'].map((chip) => (
+              {[
+                { label: 'Plan indoor route', icon: <Feather name="map-pin" size={12} color={colors.onSurfaceVariant} /> },
+                { label: 'Flight status', icon: <Ionicons name="airplane-outline" size={12} color={colors.onSurfaceVariant} /> },
+                { label: 'Nearby dining', icon: <Feather name="coffee" size={12} color={colors.onSurfaceVariant} /> }
+              ].map((chip) => (
                 <TouchableOpacity
-                  key={chip}
+                  key={chip.label}
                   activeOpacity={0.75}
-                  onPress={() => setInquireQuery(chip.slice(2).trim())}
+                  onPress={() => setInquireQuery(chip.label)}
                   style={[
                     styles.inquireChip,
                     {
                       backgroundColor: colors.surfaceContainerLow,
                       borderColor: colors.surfaceContainerHigh,
                       borderRadius: rounded.full,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 6
                     },
                   ]}
                 >
+                  {chip.icon}
                   <Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant, fontWeight: '700' }]}>
-                    {chip}
+                    {chip.label}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -280,7 +289,7 @@ export const NotificationCenter: React.FC = () => {
                       },
                     ]}
                   >
-                    <Text style={{ fontSize: 12 }}>{tab.icon}</Text>
+                    {tab.icon(isActive ? '#ffffff' : colors.onSurface)}
                     <Text
                       style={[
                         typography.utilityTiny,
@@ -349,9 +358,12 @@ export const NotificationCenter: React.FC = () => {
                 },
               ]}
             >
-              <Text style={[typography.utilityTiny, { color: colors.primary, fontWeight: '700', textAlign: 'center' }]}>
-                🕒 View notification archive & preferences →
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                <Feather name="clock" size={14} color={colors.primary} />
+                <Text style={[typography.utilityTiny, { color: colors.primary, fontWeight: '700', textAlign: 'center' }]}>
+                  View notification archive & preferences →
+                </Text>
+              </View>
             </TouchableOpacity>
           </View>
         </View>

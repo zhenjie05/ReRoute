@@ -1,18 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useTheme } from '@/core/theme';
 import { Card } from '@/shared/components';
 import { useRouter } from 'expo-router';
-import { useBudgetMockData } from './useBudgetMockData';
 
 export const OcrSplitSetupScreen: React.FC<{ roomId: string }> = ({ roomId }) => {
   const { colors, typography, spacing, rounded } = useTheme();
   const router = useRouter();
-  const { travelers } = useBudgetMockData();
 
   const [splitMethod, setSplitMethod] = useState<'Equal' | '%' | 'Shares' | 'Exact'>('Equal');
-
-  const amountPerPerson = 1386; // 5544 / 4
 
   const handleSave = () => {
     // Return to dashboard

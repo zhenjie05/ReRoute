@@ -1,3 +1,4 @@
+// fallow-ignore-file unused-file
 export interface EmergencyContact {
   destination: string;
   police: string;

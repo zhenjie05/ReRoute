@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useTheme } from '@/core/theme';
 import { useLiveTrip } from '@/lib/hooks/useLiveTrip';
+import { Feather, Ionicons } from '@expo/vector-icons';
 
 export type SOSReason = 'Medical' | 'Accident' | 'Lost' | 'Security';
 
@@ -29,11 +30,11 @@ export const SOSConfirmationModal: React.FC<SOSConfirmationModalProps> = ({
   const { liveTrip } = useLiveTrip();
   const [selectedReason, setSelectedReason] = useState<SOSReason>('Accident');
 
-  const reasons: { key: SOSReason; icon: string; label: string }[] = [
-    { key: 'Medical', icon: '🧰', label: 'Medical' },
-    { key: 'Accident', icon: '🚗', label: 'Accident' },
-    { key: 'Lost', icon: '📍', label: 'Lost' },
-    { key: 'Security', icon: '🛡️', label: 'Security' },
+  const reasons: { key: SOSReason; icon: (c: string) => React.ReactNode; label: string }[] = [
+    { key: 'Medical', icon: (c) => <Ionicons name="medical-outline" size={16} color={c} />, label: 'Medical' },
+    { key: 'Accident', icon: (c) => <Ionicons name="car-outline" size={16} color={c} />, label: 'Accident' },
+    { key: 'Lost', icon: (c) => <Feather name="map-pin" size={16} color={c} />, label: 'Lost' },
+    { key: 'Security', icon: (c) => <Feather name="shield" size={16} color={c} />, label: 'Security' },
   ];
 
   const handleCallHotline = (number: string = '0570-000-911') => {
@@ -94,9 +95,12 @@ export const SOSConfirmationModal: React.FC<SOSConfirmationModalProps> = ({
           >
             {/* Protocol Sub-Header */}
             <View style={[styles.protocolRow, { marginVertical: spacing.sm }]}>
-              <Text style={[typography.utilityTiny, { color: colors.outline, fontWeight: '600' }]}>
-                🛡️ Emergency Assistance Protocol
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <Feather name="shield" size={12} color={colors.outline} />
+                <Text style={[typography.utilityTiny, { color: colors.outline, fontWeight: '600' }]}>
+                  Emergency Assistance Protocol
+                </Text>
+              </View>
               <Text style={[typography.utilityTiny, { color: colors.outline }]}>
                 GPS Accuracy: ±4m
               </Text>
@@ -116,10 +120,7 @@ export const SOSConfirmationModal: React.FC<SOSConfirmationModalProps> = ({
             >
               {/* Title Header */}
               <View style={styles.cardTitleRow}>
-                <View style={[styles.asteriskBox, { backgroundColor: colors.error, borderRadius: rounded.xl }]}>
-                  <Text style={{ color: '#ffffff', fontSize: 20, fontWeight: '900' }}>✱</Text>
-                </View>
-                <View style={{ marginLeft: spacing.sm, flex: 1 }}>
+                <View style={{ flex: 1 }}>
                   <Text style={[typography.headlineSm, { color: colors.onSurface, fontWeight: '800' }]}>
                     SOS Confirmation
                   </Text>
@@ -146,9 +147,12 @@ export const SOSConfirmationModal: React.FC<SOSConfirmationModalProps> = ({
                   ⚠️ Triggering this confirmation immediately shares your real-time GPS coordinate and an alert banner with all 5 trip members.
                 </Text>
                 <View style={styles.gpsRow}>
-                  <Text style={[typography.utilityTiny, { color: colors.onSurface, fontWeight: '700' }]}>
-                    📍 Shinjuku Station, East Gate
-                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <Feather name="map-pin" size={14} color="#d32f2f" />
+                    <Text style={[typography.utilityTiny, { color: colors.onSurface, fontWeight: '700' }]}>
+                      Shinjuku Station, East Gate
+                    </Text>
+                  </View>
                   <Text style={[typography.utilityTiny, { color: colors.error, fontWeight: '800' }]}>
                     Live Pinned
                   </Text>
@@ -182,7 +186,9 @@ export const SOSConfirmationModal: React.FC<SOSConfirmationModalProps> = ({
                         },
                       ]}
                     >
-                      <Text style={{ fontSize: 13 }}>{r.icon}</Text>
+                      <View style={{ marginRight: 6 }}>
+                        {r.icon(isSelected ? '#ffffff' : colors.onSurface)}
+                      </View>
                       <Text
                         style={[
                           typography.labelSm,
@@ -212,7 +218,6 @@ export const SOSConfirmationModal: React.FC<SOSConfirmationModalProps> = ({
                 </View>
               </View>
 
-              {/* Confirm CTA */}
               <TouchableOpacity
                 activeOpacity={0.85}
                 onPress={() => onConfirm(selectedReason)}
@@ -226,9 +231,12 @@ export const SOSConfirmationModal: React.FC<SOSConfirmationModalProps> = ({
                   },
                 ]}
               >
-                <Text style={[typography.labelLg, { color: '#ffffff', fontWeight: '800', textAlign: 'center' }]}>
-                  📞 Confirm & Broadcast SOS
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                  <Feather name="phone-call" size={18} color="white" />
+                  <Text style={[typography.labelLg, { color: '#ffffff', fontWeight: '800', textAlign: 'center' }]}>
+                    Confirm & Broadcast SOS
+                  </Text>
+                </View>
               </TouchableOpacity>
 
               {/* Cancel Link */}
@@ -253,7 +261,7 @@ export const SOSConfirmationModal: React.FC<SOSConfirmationModalProps> = ({
               ]}
             >
               <View style={styles.hotlineLeft}>
-                <Text style={{ fontSize: 22 }}>📇</Text>
+                <Feather name="phone" size={24} color={colors.onSurface} />
                 <View style={{ marginLeft: spacing.sm }}>
                   <Text style={[typography.labelSm, { color: colors.onSurface, fontWeight: '700' }]}>
                     Tourist Safety Hotline

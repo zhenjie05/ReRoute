@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTheme } from '@/core/theme';
+import { Feather } from '@expo/vector-icons';
 
 export type LanguageTab = 'translator' | 'lessons';
 
@@ -33,17 +34,20 @@ export function LanguageSubTabs({ activeTab, onTabChange }: LanguageSubTabsProps
         ]}
         onPress={() => onTabChange('translator')}
       >
-        <Text
-          style={[
-            typography.labelSm,
-            {
-              color: activeTab === 'translator' ? colors.onSurface : colors.onSurfaceVariant,
-              fontWeight: activeTab === 'translator' ? 'bold' : '600',
-            },
-          ]}
-        >
-          ⚡ AI Translator
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <Feather name="zap" size={16} color={activeTab === 'translator' ? colors.onSurface : colors.onSurfaceVariant} />
+          <Text
+            style={[
+              typography.labelSm,
+              {
+                color: activeTab === 'translator' ? colors.onSurface : colors.onSurfaceVariant,
+                fontWeight: activeTab === 'translator' ? 'bold' : '600',
+              },
+            ]}
+          >
+            AI Translator
+          </Text>
+        </View>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -57,17 +61,20 @@ export function LanguageSubTabs({ activeTab, onTabChange }: LanguageSubTabsProps
         ]}
         onPress={() => onTabChange('lessons')}
       >
-        <Text
-          style={[
-            typography.labelSm,
-            {
-              color: activeTab === 'lessons' ? colors.onSurface : colors.onSurfaceVariant,
-              fontWeight: activeTab === 'lessons' ? 'bold' : '600',
-            },
-          ]}
-        >
-          📖 Lessons
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <Feather name="book-open" size={16} color={activeTab === 'lessons' ? colors.onSurface : colors.onSurfaceVariant} />
+          <Text
+            style={[
+              typography.labelSm,
+              {
+                color: activeTab === 'lessons' ? colors.onSurface : colors.onSurfaceVariant,
+                fontWeight: activeTab === 'lessons' ? 'bold' : '600',
+              },
+            ]}
+          >
+            Lessons
+          </Text>
+        </View>
       </TouchableOpacity>
     </View>
   );

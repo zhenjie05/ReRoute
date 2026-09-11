@@ -11,4 +11,6 @@ export interface AlbumPhoto {
   location_name?: string | null;
   itinerary_day_id?: string | null;
   caption?: string | null;
+  source_url?: string;
+  created_at?: string;
 }

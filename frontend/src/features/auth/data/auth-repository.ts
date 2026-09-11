@@ -1,3 +1,4 @@
+// fallow-ignore-file unused-file
 import { User } from '@/models/user';
 
 export const mockUsers: User[] = [

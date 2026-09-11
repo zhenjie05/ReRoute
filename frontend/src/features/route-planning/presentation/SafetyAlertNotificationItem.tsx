@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTheme } from '@/core/theme';
 import { AppNotification } from '@/models/notification';
+import { Feather } from '@expo/vector-icons';
 
 interface SafetyAlertNotificationItemProps {
   notification: AppNotification;
@@ -31,7 +32,7 @@ export const SafetyAlertNotificationItem: React.FC<SafetyAlertNotificationItemPr
       <View style={styles.topRow}>
         <View style={styles.badgeRow}>
           <View style={[styles.iconBox, { backgroundColor: '#ffedd5', borderRadius: rounded.md }]}>
-            <Text style={{ fontSize: 13 }}>🌧️</Text>
+            <Feather name="cloud-rain" size={13} color="#c2410c" />
           </View>
           <Text style={[typography.utilityTiny, { color: '#c2410c', fontWeight: '800', marginLeft: 6 }]}>
             SAFETY & WEATHER ADVISORY
@@ -55,9 +56,12 @@ export const SafetyAlertNotificationItem: React.FC<SafetyAlertNotificationItemPr
 
       {notification.metadata?.location_name && (
         <View style={styles.locationRow}>
-          <Text style={[typography.utilityTiny, { color: colors.outline, fontWeight: '600' }]}>
-            📍 Affected: {notification.metadata.location_name}
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <Feather name="map-pin" size={12} color={colors.outline} />
+            <Text style={[typography.utilityTiny, { color: colors.outline, fontWeight: '600' }]}>
+              Affected: {notification.metadata.location_name}
+            </Text>
+          </View>
         </View>
       )}
 

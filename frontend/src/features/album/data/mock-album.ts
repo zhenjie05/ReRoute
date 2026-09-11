@@ -1,3 +1,4 @@
+// fallow-ignore-file unused-file
 import { AlbumPhoto } from '@/models/album';
 import { mockAlbumPhotos } from '@/features/trip-room/data/mock-trip-room';
 

@@ -1,13 +1,16 @@
+import { languagePhrases, LessonDestination } from '@/features/language/data/destination-lessons';
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { useTheme } from '@/core/theme';
 import { TranslatorResult } from '@/models/language';
+import { Feather } from '@expo/vector-icons';
 
-export function AiTranslatorPanel() {
+export function AiTranslatorPanel({ destination = 'Japan' }: { destination?: string }) {
   const { colors, typography, spacing, rounded, shadows } = useTheme();
 
+  const language = languagePhrases[destination as LessonDestination] || languagePhrases.Japan;
   const [sourceLang, setSourceLang] = useState('English (US)');
-  const [targetLang, setTargetLang] = useState('Japanese (日本語)');
+  const [targetLang, setTargetLang] = useState(language.language);
   const [inputText, setInputText] = useState('');
   const [isTranslating, setIsTranslating] = useState(false);
   const [result, setResult] = useState<TranslatorResult | null>(null);
@@ -27,18 +30,9 @@ export function AiTranslatorPanel() {
     // Mock API delay (< 2s per spec)
     setTimeout(() => {
       setIsTranslating(false);
-      // Demo translation logic
-      if (inputText.toLowerCase().includes('subway') || inputText.toLowerCase().includes('train')) {
-        setResult({
-          translatedText: '一番近い地下鉄の入り口はどこですか？',
-          romanization: 'Ichiban chikai chikatetsu no iriguchi wa doko desu ka?',
-        });
-      } else {
-        setResult({
-          translatedText: `「${inputText}」の翻訳`,
-          romanization: 'Honyaku (Translation demo)',
-        });
-      }
+      const reverse = targetLang === 'English (US)';
+      const match = language.phrases.find(([phrase, translation]) => (reverse ? phrase : translation).toLowerCase() === inputText.trim().toLowerCase());
+      setResult(match ? { translatedText: reverse ? match[1] : match[0], romanization: reverse ? undefined : match[2] } : { translatedText: 'Try a saved phrase such as Hello, Thank you or Water, please. This translator uses mock phrases.' });
     }, 1200);
   };
 
@@ -94,9 +88,9 @@ export function AiTranslatorPanel() {
           onChangeText={setInputText}
         />
         
-        {/* Mock Microphone Icon */}
+        {/* Microphone Icon */}
         <TouchableOpacity style={[styles.micBtn, { backgroundColor: '#ffe0b2' }]}>
-          <Text style={{ fontSize: 16 }}>🎤</Text>
+          <Feather name="mic" size={20} color="#333" />
         </TouchableOpacity>
 
         <View style={styles.inputFooter}>
@@ -117,7 +111,7 @@ export function AiTranslatorPanel() {
         >
           <View style={styles.resultHeader}>
             <Text style={[typography.utilityTiny, { color: colors.primary, fontWeight: 'bold' }]}>
-              ★ AI JAPANESE TRANSLATION
+              ★ {targetLang.toUpperCase()} TRANSLATION
             </Text>
             <View style={{ flexDirection: 'row', gap: spacing.sm }}>
               <TouchableOpacity style={styles.iconBtn}>
@@ -136,7 +130,7 @@ export function AiTranslatorPanel() {
           {result.romanization && (
             <View style={[styles.romajiBox, { backgroundColor: colors.card, borderRadius: rounded.xl }]}>
               <Text style={{ fontSize: 11, color: colors.onSurfaceVariant, fontFamily: 'monospace' }}>
-                ROMAJI: {result.romanization}
+                PRONUNCIATION: {result.romanization}
               </Text>
             </View>
           )}
