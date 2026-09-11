@@ -131,9 +131,26 @@ export const SelectTripToPostModal: React.FC<SelectTripToPostModalProps> = ({
                           Highlight
                         </Text>
                       </View>
-                      <View style={[styles.archivedTag, { backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: rounded.sm }]}>
+                      <View
+                        style={[
+                          styles.archivedTag,
+                          {
+                            backgroundColor:
+                              trip.stage === 'active'
+                                ? '#15803d'
+                                : trip.stage === 'planning'
+                                ? '#8b4b00'
+                                : '#4b5563',
+                            borderRadius: rounded.sm,
+                          },
+                        ]}
+                      >
                         <Text style={{ color: '#ffffff', fontSize: 10, fontWeight: '800' }}>
-                          🔒 {trip.stage.toUpperCase()}
+                          {trip.stage === 'active'
+                            ? '🟢 ACTIVE'
+                            : trip.stage === 'planning'
+                            ? '📝 PLANNING'
+                            : '🔒 ARCHIVED'}
                         </Text>
                       </View>
                     </View>

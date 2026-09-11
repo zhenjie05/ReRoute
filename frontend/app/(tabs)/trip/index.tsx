@@ -70,15 +70,15 @@ export default function TripHubScreen({ initialSheet = null }: { initialSheet?: 
             style={{ marginBottom: spacing.lg }}
           >
             <Card
-              variant="season"
               style={{
                 borderWidth: 2,
-                borderColor: colors.season.main,
+                borderColor: '#15803d',
+                backgroundColor: '#f0fdf4',
               }}
             >
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Badge label="🔴 LIVE TRIP ACTIVE" variant="season" />
-                <Text style={[typography.labelSm, { color: colors.primary, fontWeight: '700' }]}>
+                <Badge label="🟢 LIVE TRIP ACTIVE" variant="active" />
+                <Text style={[typography.labelSm, { color: '#15803d', fontWeight: '700' }]}>
                   Open Room →
                 </Text>
               </View>
@@ -97,35 +97,42 @@ export default function TripHubScreen({ initialSheet = null }: { initialSheet?: 
 
         {/* Stage Filter Tabs */}
         <View style={{ flexDirection: 'row', gap: spacing.xs, marginBottom: spacing.lg }}>
-          {(['all', 'planning', 'active', 'archived'] as const).map((stage) => (
-            <TouchableOpacity
-              key={stage}
-              onPress={() => setSelectedStage(stage)}
-              style={[
-                styles.filterPill,
-                {
-                  backgroundColor:
-                    selectedStage === stage ? colors.primary : colors.surfaceContainerLow,
-                  borderRadius: rounded.full,
-                  paddingHorizontal: spacing.md,
-                  paddingVertical: spacing.xs,
-                },
-              ]}
-            >
-              <Text
+          {(['all', 'planning', 'active', 'archived'] as const).map((stage) => {
+            const isSelected = selectedStage === stage;
+            let selectedBg = colors.onSurface;
+            if (stage === 'active') selectedBg = '#15803d';
+            else if (stage === 'planning') selectedBg = '#8b4b00';
+            else if (stage === 'archived') selectedBg = '#6b7280';
+
+            return (
+              <TouchableOpacity
+                key={stage}
+                onPress={() => setSelectedStage(stage)}
                 style={[
-                  typography.labelSm,
+                  styles.filterPill,
                   {
-                    color: selectedStage === stage ? '#ffffff' : colors.onSurfaceVariant,
-                    fontWeight: '600',
-                    textTransform: 'capitalize',
+                    backgroundColor: isSelected ? selectedBg : colors.surfaceContainerLow,
+                    borderRadius: rounded.full,
+                    paddingHorizontal: spacing.md,
+                    paddingVertical: spacing.xs,
                   },
                 ]}
               >
-                {stage}
-              </Text>
-            </TouchableOpacity>
-          ))}
+                <Text
+                  style={[
+                    typography.labelSm,
+                    {
+                      color: isSelected ? '#ffffff' : colors.onSurfaceVariant,
+                      fontWeight: '700',
+                      textTransform: 'capitalize',
+                    },
+                  ]}
+                >
+                  {stage}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         {/* Room List */}
@@ -174,7 +181,7 @@ export default function TripHubScreen({ initialSheet = null }: { initialSheet?: 
                         <Text
                           style={[
                             typography.headlineSm,
-                            { color: room.stage === 'archived' ? room.season_theme?.text : colors.onSurface, flex: 1 },
+                            { color: room.stage === 'archived' ? '#4b5563' : colors.onSurface, flex: 1 },
                           ]}
                           numberOfLines={1}
                         >
@@ -182,16 +189,7 @@ export default function TripHubScreen({ initialSheet = null }: { initialSheet?: 
                         </Text>
                         <Badge
                           label={room.stage.toUpperCase()}
-                          style={{ 
-                            backgroundColor: seasonalTheme.badge,
-                            borderWidth: 0,
-                            paddingHorizontal: 8,
-                            paddingVertical: 4
-                          }}
-                          textStyle={{ 
-                            color: seasonalTheme.text,
-                            fontWeight: '800' 
-                          }}
+                          variant={room.stage}
                         />
                       </View>
 

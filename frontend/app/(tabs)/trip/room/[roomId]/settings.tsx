@@ -30,10 +30,13 @@ export default function RoomSettingsScreen() {
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const newUri = result.assets[0].uri;
         setGroupImage(newUri);
-        room.groupProfileImage = newUri;
+        const targetRoom = mockTripRooms.find((r) => r.id === roomId);
+        if (targetRoom) {
+          targetRoom.groupProfileImage = newUri;
+        }
         router.setParams({ imgUpdated: Date.now().toString() });
       }
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Failed to pick image');
     }
   };
@@ -90,12 +93,12 @@ export default function RoomSettingsScreen() {
           </View>
         </Card>
         {/* Trip Stage Management & Owner Start Trip Action (FR-2-2a, FR-2-10a) */}
-        <Card variant="season" style={{ marginBottom: spacing.lg }}>
+        <Card style={{ marginBottom: spacing.lg }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text style={[typography.labelLg, { color: colors.season.text, fontWeight: '800' }]}>
+            <Text style={[typography.labelLg, { color: colors.onSurface, fontWeight: '800' }]}>
               Current Stage
             </Text>
-            <Badge label={stage.toUpperCase()} variant={stage === 'active' ? 'season' : 'outline'} />
+            <Badge label={stage.toUpperCase()} variant={stage} />
           </View>
           <Text style={[typography.bodySm, { color: colors.onSurfaceVariant, marginTop: 4, marginBottom: spacing.md }]}>
             Owner-initiated transition sets this room live and enables global emergency SOS across the app.

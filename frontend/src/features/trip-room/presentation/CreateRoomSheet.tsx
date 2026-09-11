@@ -124,9 +124,9 @@ export function CreateRoomSheet({ mode: initialMode, onClose }: { mode: RoomShee
               </View>}
             </View>
             <View style={[styles.stage, { backgroundColor: colors.surfaceContainerLow }]}>
-              <View style={[styles.stageIcon, { backgroundColor: colors.tertiaryContainer }]}><Icon name="stage" color={colors.onTertiaryContainer} /></View>
+              <View style={[styles.stageIcon, { backgroundColor: '#fff0e6' }]}><Icon name="stage" color="#8b4b00" /></View>
               <View style={{ flex: 1, gap: 4 }}><Text style={label}>Initial Stage</Text><Text style={[typography.utilityTiny, { color: colors.onSurfaceVariant }]}>Starts automatically in Planning</Text></View>
-              <Text style={[typography.utilityTiny, styles.badge, { backgroundColor: colors.surfaceContainerHighest, color: colors.onSurface }]}>PLANNING</Text>
+              <Text style={[typography.utilityTiny, styles.badge, { backgroundColor: '#fff0e6', color: '#8b4b00', borderColor: '#fed7aa', borderWidth: 1 }]}>PLANNING</Text>
             </View>
           </> : <View style={[styles.group, { paddingVertical: 8 }]}>
             <Text style={label}>Room Invite Code <Text style={{ color: colors.primary }}>*</Text></Text>

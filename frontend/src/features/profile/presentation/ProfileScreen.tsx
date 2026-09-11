@@ -176,7 +176,7 @@ export const ProfileScreen: React.FC = () => {
                     {trip.dates}
                   </Text>
                 </View>
-                <Badge label="Archived" variant="season" style={{ backgroundColor: '#D4E8D4' }} />
+                <Badge label="Archived" variant="archived" />
               </Card>
             ))}
           </View>
