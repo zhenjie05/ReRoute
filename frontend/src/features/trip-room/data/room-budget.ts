@@ -45,11 +45,11 @@ export function createRoomBudget(room: TripRoom, members: TripRoomMember[]): Roo
       settled_at: `${room.end_date}T18:00:00Z`,
     }));
   } else if (room.stage === 'active' && members.length >= 4) {
-    // 1. User owes M1 (User pays M1 an amount greater than what M1 owes User)
+    // 1. User owes M1 (M1 pays User an amount greater than what M1 owes User)
     settlements.push({
       id: `${room.id}-settlement-user-owes`, room_id: room.id,
-      from_user_id: payer, from_user_name: members[0]?.user?.name,
-      to_user_id: members[1].user_id, to_user_name: members[1].user?.name,
+      from_user_id: members[1].user_id, from_user_name: members[1].user?.name,
+      to_user_id: payer, to_user_name: members[0]?.user?.name,
       amount: share + 45, currency: 'USD', method: 'Recorded transfer',
       settled_at: `${room.start_date}T12:00:00Z`,
     });

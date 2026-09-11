@@ -1,9 +1,10 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, StyleSheet, Alert, TouchableOpacity, TextInput } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/core/theme';
-import { Card, Button, Avatar } from '@/shared/components';
+import { Card, Button, Avatar, ModalSheet } from '@/shared/components';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { mockTripRooms } from '../../data/mock-trip-room';
 import { getRoomSeasonTheme } from '../../data/season-presentation';
@@ -14,15 +15,66 @@ const money = (amount: number) => '$' + amount.toLocaleString('en-US', { maximum
 export const BudgetDashboard: React.FC<{ roomId: string }> = ({ roomId }) => {
   const { colors, typography, spacing } = useTheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const room = mockTripRooms.find(item => item.id === roomId);
   const archived = room?.stage === 'archived';
   const theme = getRoomSeasonTheme(room);
-  const { expenses, categories, settlements, balances, travelers, addSettlement } = useBudgetMockData(roomId);
+  const { expenses, categories, settlements, balances, travelers, addSettlement, addCategory, updateCategory, deleteCategory } = useBudgetMockData(roomId);
   const total = expenses.reduce((sum, expense) => sum + expense.total_amount, 0);
   const planned = categories.reduce((sum, category) => sum + category.planned_amount, 0);
   const me = balances.find(item => item.id === user?.id) || balances[0];
   const balance = me?.balance || 0;
+  const isOwner = room?.created_by === user?.id;
+
+  const [categorySheetVisible, setCategorySheetVisible] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<{ id: string; category_name: string; planned_amount: number } | null>(null);
+  const [catNameInput, setCatNameInput] = useState('');
+  const [catAmountInput, setCatAmountInput] = useState('');
+
+  const openAddCategory = () => {
+    setEditingCategory(null);
+    setCatNameInput('');
+    setCatAmountInput('');
+    setCategorySheetVisible(true);
+  };
+
+  const openEditCategory = (cat: { id: string; category_name: string; planned_amount: number }) => {
+    setEditingCategory(cat);
+    setCatNameInput(cat.category_name);
+    setCatAmountInput(cat.planned_amount.toString());
+    setCategorySheetVisible(true);
+  };
+
+  const saveCategory = () => {
+    const amount = Number(catAmountInput);
+    if (!catNameInput.trim() || !Number.isFinite(amount) || amount < 0) {
+      Alert.alert('Invalid Input', 'Please provide a valid category name and positive amount.');
+      return;
+    }
+    if (editingCategory) {
+      updateCategory(editingCategory.id, { category_name: catNameInput.trim(), planned_amount: amount });
+    } else {
+      addCategory({ id: `cat-${Date.now()}`, category_name: catNameInput.trim(), planned_amount: amount });
+    }
+    setCategorySheetVisible(false);
+  };
+
+  const handleDeleteCategory = () => {
+    if (!editingCategory) return;
+    const spent = expenses.filter(e => e.category_id === editingCategory.id).reduce((sum, e) => sum + e.total_amount, 0);
+    if (spent > 0) {
+      Alert.alert('Cannot Delete', 'This category has logged expenses. Reassign them before deleting.');
+      return;
+    }
+    Alert.alert('Delete Category', `Are you sure you want to delete "${editingCategory.category_name}"?`, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: () => {
+        deleteCategory(editingCategory.id);
+        setCategorySheetVisible(false);
+      } }
+    ]);
+  };
   const myUserId = user?.id || 'demo-user-1';
   const pairwise = new Map<string, number>();
   travelers.forEach(t => { if (t.id !== myUserId) pairwise.set(t.id, 0); });
@@ -55,19 +107,23 @@ export const BudgetDashboard: React.FC<{ roomId: string }> = ({ roomId }) => {
   const mySettledCounterparties: string[] = [];
 
   pairwise.forEach((amount, counterpartyId) => {
-    const net = Math.round(amount * 100) / 100;
-    if (net < -0.01) myOwedPayments.push({ from: myUserId, to: counterpartyId, amount: -net });
-    else if (net > 0.01) myCreditPayments.push({ from: counterpartyId, to: myUserId, amount: net });
-    else {
-      const hasActivity = expenses.some(e => e.paid_by.includes(myUserId) || e.paid_by.includes(counterpartyId)) || 
-                          settlements.some(s => (s.from_user_id === myUserId && s.to_user_id === counterpartyId) || (s.from_user_id === counterpartyId && s.to_user_id === myUserId));
-      if (hasActivity) mySettledCounterparties.push(counterpartyId);
+    if (archived) {
+      mySettledCounterparties.push(counterpartyId);
+    } else {
+      const net = Math.round(amount * 100) / 100;
+      if (net < -0.01) myOwedPayments.push({ from: myUserId, to: counterpartyId, amount: -net });
+      else if (net > 0.01) myCreditPayments.push({ from: counterpartyId, to: myUserId, amount: net });
+      else {
+        const hasActivity = expenses.some(e => e.paid_by.includes(myUserId) || e.paid_by.includes(counterpartyId)) || 
+                            settlements.some(s => (s.from_user_id === myUserId && s.to_user_id === counterpartyId) || (s.from_user_id === counterpartyId && s.to_user_id === myUserId));
+        if (hasActivity) mySettledCounterparties.push(counterpartyId);
+      }
     }
   });
 
   const textColor = { color: colors.onSurface };
   return <View style={{ flex: 1, backgroundColor: colors.background }}>
-    <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: 130, gap: 20 }}>
+    <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: 150, gap: 20 }}>
       {archived && <ArchivedBanner />}
       <Card style={{ padding: 20, gap: 16, backgroundColor: theme.background, borderColor: theme.border, borderWidth: 1 }}>
         <View style={s.row}><View><Text style={s.muted}>Total Spent</Text><Text style={[typography.headlineLg, textColor]}>{money(total)}</Text></View>
@@ -78,12 +134,29 @@ export const BudgetDashboard: React.FC<{ roomId: string }> = ({ roomId }) => {
             <View key={String(label)} style={s.row}><Text style={s.muted}>{label}</Text><Text style={[s.strong, textColor]}>{money(Number(amount))}</Text></View>)}
         </View>
       </Card>
-      {archived && <View style={[s.settled, { backgroundColor: theme.background }]}><Feather name="check-circle" size={28} color="#49713B" /><View style={{ flex: 1 }}><Text style={[s.heading, textColor]}>All Settle Up!</Text><Text style={s.muted}>Every traveler is settled. No balance owed or owing.</Text></View></View>}
-      <Text style={[s.heading, textColor]}>Categories</Text>
+
+      <View style={[s.row, { marginBottom: 4 }]}>
+        <Text style={[s.heading, textColor]}>Categories</Text>
+        {isOwner && !archived && (
+          <TouchableOpacity onPress={openAddCategory} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <Text style={{ color: colors.primary, fontWeight: '600' }}>+ Add</Text>
+          </TouchableOpacity>
+        )}
+      </View>
       {categories.map(category => {
         const spent = expenses.filter(expense => expense.category_id === category.id).reduce((sum, expense) => sum + expense.total_amount, 0);
         return <Card key={category.id} variant="outlined" style={{ padding: 16, gap: 12 }}>
-          <View style={s.row}><Text style={[s.strong, textColor]}>{category.category_name}</Text><Text style={s.muted}>{money(spent)} / {money(category.planned_amount)}</Text></View>
+          <View style={s.row}>
+            <Text style={[s.strong, textColor]}>{category.category_name}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Text style={s.muted}>{money(spent)} / {money(category.planned_amount)}</Text>
+              {isOwner && !archived && (
+                <TouchableOpacity onPress={() => openEditCategory(category)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                  <Feather name="edit-2" size={14} color={colors.onSurfaceVariant} />
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
           <View style={s.track}><View style={{ width: `${category.planned_amount ? Math.min(spent / category.planned_amount * 100, 100) : 0}%`, height: '100%', backgroundColor: colors.primary }} /></View>
         </Card>;
       })}
@@ -94,12 +167,7 @@ export const BudgetDashboard: React.FC<{ roomId: string }> = ({ roomId }) => {
         <Text style={s.muted}>{travelers.filter(person => expense.paid_by.includes(person.id)).map(person => person.name).join(', ')} paid · {expense.created_at.slice(0, 10)}</Text>
         <Text style={{ fontSize: 12, color: archived ? '#49713B' : colors.onSurfaceVariant }}>{archived ? '✓ Paid · Settle Up Done' : expense.category_name || categories.find(category => category.id === expense.category_id)?.category_name}</Text>
       </Card>)}
-      {!!settlements.length && <Text style={[s.heading, textColor]}>Paid transaction history</Text>}
-      {settlements.map(payment => <Card key={payment.id} variant="outlined" style={{ padding: 16, gap: 8 }}>
-        <View style={s.row}><Text style={[s.strong, textColor, { flex: 1 }]}>{payment.from_user_name || travelers.find(person => person.id === payment.from_user_id)?.name} → {payment.to_user_name || travelers.find(person => person.id === payment.to_user_id)?.name}</Text><Text style={[s.strong, textColor]}>{money(payment.amount)}</Text></View>
-        <Text style={s.muted}>{payment.settled_at.slice(0, 10)} · {payment.method}</Text><Text style={{ color: '#49713B', fontSize: 12 }}>✓ Settle Up Done</Text>
-      </Card>)}
-      {(!archived && (myOwedPayments.length > 0 || myCreditPayments.length > 0 || mySettledCounterparties.length > 0)) && (
+      {((myOwedPayments.length > 0 || myCreditPayments.length > 0 || mySettledCounterparties.length > 0)) && (
         <View style={{ gap: 12 }}>
           <Text style={[s.heading, textColor]}>Settle Up</Text>
           {myOwedPayments.map((payment, index) => {
@@ -170,11 +238,57 @@ export const BudgetDashboard: React.FC<{ roomId: string }> = ({ roomId }) => {
         </View>
       )}
 
-      {!archived && <Button title="+ Add Expense" onPress={() => router.push(`/(tabs)/trip/room/${roomId}/budget/add-expense` as any)} />}
+      {/* Removed + Add Expense button from ScrollView content */}
     </ScrollView>
+    {!archived && (
+      <View style={{ position: 'absolute', bottom: insets.bottom + 20, left: spacing.lg, right: spacing.lg }}>
+        <Button title="+ Add Expense" onPress={() => router.push(`/(tabs)/trip/room/${roomId}/budget/add-expense` as any)} />
+      </View>
+    )}
+
+    <ModalSheet visible={categorySheetVisible} onClose={() => setCategorySheetVisible(false)} title={editingCategory ? 'Edit Category' : 'Add Category'}>
+      <View style={{ gap: 16 }}>
+        <View style={{ gap: 8 }}>
+          <Text style={{ fontSize: 14, fontWeight: '500', color: colors.onSurfaceVariant }}>Category Name</Text>
+          <View style={[s.inputWrap, { borderColor: colors.outlineVariant, backgroundColor: colors.background }]}>
+            <TextInput
+              style={[s.input, { color: colors.onSurface }]}
+              placeholder="e.g. Food & Dining"
+              placeholderTextColor={colors.onSurfaceVariant}
+              value={catNameInput}
+              onChangeText={setCatNameInput}
+            />
+          </View>
+        </View>
+
+        <View style={{ gap: 8 }}>
+          <Text style={{ fontSize: 14, fontWeight: '500', color: colors.onSurfaceVariant }}>Planned Amount (USD)</Text>
+          <View style={[s.inputWrap, { borderColor: colors.outlineVariant, backgroundColor: colors.background }]}>
+            <TextInput
+              style={[s.input, { color: colors.onSurface }]}
+              placeholder="0.00"
+              placeholderTextColor={colors.onSurfaceVariant}
+              keyboardType="decimal-pad"
+              value={catAmountInput}
+              onChangeText={setCatAmountInput}
+            />
+          </View>
+        </View>
+
+        <View style={{ gap: 12, marginTop: 12 }}>
+          <Button title="Save Category" onPress={saveCategory} />
+          {editingCategory && (
+            <Button title="Delete Category" variant="outline" onPress={handleDeleteCategory} textStyle={{ color: '#E15241' }} style={{ borderColor: '#E15241' }} />
+          )}
+        </View>
+      </View>
+    </ModalSheet>
+
   </View>;
 };
 const s = StyleSheet.create({
+  inputWrap: { borderWidth: 1, borderRadius: 12, overflow: 'hidden' },
+  input: { paddingHorizontal: 16, paddingVertical: 14, fontSize: 16 },
   row: { flexDirection: 'row', justifyContent: 'space-between', gap: 12, alignItems: 'center' },
   muted: { fontSize: 12, lineHeight: 19, color: '#666C72' },
   strong: { fontSize: 14, fontWeight: '600' },

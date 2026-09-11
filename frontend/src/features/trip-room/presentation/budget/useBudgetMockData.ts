@@ -19,5 +19,23 @@ export const useBudgetMockData = (roomId: string) => {
     if (room.stage === 'archived') return;
     setBudget(previous => ({ ...previous, settlements: [...previous.settlements, payment] }));
   };
-  return { ...budget, travelers, balances: budgetBalances(budget, travelers), addExpense, addSettlement };
+  const addCategory = (category: { id: string; category_name: string; planned_amount: number }) => {
+    if (room.stage === 'archived') return;
+    setBudget(previous => ({ ...previous, categories: [...previous.categories, { ...category, room_id: room.id }] }));
+  };
+  const updateCategory = (id: string, updates: Partial<{ category_name: string; planned_amount: number }>) => {
+    if (room.stage === 'archived') return;
+    setBudget(previous => ({
+      ...previous,
+      categories: previous.categories.map(c => c.id === id ? { ...c, ...updates } : c)
+    }));
+  };
+  const deleteCategory = (id: string) => {
+    if (room.stage === 'archived') return;
+    setBudget(previous => ({
+      ...previous,
+      categories: previous.categories.filter(c => c.id !== id)
+    }));
+  };
+  return { ...budget, travelers, balances: budgetBalances(budget, travelers), addExpense, addSettlement, addCategory, updateCategory, deleteCategory };
 };

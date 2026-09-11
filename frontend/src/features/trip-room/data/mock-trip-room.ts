@@ -62,12 +62,23 @@ export const mockTripRooms: TripRoom[] = [
     is_public: false, invite_code: 'CH-WIN', cover_image: locationPhoto('CH.VS.Zermatt 2021-10-17 Matterhorn 8726.jpg').imageUrl, groupProfileImage: 'https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=400&h=400&fit=crop',
   },
 ];
-export const mockTripMembers: TripRoomMember[] = mockTripRooms.flatMap(room =>
-  mockStandardUsers.slice(0, room.id.includes('swiss') || room.id.includes('australia') ? 4 : 5).map((user, index) => ({
+const extendedMockUsers = [
+  ...mockStandardUsers,
+  { id: 'ext-user-1', email: 'chris@example.com', auth_provider: 'email' as const, name: 'Chris Evans', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop', home_country: 'USA', created_at: '2026-08-01T00:00:00Z' },
+  { id: 'ext-user-2', email: 'emma@example.com', auth_provider: 'email' as const, name: 'Emma Watson', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop', home_country: 'UK', created_at: '2026-08-01T00:00:00Z' },
+  { id: 'ext-user-3', email: 'michael@example.com', auth_provider: 'email' as const, name: 'Michael B.', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop', home_country: 'USA', created_at: '2026-08-01T00:00:00Z' },
+  { id: 'ext-user-4', email: 'sarah@example.com', auth_provider: 'email' as const, name: 'Sarah Connor', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&h=200&fit=crop', home_country: 'USA', created_at: '2026-08-01T00:00:00Z' },
+  { id: 'ext-user-5', email: 'david@example.com', auth_provider: 'email' as const, name: 'David Lee', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop', home_country: 'Canada', created_at: '2026-08-01T00:00:00Z' },
+];
+
+export const mockTripMembers: TripRoomMember[] = mockTripRooms.flatMap(room => {
+  const users = room.stage === 'archived' ? extendedMockUsers : mockStandardUsers.slice(0, room.id.includes('swiss') || room.id.includes('australia') ? 4 : 5);
+  return users.map((user, index) => ({
     room_id: room.id, user_id: user.id, role: index === 0 ? 'owner' : 'member',
     location_sharing_opt_in: room.stage === 'active', is_live_for_user: room.stage === 'active',
     joined_at: `${room.start_date}T00:00:00Z`, user: { name: user.name, avatar: user.avatar },
-  })));
+  }));
+});
 const archivedHistory = mockTripRooms.filter(room => room.stage === 'archived').map(createArchivedHistory);
 export const mockArchivedStops = archivedHistory.flatMap(history => history.items);
 export const mockItineraryDays: ItineraryDay[] = [...archivedHistory.flatMap(history => history.days), ...mockStandardItineraryDays];
