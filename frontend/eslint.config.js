@@ -10,6 +10,6 @@ const compat = new FlatCompat({
 module.exports = [
   ...compat.extends('expo'),
   {
-    ignores: ['dist/*', '.expo/*'],
+    ignores: ['dist/*', '.expo/*', 'scripts/*', 'assets/**', 'public/**'],
   },
 ];

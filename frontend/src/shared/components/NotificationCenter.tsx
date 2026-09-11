@@ -209,7 +209,7 @@ export const NotificationCenter: React.FC = () => {
               <TextInput
                 value={inquireQuery}
                 onChangeText={setInquireQuery}
-                placeholder="Ask Corgi AI about your trip alerts..."
+                placeholder="Ask Roti about your trip alerts..."
                 placeholderTextColor={colors.outline}
                 style={[
                   typography.bodySm,

@@ -18,7 +18,7 @@ export const ProfileScreen: React.FC = () => {
   const router = useRouter();
   
   // Use global auth state to keep header in sync
-  const { user: authUser } = useAuth();
+  const { user: authUser, signOut } = useAuth();
   const { liveTrip } = useLiveTrip();
 
   const {
@@ -40,8 +40,9 @@ export const ProfileScreen: React.FC = () => {
     setIsEditModalVisible(true);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     Alert.alert('Logout', 'Logging out...');
+    await signOut();
     router.replace('/');
   };
 

@@ -381,7 +381,7 @@ export const AIChatbox: React.FC = () => {
             <View style={styles.loadingRow}>
               <ActivityIndicator size="small" color="#ffffff" />
               <Text style={[typography.labelMd, { color: '#ffffff', fontWeight: '800', marginLeft: 8 }]}>
-                Corgi AI Crafting Itinerary...
+                Roti Crafting Itinerary...
               </Text>
             </View>
           ) : (

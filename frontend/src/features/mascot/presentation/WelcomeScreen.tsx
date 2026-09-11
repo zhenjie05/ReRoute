@@ -166,7 +166,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ isFirstTime = fals
               <RotiMascotSvg
                 width={190}
                 height={230}
-                accessibilityLabel="Roti the Corgi Mascot"
+                accessibilityLabel="Roti Mascot"
               />
             </Animated.View>
 

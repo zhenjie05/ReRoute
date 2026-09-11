@@ -18,7 +18,7 @@ export const RotiMascotSvg: React.FC<RotiMascotSvgProps> = ({
   width = 160,
   height = 200,
   style,
-  accessibilityLabel = 'Roti the Corgi Mascot',
+  accessibilityLabel = 'Roti Mascot',
 }) => {
   const [svgXml, setSvgXml] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);

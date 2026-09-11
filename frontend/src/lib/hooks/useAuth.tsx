@@ -4,6 +4,8 @@ import { supabase } from '@/lib/supabase/client';
 import { authService } from '@/features/auth/data/auth-service';
 import { currentDemoUser } from '@/shared/data/standard-mock-data';
 
+import { resetRotiSpeechBubbleSession } from '@/lib/session/roti-session';
+
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
@@ -98,6 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { error };
       }
       if (data?.user) {
+        resetRotiSpeechBubbleSession();
         setUser(mapSupabaseUser(data.user));
       }
       return {};
@@ -122,6 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { error };
       }
       if (data?.user) {
+        resetRotiSpeechBubbleSession();
         setUser(mapSupabaseUser(data.user));
       }
       return {};
@@ -137,6 +141,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) {
         return { error };
       }
+      resetRotiSpeechBubbleSession();
       return {};
     } finally {
       setIsLoading(false);
@@ -147,6 +152,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       await authService.logout();
+      resetRotiSpeechBubbleSession();
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -184,6 +190,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const demoSignIn = () => {
+    resetRotiSpeechBubbleSession();
     setUser({ ...currentDemoUser });
   };
 

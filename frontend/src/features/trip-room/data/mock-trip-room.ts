@@ -13,8 +13,6 @@ import {
   mockStandardMessages,
   mockStandardDecisionCards,
   mockStandardVotes,
-  mockStandardLandmarks,
-  mockStandardSafetyAlerts,
   currentDemoUser,
 } from '@/shared/data/standard-mock-data';
 import { TripRoom, TripRoomMember } from '@/models/trip-room';
@@ -78,8 +76,7 @@ export const mockMessages = [...roomMessages, ...archivedHistory.flatMap(history
 export const mockDecisionCards: DecisionCard[] = mockStandardDecisionCards;
 export const mockVotes = mockStandardVotes;
 export const mockAlbumPhotos: AlbumPhoto[] = mockTripRooms.flatMap(room => room.stage === 'archived' ? createArchivedHistory(room).photos : createDemoAlbum(room, mockItineraryDays));
-export const mockLandmarks = mockStandardLandmarks;
-export const mockSafetyAlerts = mockStandardSafetyAlerts;
+export { mockLandmarks, mockSafetyAlerts } from '@/features/route-planning/data/mock-route-planning';
 
 
 export const mockItineraryVoteStatus: Record<

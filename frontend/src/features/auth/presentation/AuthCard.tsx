@@ -219,14 +219,14 @@ export const AuthCard: React.FC<AuthCardProps> = ({
             activeOpacity={0.88}
             onPress={handleMascotClick}
             accessibilityRole="button"
-            accessibilityLabel="Roti the Corgi Mascot. Click to say hello!"
+            accessibilityLabel="Roti Mascot. Click to say hello!"
           >
             <Animated.View style={[styles.mascotContainer, animatedMascotStyle]}>
               <Image
                 source={rotiImage}
                 style={styles.logoImage}
                 resizeMode="contain"
-                accessibilityLabel="Roti the Corgi Mascot"
+                accessibilityLabel="Roti Mascot"
               />
             </Animated.View>
           </TouchableOpacity>
