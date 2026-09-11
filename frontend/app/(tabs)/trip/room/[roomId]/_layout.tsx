@@ -4,6 +4,7 @@ import { Slot, useRouter, usePathname } from 'expo-router';
 import { useTheme } from '@/core/theme';
 import { Badge } from '@/shared/components';
 import { mockTripRooms } from '@/features/trip-room/data/mock-trip-room';
+import { getRoomSeasonTheme } from '@/features/trip-room/data/season-presentation';
 import ArchivedItinerary from '@/features/trip-room/presentation/itinerary-demo/ArchivedItinerary';
 import { Feather } from '@expo/vector-icons';
 
@@ -24,6 +25,7 @@ export default function TripRoomLayout() {
 
   const room = mockTripRooms.find((r) => r.id === roomId) || mockTripRooms[0];
   const stageLabel = room.stage.toUpperCase();
+  const seasonalTheme = getRoomSeasonTheme(room);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -32,8 +34,8 @@ export default function TripRoomLayout() {
         style={[
           styles.header,
           {
-            backgroundColor: '#ffffff',
-            borderBottomColor: colors.cardBorder,
+            backgroundColor: seasonalTheme.background,
+            borderBottomColor: seasonalTheme.border,
             paddingHorizontal: spacing.lg,
             paddingTop: spacing.md,
             paddingBottom: spacing.sm,

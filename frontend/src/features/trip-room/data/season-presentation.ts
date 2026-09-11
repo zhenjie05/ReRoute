@@ -1,11 +1,12 @@
 import type { TripRoom, TripSeason, TripSeasonTheme, TripStage } from '@/models/trip-room';
+import { seasonalPalettes } from '@/core/theme/colors';
 
 // Opaque pastel blends keep the whole card readable on every surface.
 export const seasonalThemes: Record<TripSeason, TripSeasonTheme> = {
-  spring: { background: '#FFF3F6', border: '#F1E2E7', badge: '#FFE0E6', text: '#85495C' },
-  summer: { background: '#F1F9FD', border: '#DFECF2', badge: '#E0F0F8', text: '#375F73' },
-  autumn: { background: '#FFF5EC', border: '#F2E5D9', badge: '#FDE5D1', text: '#894927' },
-  winter: { background: '#F4F8FC', border: '#E1E8EF', badge: '#E6F1FA', text: '#4D6476' },
+  spring: { background: seasonalPalettes.spring.soft, border: seasonalPalettes.spring.main, badge: seasonalPalettes.spring[100], text: seasonalPalettes.spring.text },
+  summer: { background: seasonalPalettes.summer.soft, border: seasonalPalettes.summer.main, badge: seasonalPalettes.summer[100], text: seasonalPalettes.summer.text },
+  autumn: { background: seasonalPalettes.autumn.soft, border: seasonalPalettes.autumn.main, badge: seasonalPalettes.autumn[100], text: seasonalPalettes.autumn.text },
+  winter: { background: seasonalPalettes.winter.soft, border: seasonalPalettes.winter.main, badge: seasonalPalettes.winter[100], text: seasonalPalettes.winter.text },
 };
 
 export interface TripStageTheme {

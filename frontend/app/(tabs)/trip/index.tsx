@@ -199,18 +199,18 @@ export default function TripHubScreen({ initialSheet = null }: { initialSheet?: 
                         <Text style={[typography.bodySm, { color: colors.onSurfaceVariant, flexShrink: 1 }]} numberOfLines={1}>
                           {room.start_date} - {room.end_date}
                         </Text>
-                        {room.season && room.theme_color && (
+                        {room.season && (
                           <View style={{
                             marginLeft: 8,
-                            backgroundColor: `${room.theme_color}26`,
+                            backgroundColor: colors.surfaceContainerHigh,
                             paddingHorizontal: 8,
                             paddingVertical: 4,
-                            borderRadius: 12,
+                            borderRadius: rounded.full,
                           }}>
                             <Text style={{
-                              fontSize: 12,
-                              fontWeight: '600',
-                              color: room.theme_color,
+                              fontSize: 10,
+                              fontWeight: '500',
+                              color: seasonalTheme.text,
                               textTransform: 'capitalize'
                             }}>
                               {room.season}

@@ -1,6 +1,6 @@
 export type Season = 'spring' | 'summer' | 'autumn' | 'winter';
 
-const seasonalPalettes = {
+export const seasonalPalettes = {
   spring: {
     50: '#FFECEE',
     100: '#FFE0E6',
@@ -11,16 +11,17 @@ const seasonalPalettes = {
     soft: '#FFECEE',
     main: '#FFC9D6',
     accent: '#FEB1C6',
-    text: '#85495C',
+    text: '#FEB1C6',
   },
   summer: {
+    25: '#F0F2E4',
     50: '#C3CA92',
     100: '#A4B17B',
     200: '#859864',
     300: '#697E50',
     400: '#354C2B',
     500: '#20331B',
-    soft: '#C3CA92',
+    soft: '#F0F2E4',
     main: '#697E50',
     accent: '#354C2B',
     text: '#20331B',
@@ -47,7 +48,7 @@ const seasonalPalettes = {
     soft: '#F7FBFE',
     main: '#C9DEEF',
     accent: '#AFCBE3',
-    text: '#2A4365',
+    text: '#AFCBE3',
   },
 };
 

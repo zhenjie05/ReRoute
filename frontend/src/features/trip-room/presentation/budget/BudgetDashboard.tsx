@@ -20,7 +20,7 @@ export const BudgetDashboard: React.FC<{ roomId: string }> = ({ roomId }) => {
   const room = mockTripRooms.find(item => item.id === roomId);
   const archived = room?.stage === 'archived';
   const theme = getRoomSeasonTheme(room);
-  const { expenses, categories, settlements, balances, travelers, addSettlement, addCategory, updateCategory, deleteCategory } = useBudgetMockData(roomId);
+  const { expenses, categories, settlements, splits, balances, travelers, addSettlement, addCategory, updateCategory, deleteCategory } = useBudgetMockData(roomId);
   const total = expenses.reduce((sum, expense) => sum + expense.total_amount, 0);
   const planned = categories.reduce((sum, category) => sum + category.planned_amount, 0);
   const me = balances.find(item => item.id === user?.id) || balances[0];
@@ -80,18 +80,39 @@ export const BudgetDashboard: React.FC<{ roomId: string }> = ({ roomId }) => {
   travelers.forEach(t => { if (t.id !== myUserId) pairwise.set(t.id, 0); });
 
   expenses.forEach(expense => {
-    const share = expense.total_amount / travelers.length;
-    expense.paid_by.forEach(payerId => {
+    const expenseSplits = splits ? splits.filter(s => s.expense_id === expense.id) : [];
+    const numPayers = expense.paid_by.length || 1;
+    const myPayment = expense.paid_by.includes(myUserId) ? expense.total_amount / numPayers : 0;
+    const mySplitAmount = expenseSplits.find(s => s.user_id === myUserId)?.amount_owed || 0;
+
+    if (numPayers === 1) {
+      const payerId = expense.paid_by[0];
       if (payerId === myUserId) {
-        travelers.forEach(t => {
-          if (t.id !== myUserId && !expense.paid_by.includes(t.id)) {
-            pairwise.set(t.id, (pairwise.get(t.id) || 0) + share);
+        expenseSplits.forEach(split => {
+          if (split.user_id !== myUserId) {
+            pairwise.set(split.user_id, (pairwise.get(split.user_id) || 0) + split.amount_owed);
           }
         });
       } else {
-        pairwise.set(payerId, (pairwise.get(payerId) || 0) - share);
+        if (mySplitAmount > 0) {
+          pairwise.set(payerId, (pairwise.get(payerId) || 0) - mySplitAmount);
+        }
       }
-    });
+    } else {
+      if (myPayment > 0) {
+        expenseSplits.forEach(split => {
+          if (!expense.paid_by.includes(split.user_id)) {
+            pairwise.set(split.user_id, (pairwise.get(split.user_id) || 0) + (split.amount_owed / numPayers));
+          }
+        });
+      } else {
+        if (mySplitAmount > 0) {
+          expense.paid_by.forEach(payerId => {
+            pairwise.set(payerId, (pairwise.get(payerId) || 0) - (mySplitAmount / numPayers));
+          });
+        }
+      }
+    }
   });
 
   settlements.forEach(settlement => {
@@ -114,9 +135,8 @@ export const BudgetDashboard: React.FC<{ roomId: string }> = ({ roomId }) => {
       if (net < -0.01) myOwedPayments.push({ from: myUserId, to: counterpartyId, amount: -net });
       else if (net > 0.01) myCreditPayments.push({ from: counterpartyId, to: myUserId, amount: net });
       else {
-        const hasActivity = expenses.some(e => e.paid_by.includes(myUserId) || e.paid_by.includes(counterpartyId)) || 
-                            settlements.some(s => (s.from_user_id === myUserId && s.to_user_id === counterpartyId) || (s.from_user_id === counterpartyId && s.to_user_id === myUserId));
-        if (hasActivity) mySettledCounterparties.push(counterpartyId);
+        const hasSettlement = settlements.some(s => (s.from_user_id === myUserId && s.to_user_id === counterpartyId) || (s.from_user_id === counterpartyId && s.to_user_id === myUserId));
+        if (hasSettlement) mySettledCounterparties.push(counterpartyId);
       }
     }
   });

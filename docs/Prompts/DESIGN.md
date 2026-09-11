@@ -143,6 +143,7 @@ The design system is organized into 14 units, covering layout, typography, color
     *   **Summer:**
         | Token | Hex |
         |---|---|
+        | `summer-25` | `#F0F2E4` |
         | `summer-50` | `#C3CA92` |
         | `summer-100` | `#A4B17B` |
         | `summer-200` | `#859864` |
