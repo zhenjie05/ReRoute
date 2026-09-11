@@ -253,12 +253,16 @@ export const AITripPlanReviewModal: React.FC<AITripPlanReviewModalProps> = ({
 
             {/* Timeline Stops Stepper */}
             <View style={styles.timelineContainer}>
-              {itineraryPreview.length === 0 ? (
-                <Text style={[typography.bodySm, { color: colors.outline, textAlign: 'center', marginVertical: spacing.lg }]}>
-                  No itinerary data available for this trip.
-                </Text>
-              ) : (
-                itineraryPreview.map((item, index) => {
+              {(() => {
+                const itemsForDay = itineraryPreview.filter(item => item.day === selectedDay || !item.day);
+                if (itemsForDay.length === 0) {
+                  return (
+                    <Text style={[typography.bodySm, { color: colors.outline, textAlign: 'center', marginVertical: spacing.lg }]}>
+                      No itinerary data available for this trip.
+                    </Text>
+                  );
+                }
+                return itemsForDay.map((item, index) => {
                   const isLast = index === itineraryPreview.length - 1;
                   
                   if (item.type === 'transport') {
@@ -411,8 +415,8 @@ export const AITripPlanReviewModal: React.FC<AITripPlanReviewModalProps> = ({
                   }
 
                   return null;
-                })
-              )}
+                });
+              })()}
             </View>
 
             {/* Primary Action Button */}

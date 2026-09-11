@@ -408,7 +408,7 @@ export const AIChatbox: React.FC = () => {
         }}
         prompt={promptText}
         matchPercentage={selectedHistoryTrip ? selectedHistoryTrip.matchPercentage : 98}
-        itineraryPreview={selectedHistoryTrip ? selectedHistoryTrip.itineraryPreview : []}
+        itineraryPreview={selectedHistoryTrip ? selectedHistoryTrip.itineraryPreview : mockAiHistory[0].itineraryPreview}
       />
 
       {/* History Modal */}
