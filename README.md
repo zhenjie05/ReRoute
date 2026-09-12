@@ -57,10 +57,10 @@ ReRoute gives every trip a dedicated **Trip Room**, one shared space that plans 
 
 ### 2.2 Ideation Boards
 
-![Problem Tree](ideation/problem-tree.png)
+![Problem Tree](ideation/reroute_problem_tree.png)
 *A problem tree showing the root causes of scattered group trip planning, the core problem, and who is affected most, the organizer, the budget-conscious member, and the spontaneous member.*
 
-![Idea Evolution Timeline](ideation/idea-evolution.png)
+![Idea Evolution Timeline](ideation/reroute_idea_evolution.png)
 *Our idea evolution from individual brainstorming (1 Sept) through feature integration (3 Sept) to refinement after mentor feedback (4 Sept).*
 
 ### 2.3 Mentor Consultation
