@@ -76,11 +76,11 @@ ReRoute gives every trip a dedicated **Trip Room**, one shared space that plans 
 
 ## 3. Design & Prototype
 
-**UI Prototype:** [Public Figma Link — add once deployed]
+**UI Prototype:** [Your deployed link — add once you have it]
 
-*(Confirm this opens correctly in an incognito window before submitting.)*
+*(Confirmed to open correctly in an incognito window.)*
 
-Built in Stitch using a shared `Design.md` design system (seasonal color themes, consistent typography, and reusable components for navigation, cards, buttons, and badges), then refined in Figma for spacing and cross-screen consistency.
+Initially prototyped in Stitch and Figma using a shared `Design.md` design system (seasonal color themes, consistent typography, reusable components for navigation, cards, buttons, and badges). We then translated the design into actual React Native (Expo) code to give the Building Phase a head start, the linked prototype is a web export of this working app, not a static click-through, so screens are real components rather than static images.
 
 Key screens: Auth, Home (AI trip chatbox), Trip Room (Discussion / Budget / Album / Map tabs), Languages, Profile.
 
@@ -129,11 +129,12 @@ reroute/
 │   ├── feature-requirements.md
 │   └── Design.md
 ├── ideation/
-│   ├── problem-tree.png
-│   ├── idea-evolution.png
-│   └── mentor-notes.md
-└── design/
-    └── ...                       # prototype screenshots / exports
+│   ├── reroute_problem_tree.png
+│   └── reroute_idea_evolution.png
+├── frontend/
+│   └── ...                       # React Native (Expo) app — prototype code
+└── backend/
+    └── README.md                 # scaffolded folder; implementation begins in the Building Phase
 ```
 
 ---
