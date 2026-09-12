@@ -13,7 +13,6 @@
 **Team:** Lee Zhen Jie (Team Leader) · Gan Rui En · Hong Jia Bao
 **Problem Statement:** Travel Planner
 **Video Presentation:** [Unlisted YouTube Link — add here]
-**Presentation Slides:** [Public Link — add here]
 **UI Prototype:** [Public Figma Link — add once deployed]
 
 </div>
@@ -24,18 +23,18 @@
 
 ### The Problem
 
-Planning a group trip means juggling flights, budgets, itineraries, and everyone's clashing preferences across multiple single-purpose apps and a group chat. Stakeholders — the trip organizer, budget-conscious members, and spontaneous members — each feel this differently: the organizer carries the coordination load, budget-conscious members get hit hardest by cost disputes, and spontaneous members are frustrated when nothing adapts. The moment plans change mid-trip, existing tools go silent.
+Planning a group trip means juggling flights, budgets, itineraries, and everyone's clashing preferences across multiple single-purpose apps and a group chat. Stakeholders, the trip organizer, budget-conscious members, and spontaneous members, each feel this differently: the organizer carries the coordination load, budget-conscious members get hit hardest by cost disputes, and spontaneous members are frustrated when nothing adapts. The moment plans change mid-trip, existing tools go silent.
 
-Apps like **TripIt** organize itineraries well but stop there — they don't handle group budgeting, decision-making, or what happens when a flight gets delayed. Travelers are left stitching multiple apps together themselves.
+Apps like **TripIt** organize itineraries well but stop there, they don't handle group budgeting, decision-making, or what happens when a flight gets delayed. Travelers are left stitching multiple apps together themselves.
 
 ### Our Solution
 
-ReRoute gives every trip a dedicated **Trip Room** — one shared space that plans the trip with AI, mediates group decisions, adapts in real time when plans break, splits the bill, and remembers the trip once it's over. Instead of treating "the group disagrees" and "the plan broke" as separate problems, ReRoute resolves both through the same in-chat decision-card mechanism.
+ReRoute gives every trip a dedicated **Trip Room**, one shared space that plans the trip with AI, mediates group decisions, adapts in real time when plans break, splits the bill, and remembers the trip once it's over. Instead of treating "the group disagrees" and "the plan broke" as separate problems, ReRoute resolves both through the same in-chat decision-card mechanism.
 
 **Feature set:**
 - 🗺️ AI route planning with live rerouting and safety/news risk alerts
-- 🏔️ Landmark exploration — real photo primary, AI-generated 3D model as a secondary preview
-- 🏠 Trip Rooms — anonymous voting, comments, group chat, opt-in live location sharing
+- 🏔️ Landmark exploration, real photo primary, AI-generated 3D model as a secondary preview
+- 🏠 Trip Rooms, anonymous voting, comments, group chat, opt-in live location sharing
 - 💸 Splitwise-style expense splitting with AI receipt scanning
 - 🤖 AI-suggested itineraries from aggregate traveler behavior
 - 🆘 Emergency SOS with local emergency number lookup
@@ -51,15 +50,15 @@ ReRoute gives every trip a dedicated **Trip Room** — one shared space that pla
 
 | Idea | Why it was kept / dropped |
 |---|---|
-| **Trip Room concept** (Chosen) | Everyone in one shared room per trip, with itinerary and album inside — became the core structure everything else attaches to |
+| **Trip Room concept** (Chosen) | Everyone in one shared room per trip, with itinerary and album inside, became the core structure everything else attaches to |
 | **Safety checks + Splitwise-style budget** (Chosen) | Extended the Trip Room idea to solve the "who owes who" problem directly, plus proactive risk awareness |
-| **AI-generated 3D landmark models** (Chosen, repositioned) | A standout, memorable differentiator — kept, but demoted to a secondary preview after mentor feedback (see 2.3) |
-| **Community (public trip sharing) + Friends (private DMs)** (Dropped) | Initially added to let users share trips and message each other directly. Dropped after mentor feedback — personal DMs felt inconsistent with a trip-planning app that already has group chat built into every Trip Room |
+| **AI-generated 3D landmark models** (Chosen, repositioned) | A standout, memorable differentiator is kept, but demoted to a secondary preview after mentor feedback (see 2.3) |
+| **Community (public trip sharing) + Friends (private DMs)** (Dropped) | Initially added to let users share trips and message each other directly. Dropped after mentor feedback, personal DMs felt inconsistent with a trip-planning app that already has group chat built into every Trip Room |
 
 ### 2.2 Ideation Boards
 
 ![Problem Tree](ideation/problem-tree.png)
-*A problem tree showing the root causes of scattered group trip planning, the core problem, and who is affected most — the organizer, the budget-conscious member, and the spontaneous member.*
+*A problem tree showing the root causes of scattered group trip planning, the core problem, and who is affected most, the organizer, the budget-conscious member, and the spontaneous member.*
 
 ![Idea Evolution Timeline](ideation/idea-evolution.png)
 *Our idea evolution from individual brainstorming (1 Sept) through feature integration (3 Sept) to refinement after mentor feedback (4 Sept).*
@@ -89,8 +88,8 @@ Key screens: Auth, Home (AI trip chatbox), Trip Room (Discussion / Budget / Albu
 
 ## 4. What Makes It Different
 
-- **One mechanism, two triggers.** Most travel apps treat group conflict and mid-trip disruption as separate problems needing separate features. ReRoute resolves both through the same decision-card system — whichever one triggers it, the group sees options and votes the same way.
-- **Photo-first landmark exploration.** Based on direct mentor feedback, real photos are the primary way to explore a landmark, with an AI-generated 3D model available as a secondary, playful extra — prioritizing what users actually want to see first.
+- **One mechanism, two triggers.** Most travel apps treat group conflict and mid-trip disruption as separate problems needing separate features. ReRoute resolves both through the same decision-card system, whichever one triggers it, the group sees options and votes the same way.
+- **Photo-first landmark exploration.** Based on direct mentor feedback, real photos are the primary way to explore a landmark, with an AI-generated 3D model available as a secondary, playful extra, prioritizing what users actually want to see first.
 - **Trip-scoped, not social-network-scoped.** We deliberately removed general social features (public feeds, private DMs) that didn't serve the actual travel-planning use case, keeping the app focused on what a trip group needs.
 
 | | ReRoute | TripIt | Splitwise |
