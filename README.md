@@ -1,88 +1,123 @@
 <div align="center">
 
 # 🧭 ReRoute
+### by The Avengers
 
 ### *The trip room that plans with you, travels with you, and never leaves you stranded.*
 
 [![CodeNection 2026](https://img.shields.io/badge/CodeNection-2026-14b8a6?style=for-the-badge)](https://itsocietymmu.com/codenection-2026)
 [![Track](https://img.shields.io/badge/Track-Lifestyle%20%26%20Personal%20Productivity-orange?style=for-the-badge)]()
-[![Status](https://img.shields.io/badge/Status-Prototype%20Phase-yellow?style=for-the-badge)]()
+[![Status](https://img.shields.io/badge/Status-Prototype%20Complete-brightgreen?style=for-the-badge)]()
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)]()
 
-[Prototype](#-prototype) · [Demo Video](#-demo-video) · [Features](#-features) · [Tech Stack](#-tech-stack) · [Team](#-team)
+**Team:** Lee Zhen Jie (Team Leader) · Gan Rui En · Hong Jia Bao
+**Problem Statement:** Travel Planner
+**Video Presentation:** [Unlisted YouTube Link — add here]
+**Presentation Slides:** [Public Link — add here]
+**UI Prototype:** [Public Figma Link — add once deployed]
 
 </div>
 
 ---
 
-## 🌊 What is ReRoute?
+## 1. Project Overview
 
-Planning a trip means juggling flights, budgets, itineraries, and everyone's clashing preferences — usually scattered across five apps and a group chat. The moment something changes mid-trip, every existing tool goes silent.
+### The Problem
 
-**ReRoute fixes this by giving every trip a living room.** One shared space that plans the trip, mediates group decisions, adapts in real time when things go wrong, splits the bill, and remembers the trip once it's over.
+Planning a group trip means juggling flights, budgets, itineraries, and everyone's clashing preferences across multiple single-purpose apps and a group chat. Stakeholders — the trip organizer, budget-conscious members, and spontaneous members — each feel this differently: the organizer carries the coordination load, budget-conscious members get hit hardest by cost disputes, and spontaneous members are frustrated when nothing adapts. The moment plans change mid-trip, existing tools go silent.
 
-> Built for **CodeNection 2026**, hosted by MMU IT Society — Lifestyle Track, *Planning an Escape*.
+Apps like **TripIt** organize itineraries well but stop there — they don't handle group budgeting, decision-making, or what happens when a flight gets delayed. Travelers are left stitching multiple apps together themselves.
 
----
+### Our Solution
 
-## ✨ Features
+ReRoute gives every trip a dedicated **Trip Room** — one shared space that plans the trip with AI, mediates group decisions, adapts in real time when plans break, splits the bill, and remembers the trip once it's over. Instead of treating "the group disagrees" and "the plan broke" as separate problems, ReRoute resolves both through the same in-chat decision-card mechanism.
 
-<table>
-<tr>
-<td width="50%" valign="top">
-
-### 🗺️ AI Route Planning & 3D Landmarks
-AI-generated optimal routes with live ETAs, transport comparisons, instant rerouting, and tap-to-explore 3D landmark previews with historical context.
-
-### 🛡️ Safety & Security Check
-AI monitors current local news for conflict, disasters, or unrest and proactively flags risk before it becomes a problem.
-
-### 🏠 Trip Rooms
-A dedicated room per trip with anonymous voting, per-attraction comments, group chat, and opt-in live location sharing.
-
-### 💸 Splitwise-Style Expense Splitting
-Log expenses your way — equal, percentage, shares, or exact — scan receipts with AI/OCR, and let debt-simplification handle the messy settle-up math.
-
-</td>
-<td width="50%" valign="top">
-
-### 🤖 AI-Suggested Itineraries
-Home page recommendations built from anonymized patterns across all travelers — inspiration without starting from scratch.
-
-### 🆘 Emergency SOS
-One tap alerts your whole group with your location *and* quick-dials the correct local emergency number, wherever you are.
-
-### 🗣️ Destination Language Mini-Lessons
-Bite-sized, Duolingo-style lessons scoped to real travel scenarios — ordering food, directions, emergencies.
-
-### 📸 Group Album & 👥 Community
-Auto-organized shared photo albums, plus a social feed to follow other travelers and clone itineraries you love.
-
-</td>
-</tr>
-</table>
+**Feature set:**
+- 🗺️ AI route planning with live rerouting and safety/news risk alerts
+- 🏔️ Landmark exploration — real photo primary, AI-generated 3D model as a secondary preview
+- 🏠 Trip Rooms — anonymous voting, comments, group chat, opt-in live location sharing
+- 💸 Splitwise-style expense splitting with AI receipt scanning
+- 🤖 AI-suggested itineraries from aggregate traveler behavior
+- 🆘 Emergency SOS with local emergency number lookup
+- 🗣️ Destination language mini-lessons plus a live translator
+- 📸 Shared, auto-organized trip album
+- 👤 Profile with trip history and badges
 
 ---
 
-## 🧠 Why ReRoute is different
+## 2. Ideation & Process
 
-Most travel apps stop at *planning*. ReRoute treats **disruption handling and group conflict as the same problem** — both get resolved through the same in-chat decision-card mechanism, whether it's "our flight got delayed" or "half of us want to leave early." One system, two triggers, and a much smaller app to build and reason about.
+### 2.1 Ideas We Considered
 
----
-
-## 🛠️ Tech Stack
-
-![React Native](https://img.shields.io/badge/React%20Native-Expo-20232a?style=flat-square&logo=react)
-![Supabase](https://img.shields.io/badge/Supabase-Postgres%20%2B%20PostGIS-3ecf8e?style=flat-square&logo=supabase)
-![Google Maps](https://img.shields.io/badge/Google%20Maps-Directions%20%26%20Places-4285F4?style=flat-square&logo=googlemaps)
-![AI](https://img.shields.io/badge/AI-Claude%20%2F%20OpenAI-8a2be2?style=flat-square)
-
-| Layer | Choice |
+| Idea | Why it was kept / dropped |
 |---|---|
-| Frontend | React Native (Expo) |
-| Backend | Supabase — Postgres + PostGIS, Auth, Realtime, Storage |
-| Maps | Google Maps API |
-| AI / OCR | Claude or OpenAI API *(final choice TBD)* |
+| **Trip Room concept** (Chosen) | Everyone in one shared room per trip, with itinerary and album inside — became the core structure everything else attaches to |
+| **Safety checks + Splitwise-style budget** (Chosen) | Extended the Trip Room idea to solve the "who owes who" problem directly, plus proactive risk awareness |
+| **AI-generated 3D landmark models** (Chosen, repositioned) | A standout, memorable differentiator — kept, but demoted to a secondary preview after mentor feedback (see 2.3) |
+| **Community (public trip sharing) + Friends (private DMs)** (Dropped) | Initially added to let users share trips and message each other directly. Dropped after mentor feedback — personal DMs felt inconsistent with a trip-planning app that already has group chat built into every Trip Room |
+
+### 2.2 Ideation Boards
+
+![Problem Tree](ideation/problem-tree.png)
+*A problem tree showing the root causes of scattered group trip planning, the core problem, and who is affected most — the organizer, the budget-conscious member, and the spontaneous member.*
+
+![Idea Evolution Timeline](ideation/idea-evolution.png)
+*Our idea evolution from individual brainstorming (1 Sept) through feature integration (3 Sept) to refinement after mentor feedback (4 Sept).*
+
+### 2.3 Mentor Consultation
+
+| Date | Mentor | Feedback Received | What Was Changed |
+|---|---|---|---|
+| 4 Sept 2026 | Lim Zi Yang | Personal DM-style chat felt out of place in a trip-planning app since every Trip Room already has group chat; as a user, real photos of a landmark would be preferred over a 3D model | Removed Community and Friends (private DMs) entirely; kept the 3D landmark model but made it a secondary view, with a real photo as the primary image; added a live translator feature based on the same discussion |
+| 12 Sept 2026 | Mah Qing Fung | Session was cancelled — mentor was unavailable | No changes made for this session; proceeded with the plan refined after Session 1 |
+
+> Even where we didn't get to test further ideas with a mentor before submission, we've noted the cancellation transparently rather than skip this section.
+
+---
+
+## 3. Design & Prototype
+
+**UI Prototype:** [Public Figma Link — add once deployed]
+
+*(Confirm this opens correctly in an incognito window before submitting.)*
+
+Built in Stitch using a shared `Design.md` design system (seasonal color themes, consistent typography, and reusable components for navigation, cards, buttons, and badges), then refined in Figma for spacing and cross-screen consistency.
+
+Key screens: Auth, Home (AI trip chatbox), Trip Room (Discussion / Budget / Album / Map tabs), Languages, Profile.
+
+---
+
+## 4. What Makes It Different
+
+- **One mechanism, two triggers.** Most travel apps treat group conflict and mid-trip disruption as separate problems needing separate features. ReRoute resolves both through the same decision-card system — whichever one triggers it, the group sees options and votes the same way.
+- **Photo-first landmark exploration.** Based on direct mentor feedback, real photos are the primary way to explore a landmark, with an AI-generated 3D model available as a secondary, playful extra — prioritizing what users actually want to see first.
+- **Trip-scoped, not social-network-scoped.** We deliberately removed general social features (public feeds, private DMs) that didn't serve the actual travel-planning use case, keeping the app focused on what a trip group needs.
+
+| | ReRoute | TripIt | Splitwise |
+|---|---|---|---|
+| Itinerary planning | ✅ AI-generated, adaptable | ✅ Manual/import-based | ❌ |
+| Group expense splitting | ✅ Built-in, with OCR receipt scan | ❌ | ✅ |
+| Mid-trip disruption handling | ✅ | ❌ | ❌ |
+| Group decision mediation | ✅ Anonymous voting | ❌ | ❌ |
+
+---
+
+## 5. Technical Architecture & Feasibility
+
+### Tech Stack
+
+| Layer | Choice | Why |
+|---|---|---|
+| Frontend | React Native (Expo) | Native performance, fastest path to a smooth cross-platform prototype |
+| Backend | Supabase (Postgres + PostGIS, Auth, Realtime, Storage) | Team already familiar with it; PostGIS fits our location-heavy features (live location, routes) |
+| Maps | Google Maps API | Reliable directions/places data |
+| AI | Claude / OpenAI API | Powers itinerary generation, safety-check summarization, and receipt OCR |
+
+**Constraints we expect:** Supabase's free tier has usage limits we may need to monitor if the app grows past prototype scale; live location sharing depends on device GPS permissions, which we handle as opt-in per user.
+
+### Build Plan & Scope
+
+For the Building Phase, we plan to fully implement one end-to-end flow rather than all features shallowly: sign up → create a Trip Room → generate an AI itinerary → a disruption occurs → group votes via a decision card → an expense is logged via receipt scan → settle up → view the shared album. Remaining features (Community/Friends were already cut; language learning, SOS, and the recommendation engine) are scoped as documented in `docs/feature-requirements.md`, with clear notes on what's real vs. mocked for demo purposes.
 
 ---
 
@@ -92,50 +127,21 @@ Most travel apps stop at *planning*. ReRoute treats **disruption handling and gr
 reroute/
 ├── README.md
 ├── docs/
-│   ├── feature-requirements.md   # full feature specs & data model
-│   └── idea-report.md            # original concept write-up
+│   ├── feature-requirements.md
+│   └── Design.md
 ├── ideation/
-│   └── ...                       # mindmap, mentor feedback, pivot log
+│   ├── problem-tree.png
+│   ├── idea-evolution.png
+│   └── mentor-notes.md
 └── design/
     └── ...                       # prototype screenshots / exports
 ```
 
 ---
 
-## 🎨 Prototype
-
-🔗 *[Design prototype link — add once built]*
-
-## 🎬 Demo Video
-
-🔗 *[YouTube link — add once recorded]*
-
----
-
-## 🗓️ Ideation Journey
-
-> A quick log of how ReRoute evolved — see [`ideation/`](ideation/) for the full mindmap and mentor session notes.
-
-- **v1:** Started as a disruption-handling travel planner ("ReRoute")
-- **v2:** Added group mediation for social conflict, borrowed from a separate "group vibe matching" concept
-- **v3:** Unified both under one Trip Room, reusing the same decision-card mechanism for both triggers
-- **v4:** Added Splitwise-style budgeting with AI receipt scanning, Community sharing layer, SOS, and language learning
-
----
-
-## 👥 Team
-
-| Name | Role |
-|---|---|
-| *Lee Zhen Jie* | Team Leader |
-| *Gan Rui En* | *Member* |
-| *Hong Jia Bao* | *Member* |
-
----
-
 ## 🙏 Acknowledgments
 
-Built for **CodeNection 2026**, organized by **IT Society MMU**, co-organized by **Meta-Learning**, and sponsored by **Cyberview** and **Printcious**. Thanks to our mentors for their feedback during the prototype phase.
+Built for **CodeNection 2026**, organized by **IT Society MMU**, co-organized by **Meta-Learning**, and sponsored by **Cyberview** and **Printcious**.
 
 <div align="center">
 
