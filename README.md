@@ -12,9 +12,9 @@
 
 **Team:** Lee Zhen Jie (Team Leader) · Gan Rui En · Hong Jia Bao
 **Problem Statement:** Travel Planner
-**Video Presentation:** [Unlisted YouTube Link — add here]
-**Presentation Slides:** [Public Link — add here]
-**UI Prototype:** [Public Figma Link — add once deployed]
+**Video Presentation:** [[Video](https://youtu.be/qEgKrmR7KVY?si=w5rek1cmsGN-q1Yn)]
+**Presentation Slides:** [[Slide](https://docs.google.com/presentation/d/1NqwCnODBXK5m56SYaAdT2FiDY0JwNde8/edit?usp=sharing&ouid=106631640333214814428&rtpof=true&sd=true)]
+**UI Prototype:** [[Link](https://reroute2026.netlify.app/)]
 
 </div>
 
