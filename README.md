@@ -10,12 +10,14 @@
 [![Status](https://img.shields.io/badge/Status-Prototype%20Complete-brightgreen?style=for-the-badge)]()
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)]()
 
-**Team:** Lee Zhen Jie (Team Leader) · Gan Rui En · Hong Jia Bao
+**Team:** Lee Zhen Jie (Team Leader) · Gan Rui En · Hong Jia Bao<br/>
 **Problem Statement:** Travel Planner
-**Video Presentation:** [[Video](https://youtu.be/qEgKrmR7KVY?si=w5rek1cmsGN-q1Yn)]
-**Presentation Slides:** [[Slide](https://docs.google.com/presentation/d/1NqwCnODBXK5m56SYaAdT2FiDY0JwNde8/edit?usp=sharing&ouid=106631640333214814428&rtpof=true&sd=true)]
-**UI Prototype:** [[Link](https://reroute2026.netlify.app/)]
 
+[![Video Presentation](https://img.shields.io/badge/📺_Video-Presentation-FF0000?style=for-the-badge)](https://youtu.be/qEgKrmR7KVY?si=w5rek1cmsGN-q1Yn)
+[![Presentation Slides](https://img.shields.io/badge/📊_Presentation-Slides-F4B400?style=for-the-badge)](https://docs.google.com/presentation/d/1NqwCnODBXK5m56SYaAdT2FiDY0JwNde8/edit?usp=sharing&ouid=106631640333214814428&rtpof=true&sd=true)
+[![UI Prototype](https://img.shields.io/badge/🎨_UI-Prototype-4285F4?style=for-the-badge)](https://reroute2026.netlify.app/)
+
+*👆 Click a badge above to open the video, slides, or prototype*
 </div>
 
 ---
