@@ -128,6 +128,7 @@ For the Building Phase, we plan to fully implement one end-to-end flow rather th
 ```
 reroute/
 ├── README.md
+├── .gitignore
 ├── docs/
 │   ├── feature-requirements.md
 │   ├── Design.md
