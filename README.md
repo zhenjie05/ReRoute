@@ -13,6 +13,7 @@
 **Team:** Lee Zhen Jie (Team Leader) · Gan Rui En · Hong Jia Bao
 **Problem Statement:** Travel Planner
 **Video Presentation:** [Unlisted YouTube Link — add here]
+**Presentation Slides:** [Public Link — add here]
 **UI Prototype:** [Public Figma Link — add once deployed]
 
 </div>
